@@ -1,0 +1,12 @@
+.env
+env/
+venv/
+__pycache__/
+# migrations/
+
+project/media/*
+project/media_private/*
+project/staticfiles/*
+token/
+token.json
+.vscode

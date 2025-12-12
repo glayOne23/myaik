@@ -1,0 +1,17 @@
+<div class="mb-2">
+
+	<ul class="nav nav-justified nav-tabs nav-tabs-static radius-t-1 overflow-hidden mb-2" role="tablist">
+		{% for data in data_tipe_pertemuan %}
+		<li class="nav-item mr-1px">
+			<a href="{% url 'main:admin.pertemuan.table' %}?tipe_pertemuan={{data.id}}"
+				class="btn btn-light-primary btn-h-light-primary btn-h-text-black btn-a-primary py-2 border-0 radius-0 btn-bold {% if tipe_pertemuan == data.id %}active{% endif %}">
+				{{ data.nama }}
+				{% comment %} {% if data.total_tickets %}
+				<span class="badge badge-pill badge-danger">{{data.total_tickets}}</span>
+				{% endif %} {% endcomment %}
+			</a>
+		</li>
+		{% endfor %}
+	</ul>
+
+</div>

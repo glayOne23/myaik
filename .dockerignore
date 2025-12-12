@@ -1,0 +1,33 @@
+# .env
+*.pyc
+.dockerignore
+env/
+venv/
+.git/
+__pycache__/
+# migrations/
+
+
+project/media/*
+project/media_private/*
+project/staticfiles
+project/static/template/build/
+project/static/template/html/
+project/static/template/scss/
+project/static/template/.babelrc
+project/static/template/.browserslistrc
+project/static/template/.gitignore
+project/static/template/changelog.md
+project/static/template/index.html
+project/static/template/index.js
+project/static/template/npm-shrinkwrap.json
+project/static/template/package.json
+project/static/template/README.md
+
+token/
+token.json
+
+docs/*
+!docs/requirements.txt
+
+.vscode

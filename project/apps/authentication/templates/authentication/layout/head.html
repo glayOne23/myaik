@@ -1,0 +1,30 @@
+    {% load static %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <base href="../" />
+
+    <title>{{ APP_SHORT_NAME }}</title>
+
+    <!-- include common vendor stylesheets & fontawesome -->
+    <link rel="stylesheet" type="text/css" href="{% static 'template/node_modules/bootstrap/dist/css/bootstrap.css' %}">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'template/node_modules/@fontawesome/css/all.min.css' %}">
+
+    <!-- include vendor stylesheets used in "Login" page. see "/views//pages/partials/page-login/@vendor-stylesheets.hbs" -->
+
+
+    <!-- include fonts -->
+    <link rel="stylesheet" type="text/css" href="{% static 'template/dist/css/ace-font.css' %}">
+
+
+
+    <!-- ace.css -->
+    <link rel="stylesheet" type="text/css" href="{% static 'template/dist/css/ace.css' %}">
+
+
+    <!-- favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ APP_FAVICON }}" />
+
+    <!-- "Login" page styles, specific to this page for demo only -->
+    <link rel="stylesheet" type="text/css" href="{% static 'template/views/pages/page-login/@page-style.css' %}">

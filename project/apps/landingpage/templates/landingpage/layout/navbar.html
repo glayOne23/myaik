@@ -1,0 +1,86 @@
+{% load static %}
+<nav class="navbar navbar-expand-lg navbar-darkblue navbar-fixed" id="navbar-dark">
+  <div class="navbar-inner">
+    <div class="container">
+
+
+      <div class="navbar-intro justify-content-xl-between bgc-transparent">
+        <a class="navbar-brand text-white text-180" href="">
+          <!-- <i class="fa fa-leaf text-105 text-green-l5 mr-1"></i> -->
+          <img alt="LOGO" src="{{ APP_LOGO }}" class="mx-auto mr-1" width="40"/>
+          <span style="vertical-align: middle;">{{ APP_SHORT_NAME }}</span>
+        </a><!-- /.navbar-brand -->
+      </div><!-- /.navbar-intro -->
+
+
+      <div class="navbar-menu collapse navbar-collapse navbar-backdrop " id="navbarMenu1-dark">
+
+        <div class="navbar-nav">
+          <ul class="nav nav-compact-3">
+
+
+          </ul><!-- /.navbar-nav menu -->
+        </div><!-- /.navbar-nav -->
+
+      </div><!-- /.navbar-menu.navbar-collapse -->
+
+
+      <button type="button" class="d-style btn btn-burger static collapsed mr-2 px-4 navbar-toggler d-flex d-lg-none" data-toggle="collapse" data-target="#navbarMenu2-dark" aria-controls="navbarMenu2-dark" aria-expanded="false" aria-label="Toggle navbar menu">
+        <i class="fa fa-caret-down d-collapsed text-80"></i>
+        <i class="fa fa-caret-up d-n-collapsed text-80"></i>
+
+        <i class="fa fa-user ml-2"></i>
+      </button><!-- mobile navbar toggler button -->
+
+
+      <div class="navbar-menu collapse navbar-collapse navbar-backdrop" id="navbarMenu2-dark">
+        <div class="navbar-nav">
+          
+          <ul class="nav nav-compact">
+            <li class="nav-item dropdown px-lg-2 d-lg-flex flex-column justify-content-center">
+              <a class="d-none d-lg-block h-auto btn btn-outline-white btn-bold radius-round border-2 dropdown-toggle px-2 px-xl-3" href="" role="button" aria-haspopup="true" aria-expanded="false">
+                Home
+              </a>
+  
+              <a class="d-lg-none nav-link dropdown-toggle" href="" role="button" aria-haspopup="true" aria-expanded="false">
+                <i class="fa fa-caret-right bgc-white text-blue radius-round py-2 px-3 mr-2"></i>
+                Home
+              </a>
+            </li>
+         
+
+            {% if request.user.is_authenticated %}
+              <li class="nav-item dropdown px-lg-2 d-lg-flex flex-column justify-content-center">
+                <a class="d-none d-lg-block h-auto btn btn-outline-white btn-bold radius-round border-2 dropdown-toggle px-2 px-xl-3" href="{% url 'main:dashboard' %}" role="button" aria-haspopup="true" aria-expanded="false">
+                  Dashboard
+                </a>
+    
+                <a class="d-lg-none nav-link dropdown-toggle" href="{% url 'main:dashboard' %}" role="button" aria-haspopup="true" aria-expanded="false">
+                  <i class="fa fa-caret-right bgc-white text-blue radius-round py-2 px-3 mr-2"></i>
+                  Dashboard
+                </a>
+              </li>
+            {% else %}
+              <li class="nav-item dropdown px-lg-2 d-lg-flex flex-column justify-content-center">
+                <a class="d-none d-lg-block h-auto btn btn-outline-white btn-bold radius-round border-2 dropdown-toggle px-2 px-xl-3" href="{% url 'authentication:signin' %}" role="button" aria-haspopup="true" aria-expanded="false">
+                  Login
+                </a>
+    
+                <a class="d-lg-none nav-link dropdown-toggle" href="{% url 'authentication:signin' %}" role="button" aria-haspopup="true" aria-expanded="false">
+                  <i class="fa fa-caret-right bgc-white text-blue radius-round py-2 px-3 mr-2"></i>
+                  Login
+                </a>
+              </li>
+            {% endif %}
+
+
+
+          </ul>
+        </div>
+      </div><!-- .navbar-menu -->
+
+
+
+    </div><!-- /.container -->
+  </div><!-- /.navbar-inner -->
+</nav>

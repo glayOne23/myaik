@@ -1,0 +1,17 @@
+[
+  {
+    "model": "authentication.profile",
+    "pk": 1,
+    "fields": {
+      "nip": "123",
+      "nidn": "321",
+      "ext_email": "SuperUser@gmail.com",
+      "phone_number": "08123456789",
+      "is_dosen": null,
+      "home_id": null,
+      "homebase": null,
+      "image": "",
+      "otp": null
+    }
+  }
+]

@@ -1,0 +1,300 @@
+{% extends 'main/layout/base.html' %}
+{% load main_tags %}
+
+{% block content %}
+  <div class="page-content container container-plus">
+    <div class="page-header border-0 pb-3">
+      <h1 class="page-title text-primary-d2 text-150">
+        {% for data in request.path|split:"/"|slice:"2:4" %}
+          {% if forloop.counter == 1 %}
+            {{ data|title }}
+          {% else %}
+            <small class="page-info text-secondary-d2 text-nowrap">
+              <i class="fa fa-angle-double-right text-80"></i>
+              {{ data|title }}
+            </small>
+          {% endif %}
+        {% endfor %}
+      </h1>
+
+      <div class="page-tools mt-3 mt-sm-0 mb-sm-n1">
+        <!-- dataTables search box will be inserted here dynamically -->
+      </div>
+    </div>
+
+
+    <div class="row">
+      <div class="col-12 col-sm-12 mt-3 mt-sm-0 cards-container">
+        <div class="card dcard overflow-hidden">
+          <div class="border-t-3 w-100 brc-primary-m1 radius-t-1"></div>
+          <div class="card-header">
+            <h5 class="card-title text-110 text-primary-d2 pt-1">
+              Form
+            </h5>
+
+            <div class="card-toolbar no-border">
+              <a href="#" data-action="expand" class="card-toolbar-btn btn btn-sm radius-1 btn-outline-success mx-2px d-style">
+                <i class="fa fa-expand d-n-active"></i>
+                <i class="fa fa-compress d-active"></i>
+              </a>
+
+              <a href="#" data-action="toggle" class="card-toolbar-btn btn btn-sm radius-1 btn-outline-default mx-2px">
+                <i class="fa fa-chevron-up w-2 mx-1px"></i>
+              </a>
+
+              <!-- <a href="#" data-action="close" class="card-toolbar-btn btn btn-sm radius-1 btn-outline-danger mx-2px">
+                <i class="fa fa-times w-2 mx-1px"></i>
+              </a> -->
+            </div>
+          </div><!-- /.card-header -->
+
+          <form method="post" class="mt-lg-3" autocomplete="off" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-body bg-white p-0">
+
+              <div class="form-group row px-3">
+                <div class="mb-1 mb-sm-0 col-sm-3 col-form-label text-sm-right pr-0">
+                  <label for="{{ formsignup.email.id_for_label }}" class="mb-0">
+                    {% if formsignup.email.field.required %}<span class="text-danger">*</span>{% endif %}{{ formsignup.email.label_tag }}
+                  </label>
+                </div>
+
+                <div class="col-sm-9 input-floating-label text-blue-d2 brc-blue-m1">
+                  <input type="text" name="{{ formsignup.email.name }}" id="{{ formsignup.email.id_for_label }}" placeholder="{{ formsignup.email.name }}" value="{{ formsignup.email.value|default_if_none:'' }}" class="form-control col-sm-8 col-md-7 shadow-none" {% if formsignup.email.field.required %}required{% endif %}/>
+                  <span class="floating-label text-grey-m3 text-80">
+                    <label>{{ formsignup.email.label }}</label>
+                  </span>
+                </div>
+              </div>
+
+
+              <div class="form-group row px-3">
+                <div class="mb-1 mb-sm-0 col-sm-3 col-form-label text-sm-right pr-0">
+                  <label for="{{ formsignup.username.id_for_label }}" class="mb-0">
+                    {% if formsignup.username.field.required %}<span class="text-danger">*</span>{% endif %}{{ formsignup.username.label_tag }}
+                  </label>
+                </div>
+
+                <div class="col-sm-9 input-floating-label text-blue-d2 brc-blue-m1">
+                  <input type="text" name="{{ formsignup.username.name }}" id="{{ formsignup.username.id_for_label }}" placeholder="{{ formsignup.username.name }}" value="{{ formsignup.username.value|default_if_none:'' }}" class="form-control col-sm-8 col-md-7 shadow-none" {% if formsignup.username.field.required %}required{% endif %}/>
+                  <span class="floating-label text-grey-m3 text-80">
+                    <label>{{ formsignup.username.label }}</label>
+                  </span>
+                </div>
+              </div>
+
+
+              <div class="form-group row px-3">
+                <div class="mb-1 mb-sm-0 col-sm-3 col-form-label text-sm-right pr-0">
+                  <label for="{{ formsignup.first_name.id_for_label }}" class="mb-0">
+                    {% if formsignup.first_name.field.required %}<span class="text-danger">*</span>{% endif %}{{ formsignup.first_name.label_tag }}
+                  </label>
+                </div>
+
+                <div class="col-sm-9 input-floating-label text-blue-d2 brc-blue-m1">
+                  <input type="text" name="{{ formsignup.first_name.name }}" id="{{ formsignup.first_name.id_for_label }}" placeholder="{{ formsignup.first_name.name }}" value="{{ formsignup.first_name.value|default_if_none:'' }}" class="form-control col-sm-8 col-md-7 shadow-none" {% if formsignup.first_name.field.required %}required{% endif %}/>
+                  <span class="floating-label text-grey-m3 text-80">
+                    <label>{{ formsignup.first_name.label }}</label>
+                  </span>
+                </div>
+              </div>
+
+
+              <div class="form-group row px-3">
+                <div class="mb-1 mb-sm-0 col-sm-3 col-form-label text-sm-right pr-0">
+                  <label for="{{ formsignup.last_name.id_for_label }}" class="mb-0">
+                    {% if formsignup.last_name.field.required %}<span class="text-danger">*</span>{% endif %}{{ formsignup.last_name.label_tag }}
+                  </label>
+                </div>
+
+                <div class="col-sm-9 input-floating-label text-blue-d2 brc-blue-m1">
+                  <input type="text" name="{{ formsignup.last_name.name }}" id="{{ formsignup.last_name.id_for_label }}" placeholder="{{ formsignup.last_name.name }}" value="{{ formsignup.last_name.value|default_if_none:'' }}" class="form-control col-sm-8 col-md-7 shadow-none" {% if formsignup.last_name.field.required %}required{% endif %}/>
+                  <span class="floating-label text-grey-m3 text-80">
+                    <label>{{ formsignup.last_name.label }}</label>
+                  </span>
+                </div>
+              </div>
+
+
+              <div class="form-group row px-3">
+                <div class="mb-1 mb-sm-0 col-sm-3 col-form-label text-sm-right pr-0">
+                  <label for="{{ formsignup.password1.id_for_label }}" class="mb-0">
+                    {% if formsignup.password1.field.required %}<span class="text-danger">*</span>{% endif %}{{ formsignup.password1.label_tag }}
+                  </label>
+                </div>
+
+                <div class="col-sm-9 input-floating-label text-blue-d2 brc-blue-m1">
+                  <input type="password" name="{{ formsignup.password1.name }}" id="{{ formsignup.password1.id_for_label }}" placeholder="{{ formsignup.password1.name }}" value="{{ formsignup.password1.value|default_if_none:'' }}" class="form-control col-sm-8 col-md-7 shadow-none" {% if formsignup.password1.field.required %}required{% endif %}/>
+                  <span class="floating-label text-grey-m3 text-80">
+                    <label>{{ formsignup.password1.label }}</label>
+                  </span>
+                </div>
+              </div>
+
+
+              <div class="form-group row px-3">
+                <div class="mb-1 mb-sm-0 col-sm-3 col-form-label text-sm-right pr-0">
+                  <label for="{{ formsignup.password2.id_for_label }}" class="mb-0">
+                    {% if formsignup.password2.field.required %}<span class="text-danger">*</span>{% endif %}{{ formsignup.password2.label_tag }}
+                  </label>
+                </div>
+
+                <div class="col-sm-9 input-floating-label text-blue-d2 brc-blue-m1">
+                  <input type="password" name="{{ formsignup.password2.name }}" id="{{ formsignup.password2.id_for_label }}" placeholder="{{ formsignup.password2.name }}" value="{{ formsignup.password2.value|default_if_none:'' }}" class="form-control col-sm-8 col-md-7 shadow-none" {% if formsignup.password2.field.required %}required{% endif %}/>
+                  <span class="floating-label text-grey-m3 text-80">
+                    <label>{{ formsignup.password2.label }}</label>
+                  </span>
+                </div>
+              </div>
+
+
+
+
+
+              <div class="form-group row px-3">
+                <div class="mb-1 mb-sm-0 col-sm-3 col-form-label text-sm-right pr-0">
+                  <label for="{{ formprofile.nip.id_for_label }}" class="mb-0">
+                    {% if formprofile.nip.field.required %}<span class="text-danger">*</span>{% endif %}{{ formprofile.nip.label_tag }}
+                  </label>
+                </div>
+
+                <div class="col-sm-9 input-floating-label text-blue-d2 brc-blue-m1">
+                  <input type="text" name="{{ formprofile.nip.name }}" id="{{ formprofile.nip.id_for_label }}" placeholder="{{ formprofile.nip.name }}" value="{{ formprofile.nip.value|default_if_none:'' }}" class="form-control col-sm-8 col-md-7 shadow-none" {% if formprofile.nip.field.required %}required{% endif %}/>
+                  <span class="floating-label text-grey-m3 text-80">
+                    <label>{{ formprofile.nip.label }}</label>
+                  </span>
+                </div>
+              </div>
+
+
+              <div class="form-group row px-3">
+                <div class="mb-1 mb-sm-0 col-sm-3 col-form-label text-sm-right pr-0">
+                  <label for="{{ formprofile.nidn.id_for_label }}" class="mb-0">
+                    {% if formprofile.nidn.field.required %}<span class="text-danger">*</span>{% endif %}{{ formprofile.nidn.label_tag }}
+                  </label>
+                </div>
+
+                <div class="col-sm-9 input-floating-label text-blue-d2 brc-blue-m1">
+                  <input type="text" name="{{ formprofile.nidn.name }}" id="{{ formprofile.nidn.id_for_label }}" placeholder="{{ formprofile.nidn.name }}" value="{{ formprofile.nidn.value|default_if_none:'' }}" class="form-control col-sm-8 col-md-7 shadow-none" {% if formprofile.nidn.field.required %}required{% endif %}/>
+                  <span class="floating-label text-grey-m3 text-80">
+                    <label>{{ formprofile.nidn.label }}</label>
+                  </span>
+                </div>
+              </div>
+
+
+              <div class="form-group row px-3">
+                <div class="mb-1 mb-sm-0 col-sm-3 col-form-label text-sm-right pr-0">
+                  <label for="{{ formprofile.ext_email.id_for_label }}" class="mb-0">
+                    {% if formprofile.ext_email.field.required %}<span class="text-danger">*</span>{% endif %}{{ formprofile.ext_email.label_tag }}
+                  </label>
+                </div>
+
+                <div class="col-sm-9 input-floating-label text-blue-d2 brc-blue-m1">
+                  <input type="text" name="{{ formprofile.ext_email.name }}" id="{{ formprofile.ext_email.id_for_label }}" placeholder="{{ formprofile.ext_email.name }}" value="{{ formprofile.ext_email.value|default_if_none:'' }}" class="form-control col-sm-8 col-md-7 shadow-none" {% if formprofile.ext_email.field.required %}required{% endif %}/>
+                  <span class="floating-label text-grey-m3 text-80">
+                    <label>{{ formprofile.ext_email.label }}</label>
+                  </span>
+                </div>
+              </div>
+
+
+              <div class="form-group row px-3">
+                <div class="mb-1 mb-sm-0 col-sm-3 col-form-label text-sm-right pr-0">
+                  <label for="{{ formprofile.phone_number.id_for_label }}" class="mb-0">
+                    {% if formprofile.phone_number.field.required %}<span class="text-danger">*</span>{% endif %}{{ formprofile.phone_number.label_tag }}
+                  </label>
+                </div>
+
+                <div class="col-sm-9 input-floating-label text-blue-d2 brc-blue-m1">
+                  <input type="text" name="{{ formprofile.phone_number.name }}" id="{{ formprofile.phone_number.id_for_label }}" placeholder="{{ formprofile.phone_number.name }}" value="{{ formprofile.phone_number.value|default_if_none:'' }}" class="form-control col-sm-8 col-md-7 shadow-none" {% if formprofile.phone_number.field.required %}required{% endif %}/>
+                  <span class="floating-label text-grey-m3 text-80">
+                    <label>{{ formprofile.phone_number.label }}</label>
+                  </span>
+                </div>
+              </div>
+
+
+              <div class="form-group row px-3">
+                <div class="mb-1 mb-sm-0 col-sm-3 col-form-label text-sm-right pr-0">
+                  <label for="" class="mb-0">
+                    Role
+                  </label>
+                </div>
+                
+                <div class="col-sm-9 input-floating-label text-blue-d2 brc-blue-m1">
+                  <div class="col-sm-8 col-md-7 shadow-none p-0">
+                    <select multiple="multiple" size="10" name="groups[]" class="duallistbox">
+                      {% if groups %}
+                      {% for data in groups %}
+                      <option value="{{ data.id }}" {% if data.id in usergroups %}SELECTED{% endif %}>{{ data.groupdetails.alias }}</option>
+                      {% endfor %}
+                      {% endif %}
+                    </select>
+
+                  </div>
+                </div>
+              </div>
+              
+
+              <div class="form-group row">
+                <div class="mb-1 mb-sm-0 col-sm-3 col-form-label text-sm-right pr-0">
+                  <label for="{{ formprofile.image.id_for_label }}" class="mb-0">
+                    {% if formprofile.image.field.required %}<span class="text-danger">*</span>{% endif %}{{ formprofile.image.label_tag }}
+                  </label>
+                </div>
+
+                <div class="col-sm-9 input-floating-label text-blue-d2 brc-blue-m1">
+                  <div class="col-sm-8 col-md-7 shadow-none px-2">
+                    <input type="file" class="ace-file-input" id="input_file" name="{{ formprofile.image.name }}" {% if formprofile.image.field.required %}required{% endif %}/>
+                  </div>
+                </div>
+              </div>
+           
+
+            </div><!-- /.card-body -->
+
+            <div class="mx-n25 py-3 brc-dark-l3 d-flex border-t-1 bgc-secondary-l5 px-3">
+              <div class="offset-md-3 col-md-9 text-nowrap">
+                <button class="btn btn-warning btn-bold px-4" type="button" onclick="window.history.back();"><i class="fas fa-angle-left mr-1"></i> Cancel</button>
+
+                <button class="btn btn-info btn-bold px-4" type="submit">
+                  <i class="fa fa-check mr-1"></i>
+                  Submit
+                </button>
+  
+                <button class="btn btn-lightgrey btn-bold px-4" type="reset"><i class="fa fa-undo mr-1"></i>Reset</button>
+              </div>
+            </div><!-- /.card-footer -->
+          </form>
+
+        </div><!-- /.card -->
+      </div><!-- /.col -->
+    </div>
+
+  </div>
+{% endblock %}
+
+
+{% block javascript %}
+<script>
+
+  $(document).ready(function(){
+    // multiple with image preview
+    $('#input_file').aceFileInput({
+      style: 'drop',
+      droppable: true,
+      container: 'border-1 border-dashed brc-grey-l1 brc-h-blue-m2 shadow-sm',
+      placeholderClass: 'text-90 text-600 text-grey-l1 my-2',
+      placeholderText: 'Drop images here or click to choose',
+      placeholderIcon: '<i class="fa fa-cloud-upload-alt fa-3x text-info-m2 my-2"></i>',
+      //previewSize: 64,
+      thumbnail: 'large',
+      //allowExt: 'gif|jpg|jpeg|png|webp|svg',
+      //allowMime: 'image/png|image/jpeg',
+      allowMime: 'image/*',
+      //maxSize: 100000,
+    });
+  });
+</script>
+{% endblock %}

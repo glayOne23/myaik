@@ -1,0 +1,159 @@
+{% extends 'authentication/layout/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="main-container container bgc-transparent">
+
+  <div class="main-content minh-100 justify-content-center">
+    <div class="p-2 p-md-4">
+      <div class="row" id="row-1">
+        <div class="col-12 col-xl-10 offset-xl-1 bgc-white shadow radius-1 overflow-hidden">
+
+          <div class="row" id="row-2">
+
+            {% include 'authentication/layout/colintro.html' %}
+
+
+            <div id="id-col-main" class="col-12 col-lg-7 py-lg-5 bgc-white px-0">
+              <div class="tab-pane active show mh-100 px-3 px-lg-0 pb-3" id="id-tab-signup">
+
+                <!-- show this in desktop -->
+                <div class="d-none d-lg-block col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 mt-lg-4 px-0">
+                  <h4 class="text-dark-tp4 border-b-1 brc-grey-l1 pb-1 text-130">
+                    <i class="fa fa-user text-purple mr-1"></i>
+                    Create an Account
+                  </h4>
+                </div>
+
+                <!-- show this in mobile device -->
+                <div class="d-lg-none text-secondary-m1 my-4 text-center">
+                  <a class="mt-5 mb-2" href="">
+                    <img src="{{ APP_LOGO }}" alt="LOGO" class="img-fluid mx-auto d-block mb-2" width="100px">
+                  </a>
+                  <h1 class="text-170">
+                    <span class="text-blue-d1">{{ APP_SHORT_NAME }}</span>
+                  </h1>
+
+                  Create an Account
+                </div>
+
+
+                <form method="post" autocomplete="off" class="form-row mt-4">
+                  {% csrf_token %}
+                  <div class="form-group col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 mt-1">
+                    <div class="row pl-3 pr-3">
+                      <div class="col-6 d-flex align-items-center input-floating-label text-success brc-success-m2 pl-0">
+                        <input placeholder="{{ formsignup.first_name.name }}" name="{{ formsignup.first_name.name }}" value="{{ formsignup.first_name.value|default_if_none:'' }}" type="text" class="form-control form-control-lg pr-4 shadow-none" id="{{ formsignup.first_name.id_for_label }}" required/>
+                        <i class="far fa-user text-grey-m2 ml-n4"></i>
+                        <label class="floating-label text-grey-l1 text-100 ml-n3" for="{{ formsignup.first_name.id_for_label }}">
+                          {{ formsignup.first_name.label }}
+                        </label>
+                      </div>
+  
+                      <div class="col-6 d-flex align-items-center input-floating-label text-success brc-success-m2 p-0">
+                        <input placeholder="{{ formsignup.last_name.name }}" name="{{ formsignup.last_name.name }}" value="{{ formsignup.last_name.value|default_if_none:'' }}" type="text" class="form-control form-control-lg pr-4 shadow-none" id="{{ formsignup.last_name.id_for_label }}" />
+                        <i class="far fa-user text-grey-m2 ml-n4"></i>
+                        <label class="floating-label text-grey-l1 text-100 ml-n3" for="{{ formsignup.last_name.id_for_label }}">
+                          {{ formsignup.last_name.label }}
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+
+                  <div class="form-group col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2">
+                    <div class="d-flex align-items-center input-floating-label text-success brc-success-m2">
+                      <input placeholder="{{ formsignup.email.name }}" name="{{ formsignup.email.name }}" value="{{ formsignup.email.value|default_if_none:'' }}" type="email" class="form-control form-control-lg pr-4 shadow-none" id="{{ formsignup.email.id_for_label }}" required/>
+                      <i class="fa fa-envelope text-grey-m2 ml-n4"></i>
+                      <label class="floating-label text-grey-l1 text-100 ml-n3" for="{{ formsignup.email.id_for_label }}">
+                        {{ formsignup.email.label }}
+                      </label>
+                    </div>
+                  </div>
+
+
+                  <div class="form-group col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 mt-1">
+                    <div class="d-flex align-items-center input-floating-label text-success brc-success-m2">
+                      <input placeholder="{{ formsignup.username.name }}" name="{{ formsignup.username.name }}" value="{{ formsignup.username.value|default_if_none:'' }}" type="text" class="form-control form-control-lg pr-4 shadow-none" id="{{ formsignup.username.id_for_label }}" required/>
+                      <i class="fa fa-user text-grey-m2 ml-n4"></i>
+                      <label class="floating-label text-grey-l1 text-100 ml-n3" for="{{ formsignup.username.id_for_label }}">
+                        {{ formsignup.username.label }}
+                      </label>
+                    </div>
+                  </div>
+
+
+                  <div class="form-group col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 mt-1">
+                    <div class="d-flex align-items-center input-floating-label text-success brc-success-m2">
+                      <input placeholder="{{ formsignup.password1.name }}" name="{{ formsignup.password1.name }}" value="{{ formsignup.password1.value|default_if_none:'' }}" type="password" class="form-control form-control-lg pr-4 shadow-none" id="{{ formsignup.password1.id_for_label }}" required/>
+                      <i class="fa fa-key text-grey-m2 ml-n4"></i>
+                      <label class="floating-label text-grey-l1 text-100 ml-n3" for="{{ formsignup.password1.id_for_label }}">
+                        {{ formsignup.password1.label }}
+                      </label>
+                    </div>
+                  </div>
+
+
+                  <div class="form-group col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 mt-1">
+                    <div class="d-flex align-items-center input-floating-label text-success brc-success-m2">
+                      <input placeholder="{{ formsignup.password2.name }}" name="{{ formsignup.password2.name }}" value="{{ formsignup.password2.value|default_if_none:'' }}" type="password" class="form-control form-control-lg pr-4 shadow-none" id="{{ formsignup.password2.id_for_label }}" required/>
+                      <i class="fas fa-sync-alt text-grey-m2 ml-n4"></i>
+                      <label class="floating-label text-grey-l1 text-100 ml-n3" for="{{ formsignup.password2.id_for_label }}">
+                        {{ formsignup.password2.label }}
+                      </label>
+                    </div>
+                  </div>
+
+
+                  <div class="form-group col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 mt-1">
+                    <div class="d-flex align-items-center input-floating-label text-success brc-success-m2">
+                      <input placeholder="{{ formsignupprofile.phone_number.name }}" name="{{ formsignupprofile.phone_number.name }}" value="{{ formsignupprofile.phone_number.value|default_if_none:'' }}" type="text" class="form-control form-control-lg pr-4 shadow-none" id="{{ formsignupprofile.phone_number.id_for_label }}" />
+                      <i class="fas fa-phone text-grey-m2 ml-n4"></i>
+                      <label class="floating-label text-grey-l1 text-100 ml-n3" for="{{ formsignupprofile.phone_number.id_for_label }}">
+                        {{ formsignupprofile.phone_number.label }}
+                      </label>
+                    </div>
+                  </div>
+
+
+                  <div class="form-group col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 mt-2">
+                    <label class="d-inline-block mt-3 mb-0 text-secondary-d2">
+                      <input type="checkbox" class="mr-1" id="id-agree" />
+                      <span class="text-dark-m3">I have read and agree to <a href="#" class="text-blue-d2">terms</a></span>
+                    </label>
+
+                    <button type="submit" class="btn btn-success btn-block px-4 btn-bold mt-2 mb-3">
+                      Sign Up
+                    </button>
+                  </div>
+                </form>
+
+
+                <div class="form-row w-100">
+                  <div class="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 d-flex flex-column align-items-center justify-content-center">
+
+                    <hr class="brc-default-l2 mt-0 mb-2 w-100" />
+
+                    <div class="p-0 px-md-2 text-dark-tp4 my-3">
+                      Already a member?
+                      <a class="text-blue-d1 text-600 mx-1" href="{% url 'authentication:signin' %}">
+                        Login here
+                      </a>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /.row -->
+
+        </div><!-- /.col -->
+      </div><!-- /.row -->
+
+      {% include 'authentication/layout/copyright.html' %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+  <head>
+    {% include 'landingpage/layout/head.html' %}
+    {% block head %}{% endblock %}
+  </head>
+
+  <body>
+    <div class="body-container">
+      <div class="pos-abs" id="scroll-down"></div>
+      <div class="pos-abs" id="scroll-up"></div>
+
+      {% include 'landingpage/layout/navbar.html' %}
+
+
+      <!-- <div class="main-container bgc-white w-100" style="position: absolute;"> -->
+      <div class="main-container bgc-white">
+
+        {% block content %}{% endblock %}
+
+      </div>
+
+    </div>
+
+    {% include 'landingpage/layout/javascript.html' %}
+    {% block javascript %}{% endblock %}
+  </body>
+
+</html>

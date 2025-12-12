@@ -1,0 +1,44 @@
+{% extends 'main/layout/base.html' %}
+{% load static %}
+
+
+{% block content %}
+  <div class="page-content container container-plus">
+    <div class="page-header border-0 pb-3">
+      <h1 class="page-title text-primary-d2 text-150">
+        Dashboard
+        <small class="page-info text-secondary-d2 text-nowrap">
+          <i class="fa fa-angle-double-right text-80"></i>
+          overview &amp; stats
+        </small>
+      </h1>
+
+    </div>
+
+
+    <!-- stat boxes -->
+    <div class="row px-2">
+      <div class="col-12 col-sm-12 col-md-12 px-2 mb-1 mb-md-0">
+
+        <div class="bcard d-flex flex-column text-center px-2 py-3 h-100 shadow mb-3">
+          <div class="mb-1">
+            <span class="d-inline-block p-3 radius-round">
+                <!-- <i class="fab fa-twitter text-success-m1 text-180 w-4"></i> -->                
+                <img src="{{ APP_LOGO }}" alt="" width="150px">
+            </span>
+          </div>
+
+          <div class="mt-1">
+            <div class="text-nowrap text-170 text-dark">Welcome to {{ APP_SHORT_NAME }}</div>      
+            <div class="text-nowrap text-120 text-grey">{{ APP_FULL_NAME }}</div>            
+          </div>
+
+
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+{% endblock %}
+

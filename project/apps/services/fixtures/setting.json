@@ -1,0 +1,50 @@
+[
+    {
+      "model": "main.setting",
+      "pk": 1,
+      "fields": {
+        "category": "info",
+        "key": "welcome_text",
+        "alias": "Welcome Text",
+        "mode": "char",
+        "value": "Welcome to PIONS",
+        "file": ""
+      }
+    },
+    {
+      "model": "main.setting",
+      "pk": 2,
+      "fields": {
+        "category": "info",
+        "key": "announcement",
+        "alias": "Announcement",
+        "mode": "text",
+        "value": "<p>Diumumkan kepada seluruh pengguna aplikasi ini, mohon untuk segera mengganti password anda. Demi keamanan akun anda.</p><p>Terimakasih.<br><p></p></p>",
+        "file": ""
+      }
+    },
+    {
+      "model": "main.setting",
+      "pk": 3,
+      "fields": {
+        "category": "info",
+        "key": "schedule",
+        "alias": "Schedule",
+        "mode": "file",
+        "value": "",
+        "file": ""
+      }
+    },
+    {
+      "model": "main.setting",
+      "pk": 4,
+      "fields": {
+        "category": "application",
+        "key": "name_logo",
+        "alias": "App Name & App Logo",
+        "mode": "charfile",
+        "value": "PIONS",
+        "file": ""
+      }
+    }
+]

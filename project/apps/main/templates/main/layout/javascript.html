@@ -1,0 +1,344 @@
+    {% load static %}
+    {% load main_tags %}
+
+    <script src="{% static 'template/node_modules/jquery/dist/jquery.js' %}"></script>
+    <script src="{% static 'template/node_modules/popper.js/dist/umd/popper.js' %}"></script>
+    <script src="{% static 'template/node_modules/bootstrap/dist/js/bootstrap.js' %}"></script>
+
+    <script src="{% static 'template/node_modules/sweetalert2/dist/sweetalert2.all.js' %}"></script>
+
+    <script src="{% static 'template/dist/js/ace.min.js' %}"></script>
+
+
+    {% if datatables %}
+    <script src="{% static 'template/node_modules/datatables/media/js/jquery.dataTables.js' %}"></script>
+    <script src="{% static 'template/node_modules/datatables.net-bs4/js/dataTables.bootstrap4.js' %}"></script>
+    <script src="{% static 'template/node_modules/datatables.net-colreorder/js/dataTables.colReorder.js' %}"></script>
+    <script src="{% static 'template/node_modules/datatables.net-select/js/dataTables.select.js' %}"></script>
+    <script src="{% static 'template/node_modules/datatables.net-rowgroup/js/dataTables.rowGroup.js' %}"></script>
+
+
+    <script src="{% static 'template/node_modules/datatables.net-buttons/js/dataTables.buttons.js' %}"></script>
+    <script src="{% static 'template/node_modules/datatables.net-buttons-bs4/js/buttons.bootstrap4.js' %}"></script>
+    <script src="{% static 'template/node_modules/datatables.net-buttons/js/buttons.html5.js' %}"></script>
+    <script src="{% static 'template/node_modules/datatables.net-buttons/js/buttons.print.js' %}"></script>
+    <script src="{% static 'template/node_modules/datatables.net-buttons/js/buttons.colVis.js' %}"></script>
+
+    <script src="{% static 'template/node_modules/jszip/jszip.min.js' %}"></script>
+    <script src="{% static 'template/node_modules/pdfmake/pdfmake.min.js' %}"></script>
+    <script src="{% static 'template/node_modules/pdfmake/vfs_fonts.js' %}"></script>
+
+
+    <script src="{% static 'template/node_modules/datatables.net-responsive/js/dataTables.responsive.js' %}"></script>
+    <script>
+        function get_list_id(tableid){
+          var list_id = [];
+          $(tableid).DataTable().rows({ selected: true }).every(function() {
+            list_id.push($(this.node()).find('input:checkbox:checked').val())
+          });
+          return list_id;
+        }
+
+
+        function form_listid(url, list_id, extraParams={}){
+          const form = document.createElement('form');
+          form.method = 'post';
+          form.action = url;
+
+          const params = {
+            'csrfmiddlewaretoken': '{{ csrf_token }}',
+            'list_id': list_id,
+            ...extraParams
+          }
+
+          for (const key in params) {
+            if (params.hasOwnProperty(key)) {
+              const value = params[key];
+
+              if (Array.isArray(value)) {
+                value.forEach(val => {
+                  const hiddenField = document.createElement('input');
+                  hiddenField.type = 'hidden';
+                  hiddenField.name = key;
+                  hiddenField.value = val;
+                  form.appendChild(hiddenField);
+                });
+              } else {
+                const hiddenField = document.createElement('input');
+                hiddenField.type = 'hidden';
+                hiddenField.name = key;
+                hiddenField.value = value;
+                form.appendChild(hiddenField);
+              }
+            }
+          }
+
+          document.body.appendChild(form);
+          form.submit();
+        }
+
+
+        function submit_listid(url, list_id, swalParams=null, extraParams={}){
+          const defaults = {
+            title: 'Are you sure?',
+            text: 'You won\'t be able to revert this!',
+            errtxt: 'Please select the data',
+            confbtntxt: 'Yes!',
+            denybtntxt: 'Cancel',
+          }
+
+          const options = { ...defaults, ...swalParams }
+
+          if ( list_id != null && !Array.isArray(list_id) && !isNaN(list_id) ) {
+            list_id = new Array(list_id)
+          }
+
+          if ( list_id == null || typeof list_id == "undefined" || !list_id.length ) {
+            Swal.fire({
+              icon: 'warning',
+              title: 'Oops...',
+              text: options.errtxt,
+              customClass: { confirmButton: 'btn btn-primary btn-bold fs--shadow' },
+            })
+          } else {
+            Swal.fire({
+              title: options.title,
+              text: options.text,
+              icon: 'warning',
+              confirmButtonText: options.confbtntxt,
+              showDenyButton: true,
+              denyButtonText: options.denybtntxt,
+              focusDeny: true,
+              customClass: {
+                confirmButton: 'btn btn-primary btn-bold fs--shadow',
+                denyButton: 'btn btn-danger btn-bold fs--shadow',
+              },
+            }).then((result) => {
+              if (result.isConfirmed) {
+                form_listid(url, list_id, extraParams)
+              }
+            });
+          }
+        }
+
+        function ubahDateTime(datetime) {
+          const date = new Date(datetime);
+						return date.toLocaleString("id-ID", {
+							year: "numeric",
+							month: "short",
+							day: "numeric",
+							hour: "2-digit",
+							minute: "2-digit"
+						});
+        }
+
+    </script>
+    {% endif %}
+
+
+    {% if maxlength %}
+    <script src="{% static 'template/node_modules/bootstrap-maxlength/dist/bootstrap-maxlength.js' %}"></script>
+    {% endif %}
+
+    {% if inputmask %}
+    <script src="{% static 'template/node_modules/inputmask/dist/jquery.inputmask.js' %}"></script>
+    {% endif %}
+
+    {% if tinydatepicker %}
+    <script src="{% static 'template/node_modules/tiny-date-picker/dist/date-range-picker.js' %}"></script>
+    {% endif %}
+
+    {% if moment %}
+    <script src="{% static 'template/node_modules/moment/moment.js' %}"></script>
+    {% endif %}
+
+    {% if datetimepicker %}
+    <script src="{% static 'template/node_modules/eonasdan-bootstrap-datetimepicker/src/js/bootstrap-datetimepicker.js' %}"></script>
+    {% endif %}
+
+    {% if select2 %}
+    <script src="{% static 'template/node_modules/select2/dist/js/select2.js' %}"></script>
+    <script>
+        $('.select2bs4').select2({ theme: 'bootstrap4' })
+    </script>
+    {% endif %}
+
+    {% if chosen %}
+    <script src="{% static 'template/node_modules/chosen-js/chosen.jquery.js' %}"></script>
+    {% endif %}
+
+    {% if dropzone %}
+    <script src="{% static 'template/node_modules/dropzone/dist/dropzone.js' %}"></script>
+    {% endif %}
+
+    {% if summernote %}
+    <script src="{% static 'template/node_modules/summernote/dist/summernote-lite.js' %}"></script>
+    <script>
+      // update icons for summernote example
+      $.extend($.summernote.options.icons ,  {
+        'align': 'fa fa-align',
+        'alignCenter': 'fa fa-align-center',
+        'alignJustify': 'fa fa-align-justify',
+        'alignLeft': 'fa fa-align-left',
+        'alignRight': 'fa fa-align-right',
+        'indent': 'fa fa-indent',
+        'outdent': 'fa fa-outdent',
+        'arrowsAlt': 'fa fa-arrows-alt',
+        'bold': 'fa fa-bold',
+        'caret': 'fa fa-caret-down text-grey-m2 ml-1',
+        'circle': 'fa fa-circle',
+        'close': 'fa fa-close',
+        'code': 'fa fa-code',
+        'eraser': 'fa fa-eraser',
+        'font': 'fa fa-font',
+        'italic': 'fa fa-italic',
+        'link': 'fa fa-link text-success-m1',
+        'unlink': 'fas fa-unlink',
+        'magic': 'fa fa-magic text-brown-m1',
+        'menuCheck': 'fa fa-check',
+        'minus': 'fa fa-minus',
+        'orderedlist': 'fa fa-list-ol text-blue',
+        'pencil': 'fa fa-pencil',
+        'picture': 'far fa-image text-purple-d1',
+        'question': 'fa fa-question',
+        'redo': 'fas fa-redo',
+        'square': 'fa fa-square',
+        'strikethrough': 'fa fa-strikethrough',
+        'subscript': 'fa fa-subscript',
+        'superscript': 'fa fa-superscript',
+        'table': 'fa fa-table text-danger-m2',
+        'textHeight': 'fa fa-text-height',
+        'trash': 'fa fa-trash',
+        'underline': 'fa fa-underline',
+        'undo': 'fa fa-undo',
+        'unorderedlist': 'fa fa-list-ul text-blue',
+        'video': 'far fa-file-video text-pink-m1'
+      });
+    </script>
+    {% endif %}
+
+    {% if fullcalendar %}
+    <script src="{% static 'template/node_modules/bootbox/bootbox.all.js' %}"></script>
+    <script src="{% static 'template/node_modules/fullcalendar/main.js' %}"></script>
+    {% endif %}
+
+    {% if photoswipe %}
+    <script src="{% static 'template/node_modules/photoswipe/dist/photoswipe.js' %}"></script>
+    <script src="{% static 'template/node_modules/photoswipe/dist/photoswipe-ui-default.js' %}"></script>
+    {% endif %}
+
+    {% if duallistbox %}
+    <script src="{% static 'template/node_modules/bootstrap-select/dist/js/bootstrap-select.js' %}"></script>
+    <script src="{% static 'template/node_modules/bootstrap-duallistbox/dist/jquery.bootstrap-duallistbox.js' %}"></script>
+    <script>
+      // duallist box
+      var duallistbox = $('select.duallistbox').bootstrapDualListbox({
+        infoTextFiltered: '<span class="badge badge-purple badge-lg">Filtered</span>',
+        nonSelectedListLabel: '<span class="m-1 badge bgc-white border-1 brc-grey-m2 btn-text-grey px-25 btn-block">- Non Selected -</span>',
+        selectedListLabel: '<span class="m-1 badge bgc-white border-1 brc-grey-m2 btn-text-grey px-25 btn-block">- Selected -</span>',
+      });
+
+      duallistbox.each(function(index){
+        duallist_container = $(this).bootstrapDualListbox('getContainer')
+        duallist_container.find('.btn').removeClass('btn-default').addClass('btn-xs btn-outline-info btn-h-outline-info btn-bold m-0')
+        .find('.glyphicon-arrow-right').attr('class', 'fa fa-arrow-right').end()
+        .find('.glyphicon-arrow-left').attr('class', 'fa fa-arrow-left')
+      })
+    </script>
+    {% endif %}
+
+    {% if daterange %}
+    <script src="{% static 'template/node_modules/daterangepicker/daterangepicker.js' %}"></script>
+    <script src="{% static 'template/node_modules/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+    {% endif %}
+
+    {% if countdown %}
+    <script src="{% static 'template/dist/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'template/dist/js/jquery.countdown.min.js' %}"></script>
+    {% endif %}
+
+    {% if chartjs %}
+    <script src="{% static 'template/node_modules/chart.js/dist/Chart.js' %}"></script>
+    {% endif %}
+
+    {% if flatpickr %}
+    <script src="{% static 'admin/js/flatpickr.min.js' %}"></script>
+    {% endif %}
+
+    {% if messages %}
+        <script>
+            function notif(status, title, message, data=[]){
+                let redirect;
+                let confbtntxt='Check Data';
+                let denybtntxt='Cancel';
+
+                if (data){
+                  if (data['redirect']){
+                    redirect = data['redirect']
+                  }
+
+                  if (data['confbtntxt']){
+                    confbtntxt = data['confbtntxt']
+                  }
+
+                  if (data['denybtntxt']){
+                    denybtntxt = data['denybtntxt']
+                  }
+
+                  if (data['title']){
+                    title = data['title']
+                  }
+                }
+
+                if (status && title && message) {
+                    if (!redirect || redirect == null || redirect == 'None') {
+                        Swal.fire({
+                          icon: status,
+                          title: title,
+                          html: message,
+                          customClass: { confirmButton: 'btn btn-primary btn-bold fs--shadow' },
+                        })
+                    } else {
+                        Swal.fire({
+                          icon: status,
+                          title: title,
+                          html: message,
+                          confirmButtonText: confbtntxt,
+                          showDenyButton: true,
+                          denyButtonText: denybtntxt,
+                          focusDeny: true,
+                          customClass: {
+                            confirmButton: 'btn btn-primary btn-bold fs--shadow',
+                            denyButton: 'btn btn-danger btn-bold fs--shadow',
+                          },
+                        }).then((result) => {
+                          if (result.value) {
+                            window.location.replace(redirect);
+                          }
+                        });
+                    }
+                }
+            }
+
+            {% for msg in messages %}
+                notif(`{{ msg.level_tag }}`, `{{ msg.level_tag }}`, `{{ msg|safe }}`, JSON.parse(`{{ msg.extra_tags|default:"{}"|safe }}`))
+            {% endfor %}
+        </script>
+    {% endif %}
+
+    <script>
+      function setprofilesync(uniid){
+        const form = document.createElement('form');
+        form.method = 'post';
+        form.action = "{% url 'main:services_setprofilesync' %}";
+
+        const hiddenField = document.createElement('input');
+        hiddenField.type = 'hidden';
+        hiddenField.name = 'csrfmiddlewaretoken';
+        hiddenField.value = '{{ csrf_token }}';
+        form.appendChild(hiddenField);
+
+        document.body.appendChild(form);
+        form.submit();
+      }
+    </script>

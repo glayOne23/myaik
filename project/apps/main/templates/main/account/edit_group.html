@@ -1,0 +1,104 @@
+{% extends 'main/layout/base.html' %}
+{% load main_tags %}
+
+{% block content %}
+  <div class="page-content container container-plus">
+    <div class="page-header border-0 pb-3">
+      <h1 class="page-title text-primary-d2 text-150">
+        {% for data in request.path|split:"/"|slice:"2:4" %}
+          {% if forloop.counter == 1 %}
+            {{ data|title }}
+          {% else %}
+            <small class="page-info text-secondary-d2 text-nowrap">
+              <i class="fa fa-angle-double-right text-80"></i>
+              {{ data|title }}
+            </small>
+          {% endif %}
+        {% endfor %}
+      </h1>
+
+      <div class="page-tools mt-3 mt-sm-0 mb-sm-n1">
+        <!-- dataTables search box will be inserted here dynamically -->
+      </div>
+    </div>
+
+
+    <div class="row">
+      <div class="col-12 col-sm-12 mt-3 mt-sm-0 cards-container">
+        <div class="card dcard overflow-hidden">
+          <div class="border-t-3 w-100 brc-primary-m1 radius-t-1"></div>
+          <div class="card-header">
+            <h5 class="card-title text-110 text-primary-d2 pt-1">
+              Form
+            </h5>
+
+            <div class="card-toolbar no-border">
+              <a href="#" data-action="expand" class="card-toolbar-btn btn btn-sm radius-1 btn-outline-success mx-2px d-style">
+                <i class="fa fa-expand d-n-active"></i>
+                <i class="fa fa-compress d-active"></i>
+              </a>
+
+              <a href="#" data-action="toggle" class="card-toolbar-btn btn btn-sm radius-1 btn-outline-default mx-2px">
+                <i class="fa fa-chevron-up w-2 mx-1px"></i>
+              </a>
+
+              <!-- <a href="#" data-action="close" class="card-toolbar-btn btn btn-sm radius-1 btn-outline-danger mx-2px">
+                <i class="fa fa-times w-2 mx-1px"></i>
+              </a> -->
+            </div>
+          </div><!-- /.card-header -->
+
+          <form method="post" class="mt-lg-3" autocomplete="off">
+            {% csrf_token %}
+            <div class="card-body bg-white p-0">
+
+              <div class="form-group row px-3">
+                <div class="mb-1 mb-sm-0 col-sm-3 col-form-label text-sm-right pr-0">
+                  <label for="{{ formgroupdetails.alias.id_for_label }}" class="mb-0">
+                    {{ formgroupdetails.alias.label_tag }}
+                  </label>
+                </div>
+
+                <div class="col-sm-9 input-floating-label text-blue-d2 brc-blue-m1">
+                  <input type="text" name="{{ formgroupdetails.alias.name }}" id="{{ formgroupdetails.alias.id_for_label }}" placeholder="{{ formgroupdetails.alias.name }}" value="{{ formgroupdetails.alias.value|default_if_none:'' }}" class="form-control col-sm-8 col-md-7 shadow-none" required/>
+                  <span class="floating-label text-grey-m3 text-80">
+                    <label>{{ formgroupdetails.alias.label }}</label>
+                  </span>
+                </div>
+              </div>
+
+              <div class="form-group row px-3">
+                <div class="mb-1 mb-sm-0 col-sm-3 col-form-label text-sm-right pr-0">
+                  <label for="{{ formgroupdetails.description.id_for_label }}" class="mb-0">
+                    {{ formgroupdetails.description.label_tag }}
+                  </label>
+                </div>
+
+                <div class="col-sm-9 input-floating-label text-blue-d2 brc-blue-m1">
+                  <textarea name="{{ formgroupdetails.description.name }}" id="{{ formgroupdetails.description.id_for_label }}" class="form-control col-sm-8 col-md-7 shadow-none" maxlength="1000" placeholder="{{ formgroupdetails.description.label }}">{{ formgroupdetails.description.value|default_if_none:'' }}</textarea>
+                </div>
+              </div>                
+
+            </div><!-- /.card-body -->
+
+            <div class="mx-n25 py-3 brc-dark-l3 d-flex border-t-1 bgc-secondary-l5 px-3">
+              <div class="offset-md-3 col-md-9 text-nowrap">
+                <button class="btn btn-warning btn-bold px-4" type="button" onclick="window.history.back();"><i class="fas fa-angle-left mr-1"></i> Cancel</button>
+
+                <button class="btn btn-info btn-bold px-4" type="submit">
+                  <i class="fa fa-check mr-1"></i>
+                  Submit
+                </button>
+  
+                <button class="btn btn-lightgrey btn-bold px-4" type="reset"><i class="fa fa-undo mr-1"></i>Reset</button>
+              </div>
+            </div><!-- /.card-footer -->
+          </form>
+
+        </div><!-- /.card -->
+      </div><!-- /.col -->
+    </div>
+
+  </div>
+{% endblock %}
+

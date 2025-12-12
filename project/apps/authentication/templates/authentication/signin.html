@@ -1,0 +1,131 @@
+{% extends 'authentication/layout/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="main-container container bgc-transparent">
+
+  <div class="main-content minh-100 justify-content-center">
+    <div class="p-2 p-md-4">
+      <div class="row" id="row-1">
+        <div class="col-12 col-xl-10 offset-xl-1 bgc-white shadow radius-1 overflow-hidden">
+
+          <div class="row" id="row-2">
+
+            {% include 'authentication/layout/colintro.html' %}
+
+
+            <div id="id-col-main" class="col-12 col-lg-7 py-lg-5 bgc-white px-0">
+              <div class="tab-pane active show mh-100 px-3 px-lg-0 pb-3" id="id-tab-login">
+                <!-- show this in desktop -->
+                <div class="d-none d-lg-block col-md-6 offset-md-3 mt-lg-4 px-0">
+                  <h4 class="text-dark-tp4 border-b-1 brc-secondary-l2 pb-1 text-130">
+                    <i class="fa fa-coffee text-orange-m1 mr-1"></i>
+                      Welcome Back
+                    </h4>
+                </div>
+
+                <!-- show this in mobile device -->
+                <div class="d-lg-none text-secondary-m1 my-4 text-center">
+                  <a class="mt-5 mb-2" href="">
+                    <img src="{{ APP_LOGO }}" alt="LOGO" class="img-fluid mx-auto d-block mb-2" width="100px">
+                  </a>
+                  <h1 class="text-170">
+                    <span class="text-blue-d1 text-80">
+                      {{ APP_SHORT_NAME }}
+                    </span>
+                  </h1>
+
+                  Welcome back
+                </div>
+
+
+                <form method="post" autocomplete="off" class="form-row mt-4">
+                  {% csrf_token %}
+                  <div class="form-group col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-6 offset-lg-3">
+                    <div class="d-flex align-items-center input-floating-label text-blue brc-blue-m2">
+                      <input placeholder="{{ formsignin.username.name }}" name="{{ formsignin.username.name }}" value="{{ formsignin.username.value|default_if_none:'' }}" type="text" class="form-control form-control-lg pr-4 shadow-none" id="{{ formsignin.username.id_for_label }}" required/>
+                      <i class="fa fa-user text-grey-m2 ml-n4"></i>
+                      <label class="floating-label text-grey-l1 ml-n3" for="{{ formsignin.username.id_for_label }}">
+                        {{ formsignin.username.label }}
+                      </label>
+                    </div>
+                  </div>
+
+
+                  <div class="form-group col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-6 offset-lg-3 mt-2 mt-md-1">
+                    <div class="d-flex align-items-center input-floating-label text-blue brc-blue-m2">
+                      <input placeholder="{{ formsignin.password.name }}" name="{{ formsignin.password.name }}" value="{{ formsignin.password.value|default_if_none:'' }}" type="password" class="form-control form-control-lg pr-4 shadow-none" id="{{ formsignin.password.id_for_label }}" required/>
+                      <i class="fa fa-key text-grey-m2 ml-n4"></i>
+                      <label class="floating-label text-grey-l1 ml-n3" for="{{ formsignin.password.id_for_label }}">
+                        {{ formsignin.password.label }}
+                      </label>
+                    </div>
+                  </div>
+
+                  {% if email_config_available %}
+                  <div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-6 offset-lg-3 text-right text-md-right mt-n2 mb-2">
+                    <a href="{% url 'authentication:forgot' %}" class="text-primary-m1 text-95">
+                      Forgot Password?
+                    </a>
+                  </div>
+                  {% endif %}
+
+
+                  <div class="form-group col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-6 offset-lg-3">
+                    <label class="d-inline-block mt-3 mb-0 text-dark-l1">
+                      <input type="checkbox" class="mr-1" id="id-remember-me" />
+                      Remember me
+                    </label>
+
+                    <button type="submit" class="btn btn-primary btn-block px-4 btn-bold mt-2">
+                      Sign In
+                    </button>
+                  </div>
+
+                  <div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-6 offset-lg-3 d-flex flex-column align-items-center justify-content-center">
+                    <hr class="brc-default-l2 w-100 mb-2" />
+                    <div class="mt-n4 bgc-white-tp2 px-3 py-1 text-secondary-d3 text-90">Or Login With</div> 
+                  </div>
+
+                  <div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-6 offset-lg-3 flex-column align-items-center justify-content-center">
+                    <a href="{% url 'authentication:cas_ng_login' %}">
+                      <button type="button" class="btn btn-orange btn-block px-4 btn-bold mt-2 mb-4">
+                        <i class="fas fa-arrow-right-to-bracket mr-1"></i>
+                        UMS CAS
+                        <!-- <img id="id-navbar-user-image" class="d-none d-lg-inline-block w-4" src="{% static 'images/logo/cas_logo.png' %}" alt="Image"> -->
+                      </button>
+                    </a>
+                  </div>
+                </form>
+
+
+                <div class="form-row">
+                  <div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-6 offset-lg-3 d-flex flex-column align-items-center justify-content-center">
+
+                    <hr class="brc-default-l2 mt-0 mb-2 w-100" />
+
+                    <div class="p-0 px-md-2 text-dark-tp3 my-3">
+                      Not a member?
+                      <a class="text-success-m1 text-600 mx-1" href="{% url 'authentication:signup' %}">
+                        Signup now
+                      </a>
+                    </div>
+
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div><!-- /.row -->
+
+        </div><!-- /.col -->
+      </div><!-- /.row -->
+
+      {% include 'authentication/layout/copyright.html' %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+

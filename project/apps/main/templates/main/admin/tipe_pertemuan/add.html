@@ -1,0 +1,72 @@
+{% extends 'main/layout/base.html' %}
+{% load main_tags %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+  <div class="page-content container container-plus">
+    <div class="page-header border-0 pb-3">
+      <h1 class="page-title text-primary-d2 text-150">
+        Admin
+        <small class="page-info text-secondary-d2 text-nowrap">
+          <i class="fa fa-angle-double-right text-80"></i>
+          Tipe AIK
+        </small>
+      </h1>>
+
+      <div class="page-tools mt-3 mt-sm-0 mb-sm-n1">
+        <!-- dataTables search box will be inserted here dynamically -->
+      </div>
+    </div>
+
+
+    <div class="row">
+      <div class="col-12 col-sm-12 mt-3 mt-sm-0 cards-container">
+        <div class="card dcard overflow-hidden">
+          <div class="border-t-3 w-100 brc-primary-m1 radius-t-1"></div>
+          <div class="card-header">
+            <h5 class="card-title text-110 text-primary-d2 pt-1">
+              Form
+            </h5>
+
+            <div class="card-toolbar no-border">
+              <a href="#" data-action="expand" class="card-toolbar-btn btn btn-sm radius-1 btn-outline-success mx-2px d-style">
+                <i class="fa fa-expand d-n-active"></i>
+                <i class="fa fa-compress d-active"></i>
+              </a>
+
+              <a href="#" data-action="toggle" class="card-toolbar-btn btn btn-sm radius-1 btn-outline-default mx-2px">
+                <i class="fa fa-chevron-up w-2 mx-1px"></i>
+              </a>
+            </div>
+          </div><!-- /.card-header -->
+
+          <form method="post" class="mt-lg-3" autocomplete="off">
+            {% csrf_token %}
+            <div class="card-body bg-white">
+
+              {{form|crispy}}
+
+            </div><!-- /.card-body -->
+
+            <div class="mx-n25 py-3 brc-dark-l3 d-flex border-t-1 bgc-secondary-l5 px-3">
+              <div class="offset-md-3 col-md-9 text-nowrap">
+                <button class="btn btn-warning btn-bold px-4" type="button" onclick="window.history.back();"><i class="fas fa-angle-left mr-1"></i> Cancel</button>
+
+                <button class="btn btn-info btn-bold px-4" type="submit">
+                  <i class="fa fa-check mr-1"></i>
+                  Submit
+                </button>
+
+                <button class="btn btn-lightgrey btn-bold px-4" type="reset"><i class="fa fa-undo mr-1"></i>Reset</button>
+              </div>
+            </div><!-- /.card-footer -->
+          </form>
+
+        </div><!-- /.card -->
+      </div><!-- /.col -->
+    </div>
+
+  </div>
+{% endblock %}
+

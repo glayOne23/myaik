@@ -1,0 +1,74 @@
+    {% load static %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <base href="../" />
+
+    <title>{{ APP_SHORT_NAME }}</title>
+
+    <link rel="stylesheet" type="text/css" href="{% static 'template/node_modules/bootstrap/dist/css/bootstrap.css' %}">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'template/node_modules/@fontawesome/css/all.min.css' %}">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'template/dist/css/ace-font.css' %}">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'template/dist/css/ace.css' %}">
+
+    <link rel="icon" type="image/x-icon" href="{{ APP_FAVICON }}" />
+
+    <link rel="stylesheet" type="text/css" href="{% static 'template/dist/css/ace-themes.css' %}">
+
+    {% if datatables %}
+    <link rel="stylesheet" type="text/css" href="{% static 'template/node_modules/datatables.net-bs4/css/dataTables.bootstrap4.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'template/node_modules/datatables.net-buttons-bs4/css/buttons.bootstrap4.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'template/node_modules/datatables.net-rowgroup/css/rowGroup.bootstrap.css' %}">
+    <style>.dt-buttons .btn-group .dt-button-collection .dropdown-menu { max-height: 200px; overflow-y: auto; }</style>
+    {% endif %}
+
+    {% if tinydatepicker %}
+    <link rel="stylesheet" type="text/css" href="{% static 'template/node_modules/tiny-date-picker/tiny-date-picker.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'template/node_modules/tiny-date-picker/date-range-picker.css' %}">
+    {% endif %}
+
+    {% if datetimepicker %}
+    <link rel="stylesheet" type="text/css" href="{% static 'template/node_modules/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css' %}">
+    {% endif %}
+
+    {% if select2 %}
+    <link rel="stylesheet" type="text/css" href="{% static 'template/node_modules/select2/dist/css/select2.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'template/node_modules/select2-bootstrap4-theme/select2-bootstrap4.min.css' %}">
+    {% endif %}
+
+    {% if chosen %}
+    <link rel="stylesheet" type="text/css" href="{% static 'template/node_modules/chosen-js/chosen.css' %}">
+    {% endif %}
+
+    {% if dropzone %}
+    <link rel="stylesheet" type="text/css" href="{% static 'template/node_modules/dropzone/dist/dropzone.css' %}">
+    {% endif %}
+
+    {% if summernote %}
+    <link rel="stylesheet" type="text/css" href="{% static 'template/node_modules/summernote/dist/summernote-lite.css' %}">
+    {% endif %}
+
+    {% if fullcalendar %}
+    <link rel="stylesheet" type="text/css" href="{% static 'template/node_modules/fullcalendar/main.css' %}">
+    {% endif %}
+
+    {% if photoswipe %}
+    <link rel="stylesheet" type="text/css" href="{% static 'template/node_modules/photoswipe/dist/photoswipe.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'template/node_modules/photoswipe/dist/default-skin/default-skin.css' %}">
+    {% endif %}
+
+    {% if duallistbox %}
+    <link rel="stylesheet" type="text/css" href="{% static 'template/node_modules/bootstrap-duallistbox/dist/bootstrap-duallistbox.css' %}">
+    {% endif %}
+
+    {% if daterange %}
+    <link rel="stylesheet" type="text/css" href="{% static 'template/node_modules/daterangepicker/daterangepicker.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'template/node_modules/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
+    {% endif %}
+
+    {% if flatpickr %}
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/flatpickr.min.css' %}">
+    {% endif %}

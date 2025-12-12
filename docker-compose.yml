@@ -1,0 +1,116 @@
+# ============================
+#            SERVER
+# ============================
+
+# version: '3.8'
+
+# services:
+#   web:
+#     image: gitlab.ums.ac.id:5050/project-base-inheritance/project-base:latest
+#     command: gunicorn project.wsgi:application --bind 0.0.0.0:8000
+#     ports:
+#       - 8000:8000
+#     restart: unless-stopped
+#     volumes:
+#       - media:/home/app/webapp/media/
+#       - media_private:/home/app/webapp/media_private/
+#     networks:
+#       - lan
+#     environment: # setting environment disini atau di setting.py (config default)
+#       - DEBUG=False
+#       - ALLOWED_HOSTS=*
+#       - DB_ENGINE=db_engine
+#       - DB_NAME=db_name
+#       - DB_USER=db_user
+#       - DB_PASSWORD=db_password
+#       - DB_HOST=db_host
+#       - DB_PORT=db_port
+#       - CAS_SERVER_URL=https://auth.ums.ac.id/cas/
+#       - CAS_LOGOUT_COMPLETELY=True
+#       - CAS_VERSION=2
+#       - API_GATEWAY_URL=http://172.16.10.241:8008
+#       - API_GATEWAY_USERNAME=api_username
+#       - API_GATEWAY_PASSWORD=api_password
+#       - API_STAR_URL=https://star.ums.ac.id/abubakar/
+#       - API_STAR_USERNAME=username
+#       - API_STAR_PASSWORD=password
+#       - EMAIL_HOST_USER=email_user
+#       - EMAIL_HOST_PASSWORD=email_password
+#       - WABLAS_URL=https://eu.wablas.com
+#       - WABLAS_TOKEN=token
+#       - CSRF_TRUSTED_ORIGINS=https://*.ums.ac.id
+
+# networks:
+#   lan:
+#     external:
+#       name: arsip-network # sesuaikan network
+
+# volumes:
+#   media:
+#   media_private:
+
+
+
+
+
+# ============================
+#            LOCAL
+# ============================
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: projectbase
+      POSTGRES_USER: projectuser
+      POSTGRES_PASSWORD: projectpass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  web:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    command: >
+      sh -c "
+        python manage.py makemigrations &&
+        python manage.py makemigrations authentication &&
+        python manage.py makemigrations main &&
+        python manage.py migrate &&
+        python manage.py loaddata group &&
+        python manage.py loaddata groupdetails &&
+        python manage.py loaddata user &&
+        python manage.py loaddata setting &&
+        gunicorn project.wsgi:application --bind 0.0.0.0:8000
+      "
+    depends_on:
+      - db
+    ports:
+      - 8000:8000
+    restart: unless-stopped
+    volumes:
+      - media:/home/app/webapp/media/
+      - media_private:/home/app/webapp/media_private/
+    environment:
+      - DEBUG=True
+      - ALLOWED_HOSTS=*
+      - DB_ENGINE=django.db.backends.postgresql
+      - DB_NAME=projectbase
+      - DB_USER=projectuser
+      - DB_PASSWORD=projectpass
+      - DB_HOST=db
+      - DB_PORT=5432
+      - CAS_SERVER_URL=https://auth.ums.ac.id/cas/
+      - CAS_LOGOUT_COMPLETELY=True
+      - CAS_VERSION=2
+      - CSRF_TRUSTED_ORIGINS=https://*.ums.ac.id:8000,http://localhost:8000
+
+
+
+volumes:
+  media:
+  media_private:
+  postgres_data:

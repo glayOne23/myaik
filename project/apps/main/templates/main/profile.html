@@ -1,0 +1,509 @@
+{% extends 'main/layout/base.html' %}
+{% load main_tags %}
+
+{% block content %}
+  <div class="page-content container container-plus">
+    <!-- page header -->
+    <div class="d-lg-none page-header py-0">
+      <h1 class="text-dark-m3 pb-0 mb-0 text-125">
+        Dashboard
+      </h1>
+
+      <!-- page tools -->
+      <div class="page-tools d-none">
+        <div class="action-buttons text-nowrap">
+          <a class="btn bgc-white btn-light-secondary mx-0" href="#" data-toggle="tooltip" title="Details">
+            <i class="fa fa-search-plus text-blue"></i>
+          </a>
+          <a class="btn bgc-white btn-light-secondary mx-0" href="#" data-toggle="tooltip" title="Print">
+            <i class="fa fa-print text-purple"></i>
+          </a>
+          <a class="btn bgc-white btn-light-secondary mx-0" href="#" data-toggle="tooltip" title="Remove">
+            <i class="fa fa-trash-alt text-danger"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-header mb-2 pb-2 flex-column flex-sm-row align-items-start align-items-sm-center py-25">
+      <h1 class="page-title text-primary-d2 text-140">
+        {% for data in request.path|split:"/"|slice:"2:" %}
+          {% if forloop.counter == 1 %}
+            {{ data|title }}
+          {% else %}
+            <small class="page-info text-secondary-d2 text-nowrap">
+              <i class="fa fa-angle-double-right text-80"></i>
+              {{ data|title }}
+            </small>
+          {% endif %}
+        {% endfor %}
+      </h1>
+
+    </div>
+
+
+    <div class="row mt-2 mt-md-4">
+
+      <!-- the left side profile picture and other info -->
+      <div class="col-12 col-md-5 d-flex align-items-stretch">
+        <div class="card acard h-auto w-100">
+          <div class="card-body">
+            <span class="d-none position-tl mt-2 pt-3px">
+            <span class="text-white bgc-blue-d1 ml-2 radius-b-1 py-2 px-2">
+                <i class="fa fa-star"></i>
+            </span>
+            </span>
+
+
+            <div class="d-flex flex-column py-3 px-lg-3 justify-content-center align-items-center">
+
+              <div class="pos-rel">
+                <!-- <span class="d-inline-block text-center mr-2 pt-2 radius-round bgc-success-l2 text-info font-bolder text-170" style="height: 4rem; width: 4rem;"><span>{{ formpassword.user.get_full_name.0 }}</span></span>
+                <span class=" position-tr bgc-success p-1 radius-round border-2 brc-white mt-2px mr-2px"></span> -->
+                <img alt="Profile image" src="{{ datauser.profile.image_url }}" class="p-2px border-2 radius-round bord1er-2 brc-primary-m1" style="height: 8rem; width: 8rem;"/>
+              </div>
+
+              <div class="text-center mt-2">
+                <div class="text-center mt-1" id="id-user-info">
+                  <a href="#id-user-name" class="d-style pos-rel collapsed text-blue-d2 accordion-toggle no-underline px-1 py-2px" data-toggle="collapse" aria-expanded="false">
+                    <span class="text-130 font-bolder text-wrap">{% if datauser.get_full_name %}{{ datauser.get_full_name }}{% else %}{{ datauser.username }}{% endif %}</span>
+                  </a>
+                </div>
+    
+                <div class="collapse" id="id-user-name">
+                  <div class="m-1">
+                    <span class="m-1 badge bgc-white border-1 brc-primary-m2 btn-text-primary px-25 text-60" title="Easter Eggs">
+                      Hello World ^_^
+                    </span>
+                  </div>
+                </div>
+
+                {% if datauser.is_superuser %}
+                  <span class="m-1 badge bgc-white border-1 brc-purple-m2 btn-text-purple px-25">Super User</span>
+                {% elif datauser.is_staff %}
+                  <span class="m-1 badge bgc-white border-1 brc-purple-m2 btn-text-purple px-25">Staff</span>
+                {% endif %}
+
+                {% if datauser.groups.all %}
+                  {% for group in datauser.groups.all %}
+                    <span class="m-1 badge bgc-white border-1 brc-purple-m2 btn-text-purple px-25">{{ group.groupdetails.alias|upper }}</span>
+                  {% endfor %}
+                {% elif not datauser.is_superuser and not datauser.is_staff %}
+                  <span class="m-1 badge bgc-white border-1 brc-purple-m2 btn-text-purple px-25">You Don't Have Any Role</span>
+                {% endif %}
+
+              </div>
+
+
+              <hr class="w-90 mx-auto mb-1 brc-secondary-l3" />
+
+
+              <div class="mt-2 w-100 text-90 text-secondary radius-1 px-25 py-3">
+                <div class="d-flex mb-1">
+                  <h6 class="text-600">
+                    Profile
+                  </h6>
+                </div>
+
+
+
+                <div class="border-1 brc-dark-l3 radius-1 my-25 bgc-white text-secondary-d1">
+
+                  <div class="bgc-white radius-1">
+                    <table class="table table table-striped-default table-borderless mb-0">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <i class="far fa-user text-success"></i>
+                          </td>
+                          <td class="text-95 text-600 text-secondary-d2">
+                            Name
+                          </td>
+                          <td class="text-dark-m3">
+                            {{ datauser.get_full_name|default:'-' }}
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <i class="fa-regular fa-address-card text-primary"></i>
+                          </td>
+                          <td class="text-95 text-600 text-secondary-d2">
+                            Username
+                          </td>
+                          <td class="text-dark-m3">
+                            {{ datauser.username|default:'-' }}
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <i class="far fa-envelope text-blue"></i>
+                          </td>
+                          <td class="text-95 text-600 text-secondary-d2">
+                            Email
+                          </td>
+                          <td class="text-wrap">
+                            {{ datauser.email|default:'-' }}
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <i class="fa-regular fa-id-card text-info"></i>
+                          </td>
+                          <td class="text-95 text-600 text-secondary-d2">
+                            NIP
+                          </td>
+                          <td class="text-wrap">
+                            {{ datauser.profile.nip|default:'-' }}
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <i class="fa-solid fa-id-card text-blue"></i>
+                          </td>
+                          <td class="text-95 text-600 text-secondary-d2">
+                            NIDN
+                          </td>
+                          <td class="text-wrap">
+                            {{ datauser.profile.nidn|default:'-' }}
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <i class="fa-solid fa-envelope text-purple-d3"></i>
+                          </td>
+                          <td class="text-95 text-600 text-secondary-d2">
+                            Additional Email
+                          </td>
+                          <td class="text-wrap">
+                            {{ datauser.profile.ext_email|default:'-' }}
+                          </td>
+                        </tr>
+                        
+                        <tr>
+                          <td>
+                            <i class="fa fa-phone text-purple"></i>
+                          </td>
+                          <td class="text-95 text-600 text-secondary-d2">
+                            Phone Number
+                          </td>
+                          <td class="text-dark-m3 text-wrap">
+                            {{ datauser.profile.phone_number|default:'-' }}
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <i class="fa-regular fa-handshake text-warning"></i>
+                          </td>
+                          <td class="text-95 text-600 text-secondary-d2">
+                            Fungsional
+                          </td>
+                          <td class="text-dark-m3 text-wrap">
+                            {{ datauser.profile.get_jabfung|default:'-' }}
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <i class="fa-solid fa-house text-blue"></i>
+                          </td>
+                          <td class="text-95 text-600 text-secondary-d2">
+                            Homebase
+                          </td>
+                          <td class="text-dark-m3 text-wrap">
+                            {{ datauser.profile.homebase|default:'-' }}
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <i class="fa-solid fa-user-lock text-danger-d1"></i>
+                          </td>
+                          <td class="text-95 text-600 text-secondary-d2">
+                            Role
+                          </td>
+                          <td class="text-dark-m3 text-wrap">
+                            {% if request.session.user.groups %}
+                              {% for group in request.session.user.groups %}
+                                <span class="badge badge-pill bgc-secondary-l2 text-secondary-d3 text-90 px-3">
+                                  {{ group.alias|upper }}
+                                </span>
+                              {% endfor %}
+                            {% elif not request.session.user.is_superuser and not request.session.user.is_staff %}
+                              <span class="badge badge-pill bgc-secondary-l2 text-secondary-d3 text-90 px-3">
+                                You Don't Have Any Role
+                              </span>
+                            {% endif %}
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <i class="fa-solid fa-calendar-day text-grey-d1"></i>
+                          </td>
+                          <td class="text-95 text-600 text-secondary-d2">
+                            Date Joined
+                          </td>
+                          <td class="text-dark-m3 text-wrap">
+                            {{ datauser.date_joined|date:'Y-m-d H:i'|default:'-' }}
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <i class="far fa-clock text-secondary"></i>
+                          </td>
+                          <td class="text-95 text-600 text-secondary-d2">
+                            Last Login
+                          </td>
+                          <td class="text-dark-m3 text-wrap">
+                            {{ datauser.last_login|date:'Y-m-d H:i'|default:'-' }}
+                          </td>
+                        </tr>
+
+                      </tbody>
+                    </table>
+                  </div>
+
+                </div>
+
+                
+                {% if datauser.profile.is_dosen %}
+                <div class="d-flex mt-2">
+                  <button class="btn bgc-purple btn-block" onclick="setprofilesync()">
+                    <i class="fa-solid fa-rotate text-white text-105 mr-1"></i>
+                    <span class="text-white">Profile Sync</span>
+                  </button>
+                </div>
+                {% endif %}
+
+              </div>
+
+            </div><!-- /.d-flex -->
+          </div><!-- /.card-body -->
+        </div><!-- /.card -->
+
+
+
+      </div><!-- .col -->
+
+
+      <!-- the right side profile tabs -->
+      <div class="col-12 col-md-7 mt-3 mt-md-0">
+        <div class="card dcard h-100">
+          <div class="card-body p-0">
+            <div class="sticky-nav">
+              <div class="position-tr w-100 border-t-4 brc-blue-m2 radius-2 d-md-none"></div>
+
+              <ul id="profile-tabs" class="nav nav-tabs-scroll is-scrollable nav-tabs nav-tabs-simple p-1px pl-25 bgc-secondary-l4 border-b-1 brc-dark-l3 radius-t-1" role="tablist">
+                <li class="nav-item mr-2 mr-lg-3">
+                  <a class="d-style nav-link active px-2 py-35 brc-primary-tp1" data-toggle="tab" href="#profile-tab-edit" role="tab" aria-controls="profile-tab-edit" aria-selected="true">
+                    <span class="d-n-active text-dark-l1">1. Edit Profile</span>
+                    <span class="d-active text-dark-m3">1. Edit Profile</span>
+                  </a>
+                </li>
+                <li class="nav-item mr-2 mr-lg-3">
+                  <a class="d-style nav-link px-2 py-35 brc-primary-tp1" data-toggle="tab" href="#password-tab-edit" role="tab" aria-controls="password-tab-edit" aria-selected="true">
+                    <span class="d-n-active text-dark-l1">2. Edit Password</span>
+                    <span class="d-active text-dark-m3">2. Edit Password</span>
+                  </a>
+                </li>
+              </ul>
+            </div><!-- /.sticky-nav-md -->
+
+
+            <div class="tab-content px-0 tab-sliding flex-grow-1 border-0">
+
+              <!-- profile edit tab -->
+              <div class="tab-pane active show px-1 px-md-2 px-lg-4" id="profile-tab-edit">
+                <h4 class="bgc-secondary-l4 text-dark-tp3 text-center text-140 mb-3 mx-3 py-25">Update Profile Data</h4>
+
+                <div class="row">
+                  <div class="col-12 col-lg-10 offset-lg-1 mt-3">
+
+                    <form method="post" enctype="multipart/form-data">
+                      {% csrf_token %}
+
+                      <input type="hidden" name="form" value="profile">
+
+                      <div class="form-group row">
+                        <div class="mb-1 mb-sm-0 col-sm-3 col-form-label text-sm-right pr-0">
+                          <label for="{{ formprofile.ext_email.id_for_label }}" class="mb-0">{{ formprofile.ext_email.label_tag }}</label>
+                        </div>
+
+                        <div class="col-sm-9 input-floating-label text-blue-d2 brc-blue-m1">
+                          <input type="text" placeholder="{{ formprofile.ext_email.name }}" class="form-control col-sm-10 col-md-10 shadow-none" value="{{ formprofile.ext_email.initial|default:'' }}" id="{{ formprofile.ext_email.id_for_label }}" name="{{ formprofile.ext_email.name }}" minlength="1" maxlength="100"/>
+                          <span class="floating-label text-grey-m3 text-80">
+                            {{ formprofile.ext_email.label_tag }}
+                          </span>
+                        </div>
+                      </div>
+
+
+                      <div class="form-group row">
+                        <div class="mb-1 mb-sm-0 col-sm-3 col-form-label text-sm-right pr-0">
+                          <label for="{{ formprofile.phone_number.id_for_label }}" class="mb-0">{{ formprofile.phone_number.label_tag }}</label>
+                        </div>
+
+                        <div class="col-sm-9 input-floating-label text-blue-d2 brc-blue-m1">
+                          <input type="text" placeholder="{{ formprofile.phone_number.name }}" class="form-control col-sm-10 col-md-10 shadow-none" value="{{ formprofile.phone_number.initial|default:'' }}" id="{{ formprofile.phone_number.id_for_label }}" name="{{ formprofile.phone_number.name }}" minlength="1" maxlength="15"/>
+                          <span class="floating-label text-grey-m3 text-80">
+                            {{ formprofile.phone_number.label_tag }}
+                          </span>
+                        </div>
+                      </div>
+
+                      
+                      <div class="form-group row">
+                        <div class="mb-1 mb-sm-0 col-sm-3 col-form-label text-sm-right pr-0">
+                          <label for="{{ formprofile.image.id_for_label }}" class="mb-0">{{ formprofile.image.label_tag }}</label>
+                        </div>
+  
+                        <div class="col-sm-9 input-floating-label text-blue-d2 brc-blue-m1">
+                          <div class="col-sm-10 col-md-10 shadow-none p-0">
+                            <input type="file" class="ace-file-input" id="input_file" name="{{ formprofile.image.name }}" />
+                          </div>
+                        </div>
+                      </div>
+
+
+                      <div class="form-group row">
+                        <div class="mb-1 mb-sm-0 col-sm-3 col-form-label text-sm-right pr-0">
+                          <label for="_setprofile_" class="mb-0">Default Profile Picture</label>
+                        </div>
+
+                        <div class="col-sm-9 input-floating-label text-blue-d2 brc-blue-m1">
+                          <input type="checkbox" class="ace-switch input-lg ace-switch-yesno bgc-blue-d2 text-grey-m3 radius-1" id="_setprofile_" name="_setprofile_">
+                          <!-- <label>
+                            <input type="checkbox" class="input-lg bgc-blue" id="_setprofile_" name="_setprofile_">
+                            Change profile to default
+                          </label> -->
+                        </div>
+                      </div>
+
+
+                      <div class="col-12">
+                        <hr class="border-double brc-dark-l3" />
+
+                        <div class="form-group text-center mt-4 mb-3">
+                          <button type="button" class="btn btn-outline-secondary radius-1 px-3 mx-1" onclick="window.history.back();">
+                            Cancel
+                          </button>
+
+                          <button type="submit" class="btn btn-outline-green radius-1 px-4 mx-1">
+                            Save Changes
+                          </button>
+                        </div>
+                      </div>
+                      
+                    </form>
+
+                  </div>
+
+                </div>
+              </div><!-- /.tab-pane -->
+
+              <!-- password edit tab -->
+              <div class="tab-pane px-1 px-md-2 px-lg-4" id="password-tab-edit">
+                <h4 class="bgc-secondary-l4 text-dark-tp3 text-center text-140 mb-3 mx-3 py-25">{% if datauser.password %}Update Password{% else %}Set your password for this system{% endif %}</h4>
+
+                <div class="row">
+                  <div class="col-12 col-lg-10 offset-lg-1 mt-3">
+
+                    <form method="post">
+                      {% csrf_token %}
+
+                      <input type="hidden" name="form" value="password">
+
+                      {% if datauser.password %}
+                        {{ formpassword }}
+                      {% else %}
+                        <div class="form-group row">
+                          <div class="mb-1 mb-sm-0 col-sm-3 col-form-label text-sm-right pr-0">
+                            <label for="{{ formpassword.password1.id_for_label }}" class="mb-0">{{ formpassword.password1.label_tag }}</label>
+                          </div>
+    
+                          <div class="col-sm-9 input-floating-label text-blue-d2 brc-blue-m1">
+                            <input type="password" placeholder="{{ formpassword.password1.name }}" class="form-control col-sm-10 col-md-10 shadow-none" value="" id="{{ formpassword.password1.id_for_label }}" name="{{ formpassword.password1.name }}" autocomplete="new-password" minlength="8" maxlength="20" required="required"/>
+                            <span class="floating-label text-grey-m3 text-80">
+                              {{ formpassword.password1.label_tag }}
+                            </span>
+                          </div>
+                        </div>
+    
+                        <div class="form-group row">
+                          <div class="mb-1 mb-sm-0 col-sm-3 col-form-label text-sm-right pr-0">
+                            <label for="{{ formpassword.password2.id_for_label }}" class="mb-0">{{ formpassword.password2.label_tag }}</label>
+                          </div>
+    
+                          <div class="col-sm-9 input-floating-label text-blue-d2 brc-blue-m1">
+                            <input type="password" placeholder="{{ formpassword.password2.name }}" class="form-control col-sm-10 col-md-10 shadow-none" value="" id="{{ formpassword.password2.id_for_label }}" name="{{ formpassword.password2.name }}" minlength="8" maxlength="20" required="required"/>
+                            <span class="floating-label text-grey-m3 text-80">
+                              {{ formpassword.password2.label_tag }}
+                            </span>
+                          </div>
+                        </div>
+                      {% endif %}
+
+                      <!-- {{ formpassword }} -->
+
+                      <div class="col-12">
+                        <hr class="border-double brc-dark-l3" />
+
+                        <div class="form-group text-center mt-4 mb-3">
+                          <button type="button" class="btn btn-outline-secondary radius-1 px-3 mx-1" onclick="window.history.back();">
+                            Cancel
+                          </button>
+
+                          <button type="submit" class="btn btn-outline-green radius-1 px-4 mx-1">
+                            Save Changes
+                          </button>
+                        </div>
+                      </div>
+                      
+                    </form>
+
+                  </div>
+
+                </div>
+              </div><!-- /.tab-pane -->
+
+            </div><!-- /.tab-content -->
+
+          </div>
+        </div><!-- /.card -->
+
+      </div>
+    </div>
+
+  </div>
+{% endblock %}
+
+
+{% block javascript %}
+<script>
+
+  $(document).ready(function(){
+    // multiple with image preview
+    $('#input_file').aceFileInput({
+      style: 'drop',
+      droppable: true,
+      container: 'border-1 border-dashed brc-grey-l1 brc-h-blue-m2 shadow-sm',
+      placeholderClass: 'text-90 text-600 text-grey-l1 my-2',
+      placeholderText: 'Drop images here or click to choose',
+      placeholderIcon: '<i class="fa fa-cloud-upload-alt fa-3x text-info-m2 my-2"></i>',
+      //previewSize: 64,
+      thumbnail: 'large',
+      //allowExt: 'gif|jpg|jpeg|png|webp|svg',
+      //allowMime: 'image/png|image/jpeg',
+      allowMime: 'image/*',
+      //maxSize: 100000,
+    });
+  });
+</script>
+{% endblock %}

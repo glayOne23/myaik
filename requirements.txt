@@ -1,0 +1,30 @@
+# Django is a high-level Python web framework that encourages rapid development and clean, pragmatic design.
+Django==5.2.8 # Django 4.2+ not supports PostgreSQL 11.
+
+# Gunicorn ‘Green Unicorn’ is a Python WSGI HTTP Server for UNIX.
+gunicorn==23.0.0
+
+# Radically simplified static file serving for Python web apps
+whitenoise==6.9.0
+
+# for django model column type file
+pillow==11.3.0
+
+# Log in and work on behalf of other users without having to know their credentials.
+django-hijack==3.7.4
+
+# django-cas-ng is Django CAS (Central Authentication Service) 1.0/2.0/3.0 client library to support SSO (Single Sign On) and Single Logout (SLO).
+django-cas-ng==5.0.1
+
+# This module offers a private media file storage, so user uploads can be protected behind a login.
+django-private-storage==3.1.1
+
+#PyJWT is a Python library which allows you to encode and decode JSON Web Tokens (JWT). JWT is an open, industry-standard (RFC 7519) for representing claims securely between two parties.
+PyJWT==2.10.1
+
+python-decouple==3.8 # to read .env file files
+psycopg==3.2.9 # production for postgresql database
+mysqlclient==2.2.7 # development for mysql database
+
+django-crispy-forms==2.5
+crispy-bootstrap4==2025.6

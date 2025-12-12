@@ -1,0 +1,135 @@
+====================================
+     Tambahan Template ACE Admin
+====================================
+Path: project/static/template/node_modules
+
+Pada template bawaan ACE Admin bawaan belum terdapat library dibawah, maka pada project ini sudah ditambahkan
+- @fontawesome
+- select2-bootstrap4-theme
+- tempusdominus-bootstrap-4
+- jszip
+- pdfmake
+- datatables.net-rowgroup
+
+
+Menghapus sourceMappingURL dan melakukan beberapa modifikasi pada file static agar dapat melakukan collecstatic
+
+
+
+====================================
+          Custom CSS Template
+====================================
+1. project\static\template\dist\css\ace-themes.css
+.navbar-darkblue {
+  /* Custom */
+  background-color: #2f3185; /* Default : #1166a6 */
+}
+
+scss: project\static\template\scss\_navbar-themes-variables.scss
+
+$navbar-darkblue: map-merge($navbar-color, 
+(
+    /* Custom */
+    'background': #2f3185, /* Default : #1166a6 */
+));
+
+
+
+2. project\static\template\dist\css\ace.css
+.navbar-inner {
+  height: inherit;
+  width: 100%;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  background-color: inherit;
+  visibility: visible;
+
+  /* Custom */
+  border-bottom-color: #f9cb13;
+  border-bottom-style: solid;
+}
+
+.errorlist {
+  text-align: left !important;
+}
+
+
+scss: project\static\template\scss\_navbar.scss
+
+.navbar-inner {
+	height: inherit;
+	width: 100%;
+
+	display: flex;
+	justify-content: space-between;
+
+	background-color: inherit;
+
+	visibility: visible;
+
+	/* Custom */
+	border-bottom-color: #f9cb13;
+	border-bottom-style: solid;
+}
+
+
+
+3. project\static\template\views\pages\landing-page-1\@page-style.css
+#navbar-dark.navbar-compact .navbar-inner {
+   /* Custom */
+   /* border-bottom: 1px solid rgba(0,0,0,0.075); */
+   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.125);
+   border-bottom-color: #f9cb13;
+   border-bottom-style: solid;
+}
+
+
+
+4. project\static\template\views\pages\page-login\@page-style.css
+.body-container {
+   /* Custom */
+   background-image: linear-gradient(#248fcd, #2f3185); /* Default : linear-gradient(#6baace, #264783) */
+   background-attachment: fixed;
+   background-repeat: no-repeat;
+}
+
+
+
+====================================
+     How to build images example
+====================================
+docker build -t gitlab.ums.ac.id:5050/project-base-inheritance/project-base:latest .
+docker login gitlab.ums.ac.id:5050
+docker push gitlab.ums.ac.id:5050/project-base-inheritance/project-base:latest
+
+
+
+====================================
+Connect Docker container to Local DB
+====================================
+1. Buka CMD
+2. Ketik 'ipconfig'
+3. Cek pada menu 'Ethernet adapter Ethernet:'
+4. Copy IPv4 Address
+5. Ubah DB_HOST pada .env menjadi ip yang sudah di copy
+6. Beri akses pada MySQL(Phpmyadmin) ketik query berikut :
+7. GRANT ALL ON *.* to root@'10.1.1.194' IDENTIFIED BY 'password';
+8. Ganti IP pada query diatas sesuai dengan IP PC
+9. Buka file .env ubah DB_PASSWORD menjadi 'password' sesuai query diatas
+
+
+
+====================================
+           Remove migrations
+====================================
+1. Masuk ke env ketik 'env/scripts/activate'
+2. Ketik perintah berikut pada terminal :
+
+python -Bc "import pathlib; [p.unlink() for p in pathlib.Path('.').rglob('*.py[co]')]"
+python -Bc "import pathlib; [p.rmdir() for p in pathlib.Path('.').rglob('__pycache__')]"
+python -Bc "for p in __import__('pathlib').Path('.').rglob('*.py[co]'): p.unlink()"
+python -Bc "for p in __import__('pathlib').Path('.').rglob('__pycache__'): p.rmdir()"
+
+3. Hapus seluruh folder migrations di setiap apps

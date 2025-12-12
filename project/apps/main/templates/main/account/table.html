@@ -1,0 +1,502 @@
+{% extends 'main/layout/base.html' %}
+{% load main_tags %}
+{% load hijack %}
+
+{% block content %}
+  <div class="page-content container container-plus">
+    <div class="page-header border-0 pb-3">
+      <h1 class="page-title text-primary-d2 text-150">
+        {% for data in request.path|split:"/"|slice:"2:4" %}
+          {% if forloop.counter == 1 %}
+            {{ data|title }}
+          {% else %}
+            <small class="page-info text-secondary-d2 text-nowrap">
+              <i class="fa fa-angle-double-right text-80"></i>
+              {{ data|title }}
+            </small>
+          {% endif %}
+        {% endfor %}
+      </h1>
+
+      <div class="page-tools mt-3 mt-sm-0 mb-sm-n1">
+        <!-- dataTables search box will be inserted here dynamically -->
+      </div>
+    </div>
+
+
+
+    <div class="row">
+      <div class="col-12 col-sm-12 mt-3 mt-sm-0 cards-container">
+        <div class="card dcard overflow-hidden">
+          <div class="border-t-3 w-100 brc-primary-m1 radius-t-1"></div>
+          <div class="card-header">
+            <h5 class="card-title text-110 text-primary-d2 pt-1">
+              Table
+            </h5>
+
+            <div class="card-toolbar no-border">
+              <!-- dataTables button will be inserted here dynamically -->
+            </div>
+          </div><!-- /.card-header -->
+
+          <form method="post" autocomplete="off">
+
+            <table id="datatable_account" class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table">
+              <!-- add `collapsed` by default ... it will be removed by default -->
+              <!-- thead with .sticky-nav -->
+              <thead class="sticky-nav text-secondary-m1 text-uppercase text-85">
+                <tr>
+                  <th class="td-toggle-details border-0 bgc-white shadow-sm">
+                    <i class="fa fa-angle-double-down ml-2"></i>
+                  </th>
+    
+                  <th class="border-0 bgc-white pl-3 pl-md-4 shadow-sm">
+                    <input type="checkbox" />
+                  </th>
+    
+                  <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
+                    No
+                  </th>
+    
+                  <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
+                    Name / Username
+                  </th>
+    
+                  <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
+                    Role
+                  </th>
+    
+                  <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
+                    Email
+                  </th>
+    
+                  <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
+                    Phone Number
+                  </th>
+    
+                  <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
+                    Fungsional
+                  </th>
+    
+                  <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
+                    HomeID
+                  </th>
+    
+                  <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
+                    Home Base
+                  </th>
+    
+                  <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
+                    Is Active
+                  </th>
+    
+                  <th class="border-0 bgc-white shadow-sm w-2">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+    
+              <tbody class="pos-rel">
+                <!-- Data loaded with ajax -->
+              </tbody>
+            </table>
+    
+          </form>
+
+        </div><!-- /.card -->
+      </div><!-- /.col -->
+    </div>
+
+  </div>
+
+
+{% endblock %}
+
+
+{% block javascript %}
+<script>
+  $(document).ready(function(){
+    var tableid_account = '#datatable_account'
+
+    $.extend( true, $.fn.dataTable.defaults, {
+      dom:
+        "<'row'<'col-12 col-sm-3 pl-2'l><'col-12 col-sm-3 div_filter'B><'col-12 col-sm-3'B><'col-12 col-sm-3 pr-2 text-right'f>>" +
+        "<'row'<'col-12'tr>>" +
+        "<'row'<'col-12 col-md-5'i><'col-12 col-md-7'p>>",
+      renderer: 'bootstrap'
+    })
+    
+    var $table_account = $(tableid_account).DataTable({
+      responsive: true,
+    
+      classes: {
+        sLength: "dataTables_length text-left w-auto",
+      },
+
+      buttons: {
+        dom: {
+          button: {
+            className: 'btn' //remove the default 'btn-secondary'
+          },
+          container: {
+            className: 'dt-buttons btn-group bgc-white-tp2 text-right w-auto'
+          }
+        },
+
+        buttons: [
+          {
+            "extend": "colvis",
+            "text": "<i class='far fa-eye text-125 text-dark-m2' data-toggle='tooltip' title='Show/hide columns'></i> <span class='d-none'>Show/hide columns</span>",
+            "className": "btn-light-default btn-bgc-white btn-h-outline-primary btn-a-outline-primary",
+            columns: ':not(:first)'
+          },
+          {
+            "extend": "copy",
+            "text": "<i class='far fa-copy text-125 text-purple' data-toggle='tooltip' title='Copy to clipboard'></i> <span class='d-none'>Copy to clipboard</span>",
+            "className": "btn-light-default btn-bgc-white btn-h-outline-primary btn-a-outline-primary"
+          },
+          {
+            "extend": "csv",
+            "text": "<i class='fa fa-database text-125 text-success-m1' data-toggle='tooltip' title='CSV'></i> <span class='d-none'>Export to CSV</span>",
+            "className": "btn-light-default btn-bgc-white btn-h-outline-primary btn-a-outline-primary"
+          },
+          {
+            "extend": "excel",
+            "text": "<i class='far fa-file-excel text-125 text-success-m1' data-toggle='tooltip' title='Excel'></i> <span class='d-none'>Export to Excel</span>",
+            "className": "btn-light-default btn-bgc-white btn-h-outline-primary btn-a-outline-primary"
+          },
+          {
+            "extend": "print",
+            "text": "<i class='fa fa-print text-125 text-orange-d1' data-toggle='tooltip' title='Print'></i> <span class='d-none'>Print</span>",
+            "className": "btn-light-default btn-bgc-white  btn-h-outline-primary btn-a-outline-primary",
+            autoPrint: false,
+            message: 'This print was produced using the Print button for DataTables'
+          }	,
+          {
+            "extend": "pdf",
+            "text": "<i class='far fa-file-pdf text-125 text-danger-m1' data-toggle='tooltip' title='Export to PDF'></i> <span class='d-none'>Export to PDF</span>",
+            "className": "btn-light-default btn-bgc-white btn-h-outline-primary btn-a-outline-primary"
+          },
+        ]
+      },
+
+      
+      // multiple row selection
+      select: {
+        style: 'multis'
+      },
+
+      language: {
+        search: '<i class="fa fa-search pos-abs mt-2 pt-3px ml-35 text-blue-m2"></i>',
+        searchPlaceholder: "Search : name/username"
+      },
+      lengthMenu: [
+        [5, 10, 20, 50, 100, 200, 500, -1],
+        [5, 10, 20, 50, 100, 200, 500, 'All']
+      ],
+      iDisplayLength : 10,
+      processing: true,
+      serverSide: true,
+      ajax: {
+        url: "{% url 'main:account_datatable' %}",
+        type: "POST",
+        data: function(d) {
+          d.csrfmiddlewaretoken = '{{ csrf_token }}',
+          d.group_id = $('#select_group').val()
+        },
+      },
+      columnDefs: [
+        {
+          orderable: false,
+          className: null,
+          targets:   [0,1,-1]
+        },
+        {
+          targets: 0,
+          className: 'td-toggle-details pos-rel'
+        },
+        {
+          targets: 1,
+          className: 'pl-3 pl-md-4 align-middle pos-rel'
+        },
+        {
+          targets: '_all',
+          className: 'align-middle'
+        },
+        {
+          targets: [6,7,8,9],
+          visible: false
+        }
+      ],
+      columns: [
+        {
+          data: "id",
+          render: function (data, type, row, meta) {
+              return `<div class="position-lc h-95 ml-1px border-l-3 brc-purple-m1">
+                      </div>`;
+          }
+        },
+        {
+          data: "id",
+          render: function (data, type, row, meta) {
+              return `<input type="checkbox" value="${data}" />
+                      <div class="d-n-collapsed position-lc h-95 ml-1px border-l-3 brc-purple-m1">
+                      </div>`;
+          }
+        },
+        {
+          data: "id",
+          render: function (data, type, row, meta) {
+            return meta.row + meta.settings._iDisplayStart + 1;
+          }
+        },
+        {
+          data: "id",
+          render: function (data, type, row, meta) {
+              return `<div class="d-flex align-items-start">
+                        <span class="d-inline-block text-center">
+                          <img alt="Image" src="${row.image_url}" class="radius-round border-2 p-2px brc-default-m1 mr-2 w-6 h-6">
+                        </span>
+
+                        <div class="mx-2 text-grey-d1">
+                          <div class="text-600 text-blue-d1">
+                            ${row.full_name}
+                          </div>
+                          ${row.username}
+                        </div>
+                      </div>`;
+          }
+        },
+        {
+          data: "groups",
+          render: function (data, type, row, meta) {
+            html = ``
+            data.forEach(group => {
+              html += `<span class="m-1 badge bgc-white border-1 brc-pink-m2 btn-text-pink px-25">${group}</span>`
+            });
+            return html;
+          }
+        },
+        { data: "email" },
+        { data: "phone_number" },
+        { data: "is_dosen" },
+        { data: "home_id" },
+        { data: "homebase" },
+        {
+          data: "is_active",
+          render: function (data, type, row, meta) {
+            let color = 'red'
+            let txt = 'FALSE'
+            if (data){
+              color = 'green'
+              txt = 'TRUE'
+            }
+            return `<span class="badge bgc-white border-2 brc-${color} text-dark-tp3 badge-pill badge-lg pb-4 px-3 bgc-h-${color}-l3">
+                      <span class="d-inline-block bgc-${color} radius-1 p-1 align-middle mr-1"></span> ${txt}
+                    </span>`;
+          }
+        },
+        {
+          data: "id",
+          render: function (data, type, row, meta) {
+            url_edit = "{% url 'main:account_edit' 99999 %}".replace('99999', data)
+            url_delete = "{% url 'main:account_deletelist' %}"
+            url_synclist = "{% url 'main:account_synclist' %}"
+
+            return `<div class="d-flex">
+                      <span class="d-lg-inline mx-1">
+                        <a href="${url_edit}" data-action="edit">
+                          <button type="button" data-rel="tooltip" data-action="edit" title="Edit" class="btn btn-outline-info shadow-sm btn-bgc-white">
+                              <i class="fas fa-pen-to-square text-100"></i>
+                          </button>
+                        </a>
+                      </span>
+
+                      <span class="d-lg-inline mx-1">
+                        <a data-action="sync" onclick="submit_listid('${url_synclist}', '${data}' )">
+                          <button type="button" data-rel="tooltip" data-action="sync" title="Profile Sync" class="btn btn-outline-green shadow-sm btn-bgc-white">
+                              <i class="fa-solid fa-rotate text-100"></i>
+                          </button>
+                        </a>
+                      </span>
+
+                      {% if request.user.is_superuser and request.user|can_hijack:request.user %}
+                      <span class="d-lg-inline mx-1">
+                        <form action="{% url 'hijack:acquire' %}" method="POST">
+                          {% csrf_token %}
+                          <input type="hidden" name="user_pk" value="${data}">
+                          <input type="hidden" name="next" value="{% url 'main:dashboard' %}">
+                          <button type="submit" data-rel="tooltip" data-action="hijack" title="HIJACK" class="btn btn-outline-purple shadow-sm btn-bgc-white">
+                              <i class="fa-solid fa-user-secret text-100"></i>
+                          </button>
+                        </form>
+                      </span>
+                      {% endif %}
+
+                      <span class="d-lg-inline mx-1">
+                        <a data-action="delete" onclick="submit_listid('${url_delete}', '${data}' )">
+                          <button type="button" data-rel="tooltip" data-action="delete" title="Delete" class="btn btn-outline-danger shadow-sm btn-bgc-white">
+                              <i class="fas fa-trash-can text-100"></i>
+                          </button>
+                        </a>
+                      </span>
+
+                    </div>`;
+          }
+        },
+      ],
+      initComplete: function () {
+        $('.dataTables_wrapper').find('.div_filter').html(`
+          <div class="input-group col-sm-12 input-floating-label text-blue-d2 brc-blue-m1">
+            <div class="col-sm-3 p-0">
+              <div class="input-group-prepend bgc-purple">
+                <span class="input-group-text btn-purple"><b>Role</b></span>
+              </div>
+            </div>
+
+            <div class="col-sm-9 p-0">
+              <select id="select_group" name="state" class="form-control shadow-none select2bs4">
+                  <option disabled hidden selected>- Choose Role -</option>
+                  <option value='all'>All</option>
+                  {% for group in datagroup %}
+                  <option value='{{ group.id }}' >{{ group.groupdetails.alias }}</option>
+                  {% endfor %}
+              </select>
+            </div>
+          </div>
+        `);
+
+        $('.select2bs4').select2({ theme: 'bootstrap4' })
+
+        $('#select_group').on('load change', function(){
+          $table_account.draw();
+        });
+      }
+    })
+
+    $(tableid_account).closest('.card').find('.card-toolbar').append(`
+      <a href="{% url 'main:account_add' %}">
+        <button data-rel="tooltip" type="button" class="btn radius-round btn-outline-primary border-2 btn-sm ml-2" title="Add">
+          <i class="fa fa-plus"></i>
+        </button>
+      </a>
+      
+      <button data-rel="tooltip" type="button" class="btn radius-round btn-outline-green border-2 btn-sm ml-2" title="Profile Sync" onclick="submit_listid('{% url 'main:account_synclist' %}',get_list_id('${tableid_account}'))">
+        <i class="fa-solid fa-rotate"></i>
+      </button>
+
+      <div class="btn-group dropdown dd-backdrop dd-backdrop-none-md">
+        <button data-rel="tooltip" type="button" class="btn radius-round btn-outline-warning border-2 btn-sm ml-2 dropdown-toggle" data-display="static" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Active/NonActive">
+        <i class="fas fa-user-check"></i>
+        </button>
+
+        <div class="dropdown-menu dropdown-menu-right dropdown-caret dropdown-animated animated-2 dd-slide-up dd-slide-none-md">
+          <div class="dropdown-inner">
+            <a class="dropdown-item" onclick="submit_listid('{% url 'main:account_setisactive' 'active' %}',  get_list_id('${tableid_account}'))">Active</a>
+            <a class="dropdown-item" onclick="submit_listid('{% url 'main:account_setisactive' 'nonactive' %}',  get_list_id('${tableid_account}'))">NonActive</a>
+          </div>
+        </div>
+      </div>
+
+      <button data-rel="tooltip" type="button" class="btn radius-round btn-outline-danger border-2 btn-sm ml-2" title="Delete" onclick="submit_listid('{% url 'main:account_deletelist' %}',get_list_id('${tableid_account}'))">
+        <i class="far fa-trash-alt"></i>
+      </button>
+    `)
+    
+
+    $('.dataTables_wrapper').find('.dataTables_filter').find('input').addClass('pl-45 radius-round').removeClass('form-control-sm')
+
+    // helper methods to add/remove bgc-h-* class when selecting/deselecting rows
+    var _highlightSelectedRow = function(row) {
+      row.querySelector('input[type=checkbox]').checked = true
+      row.classList.add('bgc-success-l3')
+      row.classList.remove('bgc-h-default-l4')
+    }
+    var _unhighlightDeselectedRow = function(row) {
+      row.querySelector('input[type=checkbox]').checked = false
+      row.classList.remove('bgc-success-l3')
+      row.classList.add('bgc-h-default-l4')
+    }
+
+    // listen to select/deselect event to highlight rows
+    $table_account.on('select', function (e, dt, type, index) {
+      if ( type == 'row' ) {
+        var row = $table_account.row( index ).node()
+        _highlightSelectedRow(row)
+      }
+    }).on('deselect', function (e, dt, type, index) {
+      if ( type == 'row' ) {
+        var row = $table_account.row( index ).node()
+        _unhighlightDeselectedRow(row)
+      }
+    })
+
+    // when clicking the checkbox in table header, select/deselect all rows
+    $(tableid_account).on('click', 'th input[type=checkbox]', function () {
+      if(this.checked) {
+        $table_account.rows({ search: 'applied' }).select().every(function() {
+          _highlightSelectedRow(this.node())
+        });
+      }
+      else {
+        $table_account.rows({ search: 'applied' }).deselect().every(function() {
+          _unhighlightDeselectedRow(this.node())
+        })
+      }
+    })
+
+    // don't select row if we click on the "show details" `plus` sign (td)
+    $(tableid_account).on('click', 'td.dtr-control', function (e) {
+      e.stopPropagation()
+    })
+
+
+    // add/remove bgc-h-* class to TH when soring columns
+    var previousTh = null
+    var toggleTH_highlight = function(th) {
+      th.classList.toggle('bgc-yellow-l2')
+      th.classList.toggle('bgc-h-yellow-l3')
+      th.classList.toggle('text-blue-d2')
+    }
+
+    $(tableid_account).on('click', 'th:not(.sorting_disabled)', function () {
+      if(previousTh != null) toggleTH_highlight(previousTh)// unhighlight previous TH
+      toggleTH_highlight(this)
+      previousTh = this
+    })
+  });
+</script>
+
+
+<script>
+  $(document).ready(function(){
+    var tableHead = document.querySelector('.sticky-nav')
+    tableHead.addEventListener('sticky-change', function(e) {
+      // when  thead becomes sticky, add is-stuck class to it (which adds a border-bottom to it)
+      this.classList.toggle('is-stuck', e.detail.isSticky)
+    })
+
+    // don't select row when clicking on the edit icon
+    $('a[data-action=edit], a[data-action=delete], a[data-action=hijack], a[data-action=sync]').on('click', function(e) {
+      // e.preventDefault()
+      e.stopPropagation()// don't select
+    })
+
+    // add a dark border
+    $('.dataTables_wrapper').addClass('border-b-1 border-x-1 brc-default-l2')
+    // highlight DataTable header
+    // also already done in CSS, but you can use custom colors here
+    .find('.row:first-of-type')
+    .addClass('border-b-1 brc-default-l3 bgc-blue-l4')
+    .next().addClass('mt-n1px')// move the next `.row` up by 1px to go below header's border
+    
+    // highlight DataTable footer
+    $('.dataTables_wrapper').find('.row:last-of-type').addClass('border-t-1 brc-default-l3 mt-n1px bgc-default-l4')
+
+
+    // if the table has scrollbars, add ace styling to it
+    $('.dataTables_scrollBody').aceScroll({color: "grey"})
+
+  });
+</script>
+{% endblock %}

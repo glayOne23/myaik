@@ -1,0 +1,58 @@
+    {% load static %}
+    <!-- include common vendor scripts used in demo pages -->
+    <script src="{% static 'template/node_modules/jquery/dist/jquery.js' %}"></script>
+    <script src="{% static 'template/node_modules/popper.js/dist/umd/popper.js' %}"></script>
+    <script src="{% static 'template/node_modules/bootstrap/dist/js/bootstrap.js' %}"></script>
+
+
+    <!-- include vendor scripts used in "Login" page. see "/views//pages/partials/page-login/@vendor-scripts.hbs" -->
+    <script src="{% static 'template/node_modules/sweetalert2/dist/sweetalert2.all.js' %}"></script>
+
+    <!-- include ace.js -->
+    <script src="{% static 'template/dist/js/ace.js' %}"></script>
+
+
+
+    <!-- demo.js is only for Ace's demo and you shouldn't use it -->
+    <script src="{% static 'template/app/browser/demo.js' %}"></script>
+
+
+
+    <!-- "Login" page script to enable its demo functionality -->
+    <script src="{% static 'template/views/pages/page-login/@page-script.js' %}"></script>
+
+
+    {% if messages %}
+        <script>
+            function notif(status, title, message, redirect=''){
+                if (status && title && message) {
+                    if (!redirect || redirect == null || redirect == 'None') {
+                        Swal.fire({
+                            icon: status,
+                            title: title,
+                            html: message
+                        })
+                    } else {
+                        Swal.fire({
+                            icon: status,
+                            title: title,
+                            html: message,
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Check Data',
+                            cancelButtonText: 'Cancel'
+                        }).then((result) => {
+                            if (result.value) {
+                                window.location.replace(redirect);
+                            }
+                        });
+                    }
+                }
+            }
+
+            {% for msg in messages %}
+                notif(`{{ msg.level_tag }}`, `{{ msg.level_tag }}`, `{{ msg|safe }}`, `{{ msg.extra_tags|default_if_none:"" }}`)
+            {% endfor %}
+        </script>
+    {% endif %}

@@ -1,0 +1,26 @@
+{% load static %}
+
+  <div id="id-col-intro" class="col-lg-5 d-none d-lg-flex border-r-1 brc-default-l3 px-0">
+    <!-- the left side section is carousel in this demo, to show some example variations -->
+    <div id="loginBgCarousel" class="carousel slide minw-100 h-100">
+      <div class="carousel-item active minw-100 h-100">
+        <!-- default carousel section that you see when you open login page -->
+        <div style="background-image: url({% static 'images/background/login-bg-1.svg' %});" class="px-3 bgc-blue-l4">
+          <div class="d-flex flex-column align-items-center justify-content-center h-90">
+            <a class="mb-2" href="/">
+              <img src="{{ APP_LOGO }}" alt="LOGO" class="img-fluid mx-auto d-block" width="200">
+            </a>
+  
+            <h2 class="text-primary-d1 text-center">
+              {{ APP_SHORT_NAME }}<br><span class="text-80 text-dark-l1">{{ APP_COMPANY_FULL_NAME }}</span>
+            </h2>
+          </div>
+          
+          <div class="text-center text-dark-tp2 h-10">
+            {{ APP_DEVELOPER }} {{ APP_COMPANY_SHORT_NAME }} &copy; <span id="app_year">{{ APP_YEAR }}</span>
+            <script>document.getElementById("app_year").innerText = "{{ APP_YEAR }} - " + new Date().getFullYear();</script>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

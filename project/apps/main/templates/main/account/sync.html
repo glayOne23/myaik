@@ -1,0 +1,368 @@
+{% extends 'main/layout/base.html' %}
+{% load main_tags %}
+{% load hijack %}
+
+{% block content %}
+  <div class="page-content container container-plus">
+    <div class="page-header border-0 pb-3">
+      <h1 class="page-title text-primary-d2 text-150">
+        {% for data in request.path|split:"/"|slice:"2:4" %}
+          {% if forloop.counter == 1 %}
+            {{ data|title }}
+          {% else %}
+            {% if data %}
+            <small class="page-info text-secondary-d2 text-nowrap">
+              <i class="fa fa-angle-double-right text-80"></i>
+              {{ data|title }}
+            </small>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+      </h1>
+
+      <div class="page-tools mt-3 mt-sm-0 mb-sm-n1">
+        <!-- dataTables search box will be inserted here dynamically -->
+      </div>
+    </div>
+
+
+    <div class="mt-45 bcard">
+      <ul class="nav nav-justified nav-tabs nav-tabs-simple" role="tablist">
+        <li class="nav-item mr-1px">
+          <a class="d-style btn btn-outline-light btn-a-text-dark btn-a-outline-lightgrey bgc-white radius-0 py-2 text-95 active" id="tabbtn_employee" data-toggle="tab" href="#tabpane_employee" role="tab" aria-controls="ctr_employee" aria-selected="true">
+            <span class="v-active position-tl w-102 border-t-3 brc-primary mt-n3px ml-n1px"></span><!-- show this when active -->
+            <span class="v-n-active v-hover position-tl w-102 border-t-3 brc-primary-tp3 mt-n2px ml-n1px"></span><!-- show this when hovered & NOT active -->
+            Karyawan
+          </a>
+        </li>
+
+        <li class="nav-item mr-1px">
+          <a class="d-style btn btn-outline-light btn-a-text-dark btn-a-outline-lightgrey bgc-white radius-0 py-2 text-95" id="tabbtn_student" data-toggle="tab" href="#tabpane_student" role="tab" aria-controls="ctr_student" aria-selected="true">
+            <span class="v-active position-tl w-102 border-t-3 brc-primary mt-n3px ml-n1px"></span><!-- show this when active -->
+            <span class="v-n-active v-hover position-tl w-102 border-t-3 brc-primary-tp3 mt-n2px ml-n1px"></span><!-- show this when hovered & NOT active -->
+            Mahasiswa
+          </a>
+        </li>
+      </ul>
+
+
+      <div class="tab-content bgc-white p-35 border-1 brc-grey-l1">
+        <div class="tab-pane fade text-95 active show" id="tabpane_employee" role="tabpanel" aria-labelledby="tabbtn_employee">
+          <div class="alert alert-collapse bgc-white text-dark-tp3 border-1 brc-secondary-l2 shadow-sm radius-0 py-3 d-flex align-items-start">
+            <div class="position-tl w-102 m-n1px border-t-4 brc-primary"></div>
+            <div class="bgc-primary px-4 py-25 radius-1px mr-4 shadow-sm">
+              <i class="fa fa-exclamation text-180 text-white"></i>
+            </div>
+
+            <div class="text-dark-tp3">
+              <h3 class="text-blue-d1 text-130">Alert Message!</h3>
+              Import data form API SIHRD
+            </div>
+
+            <button type="button" class="close align-self-start ml-auto mt-n25 mr-n2 text-blue-d2 text-150 opacity-2 bgc-h-blue-l2 radius-round px-15 pt-1px pb-3px" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+
+          <table id="datatable_employee" class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table tablerole">
+            <thead class="sticky-nav text-secondary-m1 text-uppercase text-85">
+              <tr>
+                <th class="td-toggle-details border-0 bgc-white shadow-sm">
+                  <i class="fa fa-angle-double-down ml-2"></i>
+                </th>
+  
+                <th class="border-0 bgc-white pl-3 pl-md-4 shadow-sm">
+                  <input type="checkbox" />
+                </th>
+  
+                <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
+                  NO
+                </th>
+  
+                <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
+                  UNIID
+                </th>
+  
+                <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
+                  NAMA LENGKAP
+                </th>
+  
+                <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
+                  NAMA BERGELAR
+                </th>
+  
+                <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
+                  HOMEBASE
+                </th>
+                
+              </tr>
+            </thead>
+  
+            <tbody class="pos-rel">
+              <!-- Data loaded with ajax -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="tab-pane fade text-95" id="tabpane_student" role="tabpanel" aria-labelledby="tabbtn_student">
+          <div class="alert alert-collapse bgc-white text-dark-tp3 border-1 brc-secondary-l2 shadow-sm radius-0 py-3 d-flex align-items-start">
+            <div class="position-tl w-102 m-n1px border-t-4 brc-primary"></div>
+            <div class="bgc-primary px-4 py-25 radius-1px mr-4 shadow-sm">
+              <i class="fa fa-exclamation text-180 text-white"></i>
+            </div>
+
+            <div class="text-dark-tp3">
+              <h3 class="text-blue-d1 text-130">Alert Message!</h3>
+              Import data form API STAR
+            </div>
+
+            <button type="button" class="close align-self-start ml-auto mt-n25 mr-n2 text-blue-d2 text-150 opacity-2 bgc-h-blue-l2 radius-round px-15 pt-1px pb-3px" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+
+          <div class="alert alert-secondary bgc-secondary-l4 brc-secondary-l2 text-dark-tp2" role="alert">
+            <h5 class="alert-heading text-primary-d1 font-bolder">
+              COMING SOON
+            </h5>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+{% endblock %}
+
+
+{% block javascript %}
+<script>
+  $(document).ready(function(){
+    var tableId_employee = '#datatable_employee'
+    var $table_employee = $(tableId_employee).DataTable({
+      dom:
+        "<'row'<'col-12 col-sm-2'l><'col-12 col-sm-3 div_filter'><'col-12 col-sm-3 text-center'B><'col-12 col-sm-4 text-right'f>>" +
+        "<'row'<'col-12'tr>>" +
+        "<'row'<'col-12 col-md-5'i><'col-12 col-md-7'p>>",
+      renderer: 'bootstrap',
+      buttons: {
+        dom: {
+          button: {
+            className: 'btn' //remove the default 'btn-secondary'
+          },
+          container: {
+            className: 'dt-buttons btn-group bgc-white-tp2 text-right w-auto'
+          }
+        },
+
+        buttons: [
+          {
+            "extend": "colvis",
+            "text": "<i class='far fa-eye text-125 text-dark-m2' data-toggle='tooltip' title='Show/hide columns'></i> <span class='d-none'>Show/hide columns</span>",
+            "className": "btn-light-default btn-bgc-white btn-h-outline-primary btn-a-outline-primary",
+            columns: ':not(:first)'
+          },
+          {
+            "extend": "copy",
+            "text": "<i class='far fa-copy text-125 text-purple' data-toggle='tooltip' title='Copy to clipboard'></i> <span class='d-none'>Copy to clipboard</span>",
+            "className": "btn-light-default btn-bgc-white btn-h-outline-primary btn-a-outline-primary"
+          },
+          {
+            "extend": "csv",
+            "text": "<i class='fa fa-database text-125 text-success-m1' data-toggle='tooltip' title='CSV'></i> <span class='d-none'>Export to CSV</span>",
+            "className": "btn-light-default btn-bgc-white btn-h-outline-primary btn-a-outline-primary"
+          },
+          {
+            "extend": "excel",
+            "text": "<i class='far fa-file-excel text-125 text-success-m1' data-toggle='tooltip' title='Excel'></i> <span class='d-none'>Export to Excel</span>",
+            "className": "btn-light-default btn-bgc-white btn-h-outline-primary btn-a-outline-primary"
+          },
+          {
+            "extend": "print",
+            "text": "<i class='fa fa-print text-125 text-orange-d1' data-toggle='tooltip' title='Print'></i> <span class='d-none'>Print</span>",
+            "className": "btn-light-default btn-bgc-white  btn-h-outline-primary btn-a-outline-primary",
+            autoPrint: false,
+            message: 'This print was produced using the Print button for DataTables'
+          }	,
+          {
+            "extend": "pdf",
+            "text": "<i class='far fa-file-pdf text-125 text-danger-m1' data-toggle='tooltip' title='Export to PDF'></i> <span class='d-none'>Export to PDF</span>",
+            "className": "btn-light-default btn-bgc-white btn-h-outline-primary btn-a-outline-primary"
+          },
+        ]
+      },
+      responsive: true,
+      select: {style: 'multis'},
+      language: {
+        search: '<i class="fa fa-search pos-abs mt-2 pt-3px ml-35 text-blue-m2"></i>',
+        searchPlaceholder: "Search"
+      },
+      lengthMenu: [
+        [5, 10, 20, 50, 100, 200, 500, -1],
+        [5, 10, 20, 50, 100, 200, 500, 'All']
+      ],
+      iDisplayLength : 10,
+      ajax: {
+        url: "{% url 'main:account_data_employee' %}",
+        type: "POST",
+        data: function (d) {
+          d.csrfmiddlewaretoken = '{{ csrf_token }}',
+          d.kepeg = $('#select_kepeg').val();
+        },
+        dataSrc: function ( json ) {
+          return json.data;
+        }  
+      },
+      columnDefs: [
+        {
+          orderable: false,
+          className: null,
+          targets:   [0,1,-1]
+        },
+        {
+          targets: 0,
+          className: 'td-toggle-details pos-rel'
+        },
+        {
+          targets: 1,
+          className: 'pl-3 pl-md-4 align-middle pos-rel'
+        },
+        {
+          targets: '_all',
+          className: 'align-middle'
+        },
+      ],
+      columns: [
+        {
+          data: "uniid",
+          render: function (data, type, row, meta) {
+              return `<div class="position-lc h-95 ml-1px border-l-3 brc-purple-m1">
+                      </div>`;
+          }
+        },
+        {
+          data: "uniid",
+          render: function (data, type, row, meta) {
+              return `<input type="checkbox" value="${data}" />
+                      <div class="d-n-collapsed position-lc h-95 ml-1px border-l-3 brc-purple-m1">
+                      </div>`;
+          }
+        },
+        {
+          data: "uniid",
+          render: function (data, type, row, meta) {
+            return meta.row + meta.settings._iDisplayStart + 1;
+          }
+        },
+        { data: "uniid" },
+        { data: "namalengkap" },
+        { data: "namabergelar" },
+        { data: "homebase" },
+      ],
+      initComplete: function () {
+        $('.dataTables_wrapper').find('.div_filter').html(`
+          <div class="bgc-purple border-1">
+            <div class="input-group col-sm-12 p-0" id="kepeg">
+              <div class="input-group-prepend">
+                <span class="input-group-text btn-purple"><b>Kepeg</b></span>
+              </div>
+
+              <select id="select_kepeg" name="state" class="select2 form-control" data-placeholder="Click to Choose Kepeg" data-placement="top" data-content="Choose a kepeg filter to load data">
+                  <option disabled hidden selected>- Choose Kepeg -</option>
+                  <option value='all' {% if kepeg == 'all' %}SELECTED{% endif %}>All</option>
+                  <option value='dosen' {% if kepeg == 'dosen' %}SELECTED{% endif %}>Dosen</option>
+                  <option value='tendik' {% if kepeg == 'tendik' %}SELECTED{% endif %}>Tendik</option>
+              </select>
+
+            </div>
+          </div>
+        `);
+        
+        $('#select_kepeg').popover('show')
+        
+        $('#select_kepeg').on('load change', function(){
+          $table_employee.ajax.reload();
+        });
+
+        $('#tabbtn_student').on('click', function(){
+          $('#select_kepeg').popover('hide')
+        })
+      }
+    })
+
+
+
+    $('.dataTables_wrapper').find('.dataTables_filter').find('input').addClass('pl-45 radius-round').removeClass('form-control-sm')
+    .end().append(`
+      <button data-rel="tooltip" type="button" class="btn radius-round btn-outline-primary border-2 btn-sm ml-2" title="Sinkron" onclick="submit_listid('{% url 'main:account_import' %}',get_list_id('${tableId_employee}'))">
+        <i class="fa fa-plus"></i> Import
+      </button>
+    `)
+
+
+    // helper methods to add/remove bgc-h-* class when selecting/deselecting rows
+    var _highlightSelectedRow_employee = function(row) {
+      row.querySelector('input[type=checkbox]').checked = true
+      row.classList.add('bgc-success-l3')
+      row.classList.remove('bgc-h-default-l4')
+    }
+    var _unhighlightDeselectedRow_employee = function(row) {
+      row.querySelector('input[type=checkbox]').checked = false
+      row.classList.remove('bgc-success-l3')
+      row.classList.add('bgc-h-default-l4')
+    }
+
+
+    // listen to select/deselect event to highlight rows
+    $table_employee.on('select', function (e, dt, type, index) {
+      if ( type == 'row' ) {
+        var row = $table_employee.row( index ).node()
+        _highlightSelectedRow_employee(row)
+      }
+    }).on('deselect', function (e, dt, type, index) {
+      if ( type == 'row' ) {
+        var row = $table_employee.row( index ).node()
+        _unhighlightDeselectedRow_employee(row)
+      }
+    })
+
+
+    // when clicking the checkbox in table header, select/deselect all rows
+    $(tableId_employee).on('click', 'th input[type=checkbox]', function () {
+      if(this.checked) {
+        $table_employee.rows({ search: 'applied' }).select().every(function() {
+          _highlightSelectedRow_employee(this.node())
+        });
+      }
+      else {
+        $table_employee.rows({ search: 'applied' }).deselect().every(function() {
+          _unhighlightDeselectedRow_employee(this.node())
+        })
+      }
+    })
+
+
+    // add/remove bgc-h-* class to TH when soring columns
+    var previousTh = null
+    var toggleTH_highlight_employee = function(th) {
+      th.classList.toggle('bgc-yellow-l2')
+      th.classList.toggle('bgc-h-yellow-l3')
+      th.classList.toggle('text-blue-d2')
+    }
+
+    $(tableId_employee).on('click', 'th:not(.sorting_disabled)', function () {
+      if(previousTh != null) toggleTH_highlight_employee(previousTh)// unhighlight previous TH
+      toggleTH_highlight_employee(this)
+      previousTh = this
+    })
+
+
+    // don't select row if we click on the "show details" `plus` sign (td)
+    $(tableId_employee).on('click', 'td.dtr-control', function (e) {
+      e.stopPropagation()
+    })
+
+  });
+</script>
+{% endblock %}

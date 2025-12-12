@@ -1,0 +1,264 @@
+{% load static %}
+{% load main_tags %}
+
+<div id="sidebar" class="sidebar sidebar-white sidebar-fixed sidebar-backdrop expandable {% if collapsed %}collapsed{% endif %}" data-swipe="true" data-dismiss="true">
+  <div class="sidebar-inner">
+
+    <!-- .navbar-brand inside sidebar, only show in desktop view -->
+    <div class="d-none d-xl-flex sidebar-section-item m-0 fadeable-left fadeable-top">
+      <div class="fadeinable">
+        <div class="py-2 mx-1 border-b-1 brc-secondary-l3" id="sidebar-header-brand1">
+          <a class="navbar-brand text-140">
+            <!-- <i class="fas fa-desktop text-success-m2"></i> -->
+            <img alt="LOGO" src="{{ APP_LOGO }}" class="mx-auto mr-1" width="40">
+          </a>
+        </div>
+      </div>
+
+      <div class="fadeable w-100 ">
+        <div class="py-2 text-center mx-3 border-b-1 brc-secondary-l3" id="sidebar-header-brand2">
+
+          <a class="navbar-brand text-140 text-grey-d2" href="/">
+            <!-- <i class="fas fa-desktop mr-1 text-success-m2 text-105"></i> -->
+            <img alt="LOGO" src="{{ APP_LOGO }}" class="mx-auto mr-1" width="40"/>
+            <span class="align-middle text-600">{{ APP_SHORT_NAME }}</span>
+          </a>
+
+        </div>
+      </div>
+    </div><!-- /.sidebar-section-item  -->
+
+
+    <div class="pt-2 flex-grow-1 ace-scroll" data-ace-scroll="{}">
+      <!-- some part of sidebar header (brand) is outside scrollable area ^ -->
+      <div class="sidebar-section-item fadeable-left fadeable-top">
+        <div class="fadeinable">
+          <img alt="Image" src="{{ request.session.user.image }}" width="60%" class="p-2px border-2 brc-primary-tp2 radius-round" style="aspect-ratio : 1 / 1;"/>
+        </div>
+
+        <div class="fadeable hideable">
+
+          <div class="py-2 d-flex flex-column align-items-center">
+            <div>
+              <img alt="Image" src="{{ request.session.user.image }}" width="100" class="p-2px border-2 brc-primary-tp2 radius-round" style="aspect-ratio : 1 / 1;"/>
+            </div>
+
+            <div class="text-center mt-1" id="id-user-info">
+              <a href="#id-user-menu" class="d-style pos-rel collapsed text-blue-d2 accordion-toggle no-underline bgc-h-primary-l2 px-1 py-2px" data-toggle="collapse" aria-expanded="false">
+                <span class="text-95 font-bolder text-wrap">{{ request.session.user.fullname|title }}</span>
+                <i class="fa fa-caret-down text-90 d-collapsed"></i>
+                <i class="fa fa-caret-up text-90 d-n-collapsed"></i>
+              </a>
+            </div><!-- /#id-user-info -->
+
+            <div class="collapse" id="id-user-menu">
+              <div class="mt-3">
+                <a class="btn btn-light-blue btn-brc-white btn-h-light-blue radius-round py-2 px-1 border-2 shadow-sm" title="Humanisasi">
+                  <i class="fa fa-users w-4 text-110 text-blue-d1"></i>
+                </a>
+
+                <a class="btn btn-light-blue btn-brc-white btn-h-light-blue radius-round py-2 px-1 border-2 shadow-sm" title="Liberasi">
+                  <i class="fa fa-book w-4 text-110 text-blue-d1"></i>
+                </a>
+
+                <a class="btn btn-light-blue btn-brc-white btn-h-light-blue radius-round py-2 px-1 border-2 shadow-sm" title="Transendensi">
+                  <i class="fa fa-star w-4 text-110 text-blue-d1"></i>
+                </a>
+              </div>
+            </div><!-- /.collapse -->
+
+            <div class="row text-80 m-2 justify-content-center">
+              {% if request.session.user.groups %}
+                {% for group in request.session.user.groups %}
+                  <span class="m-1 badge bgc-white border-1 brc-purple-m2 btn-text-purple px-25 text-wrap">{{ group.alias|upper }}</span>
+                {% endfor %}
+              {% elif not request.session.user.is_superuser and not request.session.user.is_staff %}
+                <span class="m-1 badge bgc-white border-1 brc-purple-m2 btn-text-purple px-25 text-wrap">You Don't Have Any Role</span>
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+
+
+
+      <!-- optional `nav` tag -->
+      <nav aria-label="Main">
+        <ul class="nav flex-column mt-2 has-active-border">
+
+          <li class="nav-item {% setactive req=request url='main:dashboard' css='active' %}">
+            <a href="{% url 'main:dashboard' %}" class="nav-link">
+              <i class="nav-icon fa fa-tachometer-alt nav-icon-round bgc-primary-tp1"></i>
+              <span class="nav-text fadeable">
+                <span>Dashboard</span>
+              </span>
+            </a>
+            <b class="sub-arrow"></b>
+          </li>
+
+
+          {% if request|has_group:'admin' %}
+            <li class="nav-item-caption">
+              <span class="fadeable pl-3">Menu Admin</span>
+              <span class="fadeinable mt-n2 text-125">…</span>
+            </li>
+
+
+            <li class="nav-item {% setactive req=request url='main:admin.pertemuan.table' css='active' %}">
+              <a href="{% url 'main:admin.pertemuan.table' %}" class="nav-link">
+                <i class="nav-icon fas fa-cube nav-icon-round bgc-primary-tp1"></i>
+                <span class="nav-text fadeable">
+                  <span>AIK</span>
+                </span>
+              </a>
+
+              <b class="sub-arrow"></b>
+            </li>
+
+
+            <li class="nav-item {% setactive req=request url='main:admin.tipe_pertemuan.table' css='active' %}">
+              <a href="{% url 'main:admin.tipe_pertemuan.table' %}" class="nav-link">
+                <i class="nav-icon fas fa-cubes nav-icon-round bgc-green-tp1"></i>
+                <span class="nav-text fadeable">
+                  <span>Tipe AIK</span>
+                </span>
+              </a>
+
+              <b class="sub-arrow"></b>
+            </li>
+
+
+            <li class="nav-item {% setactive req=request url='/main/account' css='active open' %}">
+              <a  class="nav-link dropdown-toggle collapsed">
+                <i class="nav-icon fa-solid fa-user-gear nav-icon-round bgc-purple-tp1"></i>
+                <span class="nav-text fadeable">
+                  <span>Account</span>
+                </span>
+
+                <b class="caret fa fa-angle-left rt-n90"></b>
+              </a>
+
+              <div class="hideable submenu collapse {% setactive req=request url='/main/account' css='show' %}">
+                <ul class="submenu-inner">
+
+                  <li class="nav-item {% setactive req=request url='main:account_table' css='active' %}">
+                    <a href="{% url 'main:account_table' %}" class="nav-link">
+                      <span class="nav-text">
+                        <span>Table</span>
+                      </span>
+                    </a>
+                  </li>
+
+                  <li class="nav-item {% setactive req=request url='main:account_role' css='active' %}">
+                    <a href="{% url 'main:account_role' %}" class="nav-link">
+                      <span class="nav-text">
+                        <span>Role</span>
+                      </span>
+                    </a>
+                  </li>
+
+                  <li class="nav-item {% setactive req=request url='main:account_add' css='active' %}">
+                    <a href="{% url 'main:account_add' %}" class="nav-link">
+                      <span class="nav-text">
+                        <span>Add</span>
+                      </span>
+                    </a>
+                  </li>
+
+                  {% if request|use_apigateway %}
+                  <li class="nav-item {% setactive req=request url='main:account_import' css='active' %}">
+                    <a href="{% url 'main:account_import' %}" class="nav-link">
+                      <span class="nav-text">
+                        <span>Import</span>
+                      </span>
+                    </a>
+                  </li>
+                  {% endif %}
+                </ul>
+              </div>
+
+              <b class="sub-arrow"></b>
+            </li>
+
+            <!-- <li class="nav-item {% setactive req=request url='/main/category' css='active open' %}">
+              <a  class="nav-link dropdown-toggle collapsed">
+                <i class="nav-icon fas fa-tags nav-icon-round bgc-green-tp1"></i>
+                <span class="nav-text fadeable">
+                  <span>Category</span>
+                </span>
+
+                <b class="caret fa fa-angle-left rt-n90"></b>
+              </a>
+
+              <div class="hideable submenu collapse {% setactive req=request url='/main/category' css='show' %}">
+                <ul class="submenu-inner">
+
+                  <li class="nav-item {% setactive req=request url='main:category_table' css='active' %}">
+                    <a href="{% url 'main:category_table' %}" class="nav-link">
+                      <span class="nav-text">
+                        <span>Table</span>
+                      </span>
+                    </a>
+                  </li>
+
+
+                  <li class="nav-item {% setactive req=request url='main:category_add' css='active' %}">
+                    <a href="{% url 'main:category_add' %}" class="nav-link">
+                      <span class="nav-text">
+                        <span>Add</span>
+                      </span>
+                    </a>
+                  </li>
+
+                </ul>
+              </div>
+
+              <b class="sub-arrow"></b>
+            </li> -->
+
+
+            <li class="nav-item {% setactive req=request url='main:setting_edit' css='active' %}">
+              <a href="{% url 'main:setting_edit' %}" class="nav-link">
+                <i class="nav-icon fas fa-cogs nav-icon-round bgc-grey-tp1"></i>
+                <span class="nav-text fadeable">
+                  <span>Setting</span>
+                </span>
+              </a>
+
+              <b class="sub-arrow"></b>
+            </li>
+          {% endif %}
+
+        </ul>
+      </nav>
+
+    </div><!-- /.ace-scroll -->
+
+
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-item fadeable-left fadeable-top">
+        <div class="fadeinable">
+          <button type="button" class="btn btn-primary btn-bold">
+            <i class="fas fa-house"></i>
+          </button>
+        </div>
+
+        <div id="sidebar-footer" class="fadeable text-center border-t-1 brc-secondary-l2 w-100">
+          <div class="p-2">
+            <a href="/">
+              <button type="button" class="btn btn-sm btn-primary btn-bold px-5 radius-1">
+                <i class="nav-icon fas fa-house mr-1"></i>
+                HOME
+              </button>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+</div>

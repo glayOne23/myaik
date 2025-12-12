@@ -1,0 +1,377 @@
+{% extends 'main/layout/base.html' %}
+{% load main_tags %}
+
+{% block content %}
+  <div class="page-content container container-plus">
+    <div class="page-header border-0 pb-3">
+      <h1 class="page-title text-primary-d2 text-150">
+        {% for data in request.path|split:"/"|slice:"2:4" %}
+          {% if forloop.counter == 1 %}
+            {{ data|title }}
+          {% else %}
+            <small class="page-info text-secondary-d2 text-nowrap">
+              <i class="fa fa-angle-double-right text-80"></i>
+              {{ data|title }}
+            </small>
+          {% endif %}
+        {% endfor %}
+      </h1>
+
+      <div class="page-tools mt-3 mt-sm-0 mb-sm-n1">
+        <!-- dataTables search box will be inserted here dynamically -->
+      </div>
+    </div>
+
+
+
+    <div class="card bcard h-auto">
+      <form method="post" autocomplete="off" class="border-t-3 brc-blue-m2">
+
+        <table id="datatable" class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table tablerole">
+          <!-- add `collapsed` by default ... it will be removed by default -->
+          <!-- thead with .sticky-nav -->
+          <thead class="sticky-nav text-secondary-m1 text-uppercase text-85">
+            <tr>
+              <th class="td-toggle-details border-0 bgc-white shadow-sm">
+                <i class="fa fa-angle-double-down ml-2"></i>
+              </th>
+
+              <th class="border-0 bgc-white pl-3 pl-md-4 shadow-sm">
+                <input type="checkbox" />
+              </th>
+
+              <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
+                No
+              </th>
+
+              <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
+                Name (System)
+              </th>
+
+              <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
+                Alias
+              </th>
+
+              <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
+                Description
+              </th>
+
+              <th class="border-0 bgc-white shadow-sm w-2">
+                Action
+              </th>
+            </tr>
+          </thead>
+
+          <tbody class="pos-rel">
+            {% if datagroup %}
+            {% for data in datagroup %}
+            <tr class="d-style bgc-h-default-l4">
+              <td class="td-toggle-details pos-rel">
+                <!-- this empty table cell will show the `+` sign which toggles the hidden cells in responsive (collapsed) mode -->
+
+                <div class="position-lc h-95 ml-1px border-l-3 brc-purple-m1">
+                  <!-- this decorative highlight border will be shown only when table is collapsed (responsive) -->
+                </div>
+              </td>
+
+              <td class="pl-3 pl-md-4 align-middle pos-rel">
+                <input type="checkbox" data-id="{{ data.id }}" />
+                <div class="d-n-collapsed position-lc h-95 ml-1px border-l-3 brc-purple-m1">
+                  <!-- this decorative highlight border will be shown only when table is in full mode (not collapsed >> .d-n-collapsed) -->
+                </div>
+              </td>
+
+              <td class="align-middle">
+                {{ forloop.counter }}
+              </td>
+
+              <td class="align-middle">
+                {{ data.name }}
+              </td>
+
+              <td class="align-middle">
+                {{ data.groupdetails.alias }}
+              </td>
+
+              <td class="align-middle">
+                {{ data.groupdetails.description }}
+              </td>
+
+              <td class="align-middle">
+                <div class="d-flex">
+                  <span class="d-lg-inline mx-1">
+                    <a href="{% url 'main:account_edit_group' data.id %}" data-action="edit">
+                      <button type="button" data-rel="tooltip" data-action="edit" title="Edit" class="btn btn-outline-warning shadow-sm btn-bgc-white">
+                          <i class="fas fa-pen-to-square text-100"></i>
+                      </button>
+                    </a>
+                  </span>
+                </div>
+
+              </td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+          </tbody>
+        </table>
+
+      </form>
+    </div>
+
+
+
+    <div class="mt-45 bcard">
+      <ul class="nav nav-justified nav-tabs nav-tabs-simple" role="tablist">
+        {% for group in datagroup %}
+        <li class="nav-item mr-1px">
+          <a class="d-style btn btn-outline-light btn-a-text-dark btn-a-outline-lightgrey bgc-white radius-0 py-2 text-95 {% if forloop.counter == 1 %}active{% endif %}" id="tabbtn_{{group.id}}" data-toggle="tab" href="#tabpane_{{group.id}}" role="tab" aria-controls="ctr_{{group.id}}" aria-selected="true">
+            <span class="v-active position-tl w-102 border-t-3 brc-orange mt-n3px ml-n1px"></span><!-- show this when active -->
+            <span class="v-n-active v-hover position-tl w-102 border-t-3 brc-orange-tp3 mt-n2px ml-n1px"></span><!-- show this when hovered & NOT active -->
+            {{ group.groupdetails.alias }}
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+
+
+      <div class="tab-content bgc-white p-35 border-1 brc-grey-l1">
+        {% for group in datagroup %}
+        <div class="tab-pane fade text-95 {% if forloop.counter == 1 %}active show{% endif %}" id="tabpane_{{group.id}}" role="tabpanel" aria-labelledby="tabbtn_{{group.id}}">
+          <table id="datatable_{{group.id}}" class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table tablerole">
+            <thead class="sticky-nav text-secondary-m1 text-uppercase text-85">
+              <tr>
+                <th class="td-toggle-details border-0 bgc-white shadow-sm">
+                  <i class="fa fa-angle-double-down ml-2"></i>
+                </th>
+  
+                <th class="border-0 bgc-white pl-3 pl-md-4 shadow-sm">
+                  <input type="checkbox" />
+                </th>
+  
+                <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
+                  No
+                </th>
+  
+                <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
+                  Username
+                </th>
+  
+                <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
+                  Name
+                </th>
+  
+                <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
+                  Email
+                </th>
+
+                <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
+                  Aksi
+                </th>
+              </tr>
+            </thead>
+  
+            <tbody class="pos-rel">
+              <!-- Data loaded with ajax -->
+            </tbody>
+          </table>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+
+
+{% endblock %}
+
+
+{% block javascript %}
+{% for group in datagroup %}
+<script>
+  $(document).ready(function(){
+    // helper methods to add/remove bgc-h-* class when selecting/deselecting rows
+    var _highlightSelectedRow_{{group.id}} = function(row) {
+      row.querySelector('input[type=checkbox]').checked = true
+      row.classList.add('bgc-success-l3')
+      row.classList.remove('bgc-h-default-l4')
+    }
+    var _unhighlightDeselectedRow_{{group.id}} = function(row) {
+      row.querySelector('input[type=checkbox]').checked = false
+      row.classList.remove('bgc-success-l3')
+      row.classList.add('bgc-h-default-l4')
+    }
+
+    var $table_role_{{group.id}} = $('#datatable_{{group.id}}').DataTable({
+      dom:
+        "<'row'<'col-12 col-sm-4'l><'col-12 col-sm-4 text-center'B><'col-12 col-sm-4 text-right'f>>" +
+        "<'row'<'col-12'tr>>" +
+        "<'row'<'col-12 col-md-5'i><'col-12 col-md-7'p>>",
+      renderer: 'bootstrap',
+      buttons: {
+        dom: {
+          button: {
+            className: 'btn' //remove the default 'btn-secondary'
+          },
+          container: {
+            className: 'dt-buttons btn-group bgc-white-tp2 text-right w-auto'
+          }
+        },
+
+        buttons: [
+          {
+            "extend": "colvis",
+            "text": "<i class='far fa-eye text-125 text-dark-m2' data-toggle='tooltip' title='Show/hide columns'></i> <span class='d-none'>Show/hide columns</span>",
+            "className": "btn-light-default btn-bgc-white btn-h-outline-primary btn-a-outline-primary",
+            columns: ':not(:first)'
+          },
+          {
+            "extend": "copy",
+            "text": "<i class='far fa-copy text-125 text-purple' data-toggle='tooltip' title='Copy to clipboard'></i> <span class='d-none'>Copy to clipboard</span>",
+            "className": "btn-light-default btn-bgc-white btn-h-outline-primary btn-a-outline-primary"
+          },
+          {
+            "extend": "csv",
+            "text": "<i class='fa fa-database text-125 text-success-m1' data-toggle='tooltip' title='CSV'></i> <span class='d-none'>Export to CSV</span>",
+            "className": "btn-light-default btn-bgc-white btn-h-outline-primary btn-a-outline-primary"
+          },
+          {
+            "extend": "excel",
+            "text": "<i class='far fa-file-excel text-125 text-success-m1' data-toggle='tooltip' title='Excel'></i> <span class='d-none'>Export to Excel</span>",
+            "className": "btn-light-default btn-bgc-white btn-h-outline-primary btn-a-outline-primary"
+          },
+          {
+            "extend": "print",
+            "text": "<i class='fa fa-print text-125 text-orange-d1' data-toggle='tooltip' title='Print'></i> <span class='d-none'>Print</span>",
+            "className": "btn-light-default btn-bgc-white  btn-h-outline-primary btn-a-outline-primary",
+            autoPrint: false,
+            message: 'This print was produced using the Print button for DataTables'
+          }	,
+          {
+            "extend": "pdf",
+            "text": "<i class='far fa-file-pdf text-125 text-danger-m1' data-toggle='tooltip' title='Export to PDF'></i> <span class='d-none'>Export to PDF</span>",
+            "className": "btn-light-default btn-bgc-white btn-h-outline-primary btn-a-outline-primary"
+          },
+        ]
+      },
+      responsive: true,
+      select: {style: 'single'},
+      language: {
+        search: '<i class="fa fa-search pos-abs mt-2 pt-3px ml-35 text-blue-m2"></i>',
+        searchPlaceholder: "Search"
+      },
+      lengthMenu: [
+        [5, 10, 20, 50, 100, 200, 500, -1],
+        [5, 10, 20, 50, 100, 200, 500, 'All']
+      ],
+      iDisplayLength : 10,
+      processing: true,
+      serverSide: true,
+      ajax: {
+        url: "{% url 'main:account_datatable' %}",
+        type: "POST",
+        data: function (d) {
+          d.csrfmiddlewaretoken = '{{ csrf_token }}',
+          d.group_id = '{{group.id}}';
+        }
+      },
+      columnDefs: [
+        {
+          orderable: false,
+          className: null,
+          targets:   [0,1,-1]
+        },
+        {
+          targets: 0,
+          className: 'td-toggle-details pos-rel'
+        },
+        {
+          targets: 1,
+          className: 'pl-3 pl-md-4 align-middle pos-rel'
+        },
+        {
+          targets: '_all',
+          className: 'align-middle'
+        },
+      ],
+      columns: [
+        {
+          data: "id",
+          render: function (data, type, row, meta) {
+              return `<div class="position-lc h-95 ml-1px border-l-3 brc-purple-m1">
+                      </div>`;
+          }
+        },
+        {
+          data: "id",
+          render: function (data, type, row, meta) {
+              return `<input type="checkbox" value="${data}" />
+                      <div class="d-n-collapsed position-lc h-95 ml-1px border-l-3 brc-purple-m1">
+                      </div>`;
+          }
+        },
+        {
+          data: "id",
+          render: function (data, type, row, meta) {
+            return meta.row + meta.settings._iDisplayStart + 1;
+          }
+        },
+        { data: "username" },
+        { data: "full_name" },
+        { data: "email" },
+        {
+          data: "id",
+          render: function (data, type, row, meta) {
+            url_edit = "{% url 'main:account_edit' 99999 %}".replace('99999', data)
+            url_delrole = "{% url 'main:account_delrole' 99999 group.id %}".replace('99999', data)
+
+            return `<div class="d-flex">
+                      <span class="d-lg-inline mx-1">
+                        <a href="${url_edit}">
+                          <button type="button" data-rel="tooltip" data-action="edit" title="Edit" class="btn btn-outline-info shadow-sm btn-bgc-white">
+                              <i class="fas fa-pen-to-square text-100"></i>
+                          </button>
+                        </a>
+                      </span>
+
+                      <span class="d-none d-lg-inline mx-1">
+                        <a data-action="delete" onclick="submit_listid('${url_delrole}', '0', {text:'This user role will be deleted'})">
+                          <button type="button" data-rel="tooltip" data-action="delete" title="Delete Role" class="btn btn-outline-danger shadow-sm btn-bgc-white">
+                            <i class="fas fa-trash-can text-100"></i>
+                          </button>
+                        </a>
+                      </span>
+                    </div>`;
+          }
+        },
+      ]
+    }).on('select', function (e, dt, type, index) {
+      if ( type == 'row' ) {
+        var row = $table_role_{{group.id}}.row( index ).node()
+        _highlightSelectedRow_{{group.id}}(row)
+      }
+    }).on('deselect', function (e, dt, type, index) {
+      if ( type == 'row' ) {
+        var row = $table_role_{{group.id}}.row( index ).node()
+        _unhighlightDeselectedRow_{{group.id}}(row)
+      }
+    })
+
+    // when clicking the checkbox in table header, select/deselect all rows
+    $('#datatable_{{group.id}}').on('click', 'th input[type=checkbox]', function () {
+      if(this.checked) {
+        $table_role_{{group.id}}.rows({ search: 'applied' }).select().every(function() {
+          _highlightSelectedRow_category(this.node())
+        });
+      }
+      else {
+        $table_role_{{group.id}}.rows({ search: 'applied' }).deselect().every(function() {
+          _unhighlightDeselectedRow_category(this.node())
+        })
+      }
+    })
+
+    $('.dataTables_wrapper').find('.dataTables_filter').find('input').addClass('pl-45 radius-round').removeClass('form-control-sm')
+  });
+</script>
+{% endfor %}
+{% endblock %}

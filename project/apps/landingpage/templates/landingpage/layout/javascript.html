@@ -1,0 +1,75 @@
+{% load static %}
+    <!-- include common vendor scripts used in demo pages -->
+    <script src="{% static 'template/node_modules/jquery/dist/jquery.js' %}"></script>
+    <script src="{% static 'template/node_modules/popper.js/dist/umd/popper.js' %}"></script>
+    <script src="{% static 'template/node_modules/bootstrap/dist/js/bootstrap.js' %}"></script>
+
+
+    <!-- include vendor scripts used in "Landing Page 1" page. see "/views//pages/partials/landing-page-1/@vendor-scripts.hbs" -->
+    <script src="{% static 'template/node_modules/aos/dist/aos.js' %}"></script>
+
+
+    <!-- include ace.js -->
+    <script src="{% static 'template/dist/js/ace.js' %}"></script>
+
+    <!-- "Landing Page 1" page script to enable its demo functionality -->
+    <script src="{% static 'template/views/pages/landing-page-1/@page-script.js' %}"></script>
+
+    <script src="{% static 'template/node_modules/sweetalert2/dist/sweetalert2.all.js' %}"></script>
+
+    {% if datatables %}
+    <script src="{% static 'template/node_modules/datatables/media/js/jquery.dataTables.js' %}"></script>
+    <script src="{% static 'template/node_modules/datatables.net-bs4/js/dataTables.bootstrap4.js' %}"></script>
+    <script src="{% static 'template/node_modules/datatables.net-colreorder/js/dataTables.colReorder.js' %}"></script>
+    <script src="{% static 'template/node_modules/datatables.net-select/js/dataTables.select.js' %}"></script>
+
+
+    <script src="{% static 'template/node_modules/datatables.net-buttons/js/dataTables.buttons.js' %}"></script>
+    <script src="{% static 'template/node_modules/datatables.net-buttons-bs4/js/buttons.bootstrap4.js' %}"></script>
+    <script src="{% static 'template/node_modules/datatables.net-buttons/js/buttons.html5.js' %}"></script>
+    <script src="{% static 'template/node_modules/datatables.net-buttons/js/buttons.print.js' %}"></script>
+    <script src="{% static 'template/node_modules/datatables.net-buttons/js/buttons.colVis.js' %}"></script>
+
+    <script src="{% static 'template/node_modules/jszip/jszip.min.js' %}"></script>
+    <script src="{% static 'template/node_modules/pdfmake/pdfmake.min.js' %}"></script>
+    <script src="{% static 'template/node_modules/pdfmake/vfs_fonts.js' %}"></script>
+
+
+    <script src="{% static 'template/node_modules/datatables.net-responsive/js/dataTables.responsive.js' %}"></script>
+    {% endif %}
+
+
+    {% if messages %}
+        <script>
+            function notif(status, title, message, redirect=''){
+                if (status && title && message) {
+                    if (!redirect || redirect == null || redirect == 'None') {
+                        Swal.fire({
+                            icon: status,
+                            title: title,
+                            html: message
+                        })
+                    } else {
+                        Swal.fire({
+                            icon: status,
+                            title: title,
+                            html: message,
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Check Data',
+                            cancelButtonText: 'Cancel'
+                        }).then((result) => {
+                            if (result.value) {
+                                window.location.replace(redirect);
+                            }
+                        });
+                    }
+                }
+            }
+
+            {% for msg in messages %}
+                notif(`{{ msg.level_tag }}`, `{{ msg.level_tag }}`, `{{ msg|safe }}`)
+            {% endfor %}
+        </script>
+    {% endif %}

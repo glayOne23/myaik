@@ -1,0 +1,205 @@
+{% extends 'main/layout/base.html' %}
+{% load main_tags %}
+
+{% block content %}
+  <div class="page-content container container-plus">
+    <div class="page-header border-0 pb-3">
+      <h1 class="page-title text-primary-d2 text-150">
+        {% for data in request.path|split:"/"|slice:"2:4" %}
+          {% if forloop.counter == 1 %}
+            {{ data|title }}
+          {% else %}
+            {% if data %}
+            <small class="page-info text-secondary-d2 text-nowrap">
+              <i class="fa fa-angle-double-right text-80"></i>
+              {{ data|title }}
+            </small>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+      </h1>
+
+      <div class="page-tools mt-3 mt-sm-0 mb-sm-n1">
+        <!-- dataTables search box will be inserted here dynamically -->
+      </div>
+    </div>
+
+    {% if request.user.is_superuser %}
+    <div class="row mt-2 mt-lg-2 pt-2">
+      <div class="col-12 col-lg-12">
+
+        <div class="card bcard h-auto">
+          <div class="border-t-3 w-100 brc-danger-m1 radius-t-1"></div><!-- the colored line on top of stats -->
+
+          <div class="card-header">
+            <h5 class="card-title text-grey-d1 pl-1 text-140">
+              <i class="fas fa-exclamation-circle mr-1 text-120 text-orange-d1"></i> Notes
+            </h5>
+            <div class="card-toolbar">
+
+              <div class="card-toolbar no-border">
+                <a href="#" data-action="close" class="card-toolbar-btn btn btn-sm radius-1 btn-outline-danger mx-2px">
+                  <i class="fas fa-xmark w-2 mx-1px"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body px-3 pb-3">
+            <div class="row">
+              <div class="col-12">
+                <p><b>Model Setting</b><br></p><p>Digunakan sebagai tempat penyimpanan data semi static. Seperti contoh : File Logo, Link WA, Link Google Form, File Jadwal, Teks Welcome, dll</p><p>Pada menu setting berikut sudah dibuat agar form input dapat ditambahkan secara dinamis dan tidak perlu membuat CRUD secara manual, tambahkan data melalui link berikut <a href="{% url 'admin:main_setting_add' %}" target="_blank"><button class="btn btn-primary btn-sm">Add Setting</button></a> lalu isi data category, key, alias dan mode.</p><p style="line-height: 1;">1. Keterangan Field :<br></p><ul><li style="line-height: 1.5;">Category : mengelompokkan data setting, gunakan string yang sama</li><li>Key : sebagai acuan untuk mendapatkan data</li><li>Alias : menampilkan label setting pada form input</li><li>Mode : memilih tipe form input apakah char, text, file atau kombinasi seperti charfile dan textfile</li></ul><p style="line-height: 1;">2. Keterangan Mode :<br></p><ul><li>char = default form input</li><li>text = WYSIWYG form input / summernote</li><li>file = ace file input</li><li>charfile = 2 form input (char and file)</li><li>textfile = 2 form input (text and file)<br></li></ul><p>Gunakan field category dan key untuk mendapatkan data setting tertentu dan usahakan jangan mengubah data category dan key, karena digunakan sebagai acuan untuk mencari data setting (hard code).<br></p><p>Untuk melihat contoh setting, silakan load fixture:</p><div style="color: #cccccc;background-color: #1f1f1f;font-family: Consolas, 'Courier New', monospace;font-weight: normal;font-size: 14px;line-height: 19px;white-space: pre;"><div><span style="color: #d4d4d4;">python manage.py loaddata </span>setting</div></div><p></p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        
+      </div>
+    </div>
+    {% endif %}
+
+
+    <div class="row mt-3">
+      <div class="col-12 col-sm-12 mt-3 mt-sm-0 cards-container">
+        <div class="card dcard overflow-hidden">
+          <div class="border-t-3 w-100 brc-primary-m1 radius-t-1"></div>
+          <div class="card-header">
+            <h5 class="card-title text-110 text-primary-d2 pt-1">
+              Form
+            </h5>
+
+            <div class="card-toolbar no-border">
+              <a href="#" data-action="expand" class="card-toolbar-btn btn btn-sm radius-1 btn-outline-success mx-2px d-style">
+                <i class="fa fa-expand d-n-active"></i>
+                <i class="fa fa-compress d-active"></i>
+              </a>
+
+              <a href="#" data-action="toggle" class="card-toolbar-btn btn btn-sm radius-1 btn-outline-default mx-2px">
+                <i class="fa fa-chevron-up w-2 mx-1px"></i>
+              </a>
+
+              <!-- <a href="#" data-action="close" class="card-toolbar-btn btn btn-sm radius-1 btn-outline-danger mx-2px">
+                <i class="fa fa-times w-2 mx-1px"></i>
+              </a> -->
+            </div>
+          </div><!-- /.card-header -->
+
+          <form method="post" class="mt-lg-3" autocomplete="off" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card-body bg-white p-0">
+              {% if datasetting %}
+              {% for data in datasetting %}
+                {% if data.mode in inputchar %}
+                  <div class="form-group row px-3">
+                    <div class="mb-1 mb-sm-0 col-sm-3 col-form-label text-sm-right pr-0">
+                      <label for="setting_{{data.id}}" class="mb-0">
+                        {{ data.alias }}
+                      </label>
+                    </div>
+
+                    <div class="col-sm-9 input-floating-label text-blue-d2 brc-blue-m1">
+                      <input type="text" name="{{data.id}}" id="setting_{{data.id}}" placeholder="{{ data.alias }}" value="{{ data.value|default_if_none:'' }}" class="form-control col-sm-8 col-md-7 shadow-none"/>
+                      <span class="floating-label text-grey-m3 text-80">
+                        {{ data.alias }}
+                      </span>
+                    </div>
+                  </div>
+                {% endif %}
+                {% if data.mode in inputtext %}
+                  <div class="form-group row px-3">
+                    <div class="mb-1 mb-sm-0 col-sm-3 col-form-label text-sm-right pr-0">
+                      <label for="setting_{{data.id}}" class="mb-0">
+                        {{ data.alias }}
+                      </label>
+                    </div>
+
+                    <div class="col-sm-9 input-floating-label text-blue-d2 brc-blue-m1">
+                      <div class="col-sm-8 col-md-7 p-0">
+                        <textarea name="{{data.id}}" id="setting_{{data.id}}" class="form-control shadow-none summernote" placeholder="{{ data.alias }}">{{ data.value|default_if_none:'' }}</textarea>
+                      </div>
+                    </div>
+                  </div>
+                {% endif %}
+                {% if data.mode in inputfile %}
+                  <div class="form-group row px-3">
+                    <div class="mb-1 mb-sm-0 col-sm-3 col-form-label text-sm-right pr-0">
+                      <label for="setting_{{data.id}}" class="mb-0">
+                        {{ data.alias }}
+                      </label>
+                    </div>
+
+                    <div class="col-sm-9 input-floating-label text-blue-d2 brc-blue-m1">
+                      <div class="d-flex">
+                        <div class="col-sm-2 col-md-2 shadow-none pl-0 pr-1">
+                          <a href="{{ data.file_url }}" target="_blank" rel="noopener noreferrer">
+                            <img src="{% if data.is_image is False %}data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%22100%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_191fdd537d6%20text%20%7B%20fill%3A%23AAAAAA%3Bfont-weight%3Abold%3Bfont-family%3AArial%2C%20Helvetica%2C%20Open%20Sans%2C%20sans-serif%2C%20monospace%3Bfont-size%3A10pt%3Btext-anchor%3Amiddle%3Bdominant-baseline%3Amiddle%3B%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20fill%3D%22%23EEEEEE%22%3E%3C%2Frect%3E%3Cg%20id%3D%22holder_191fdd537d6%22%3E%3Ctext%20x%3D%2250%22%20y%3D%2250%22%3EDownload%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fsvg%3E{% elif data.is_image is None %}{{ data.file_url }}{% else %}{{ data.file_url }}{% endif %}" id="img-preview" alt="Preview Image" class="img-thumbnail w-100" >
+                          </a>
+                          <a href="{% url 'main:setting_deletefile' data.id %}">
+                            <button type="button" class="btn btn-danger btn-block">DELETE</button>
+                          </a>
+                        </div>
+                        <div class="col-sm-5 col-md-5 shadow-none pr-1 pr-0">
+                          <input type="file" class="ace-file-input" id="setting_{{data.id}}" name="{{data.id}}" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% endif %}
+              {% endfor %}
+              {% endif %}             
+
+            </div><!-- /.card-body -->
+
+            <div class="mx-n25 py-3 brc-dark-l3 d-flex border-t-1 bgc-secondary-l5 px-3">
+              <div class="offset-md-3 col-md-9 text-nowrap">
+                <button class="btn btn-warning btn-bold px-4" type="button" onclick="window.history.back();"><i class="fas fa-angle-left mr-1"></i> Cancel</button>
+
+                <button class="btn btn-info btn-bold px-4" type="submit">
+                  <i class="fa fa-check mr-1"></i>
+                  Submit
+                </button>
+  
+                <button class="btn btn-lightgrey btn-bold px-4" type="reset"><i class="fa fa-undo mr-1"></i>Reset</button>
+              </div>
+            </div><!-- /.card-footer -->
+          </form>
+
+        </div><!-- /.card -->
+      </div><!-- /.col -->
+    </div>
+
+  </div>
+{% endblock %}
+
+
+{% block javascript %}
+<script>
+  $(document).ready(function(){
+    $('.summernote').summernote({
+      toolbar: [
+        ['font', ['fontname','fontsize', 'fontsizeunit', 'color', 'forecolor','backcolor','bold','italic','underline','strikethrough','superscript','subscript','clear']],
+        ['para', ['style','ol','ul','paragraph','height']],
+        ['insert', ['picture','link','video','table', 'hr']], // image and doc are customized buttons
+        ['misc', ['codeview','fullscreen','undo','redo','help']],
+      ]
+    });
+
+
+    $('.ace-file-input').aceFileInput({
+      style: 'drop',
+      droppable: true,
+      container: 'border-1 border-dashed brc-grey-l1 brc-h-blue-m2 shadow-sm',
+      placeholderClass: 'text-90 text-600 text-grey-l1 my-2',
+      placeholderText: 'Drop file here or click to choose',
+      placeholderIcon: '<i class="fa fa-cloud-upload-alt fa-3x text-info-m2 my-2"></i>',
+      //previewSize: 64,
+      thumbnail: 'large',
+      //allowExt: 'gif|jpg|jpeg|png|webp|svg',
+      //allowMime: 'image/png|image/jpeg',
+      // allowMime: 'image/*',
+      //maxSize: 100000,
+    });
+  })
+</script>
+{% endblock %}

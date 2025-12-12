@@ -1,0 +1,332 @@
+{% extends 'main/layout/base.html' %}
+{% load main_tags %}
+
+{% block content %}
+  <div class="page-content container container-plus">
+    <div class="page-header border-0 pb-3">
+      <h1 class="page-title text-primary-d2 text-150">
+        Admin
+        <small class="page-info text-secondary-d2 text-nowrap">
+          <i class="fa fa-angle-double-right text-80"></i>
+          Tipe AIK
+        </small>
+      </h1>
+
+      <div class="page-tools mt-3 mt-sm-0 mb-sm-n1">
+
+      </div>
+    </div>
+
+
+
+
+    <div class="row">
+      <div class="col-12 col-sm-12 mt-3 mt-sm-0 cards-container">
+        <div class="card dcard overflow-hidden">
+          <div class="border-t-3 w-100 brc-primary-m1 radius-t-1"></div>
+          <div class="card-header">
+            <h5 class="card-title text-110 text-primary-d2 pt-1">
+              Table
+            </h5>
+
+            <div class="card-toolbar no-border">
+              <!-- dataTables button will be inserted here dynamically -->
+            </div>
+          </div><!-- /.card-header -->
+
+          <form method="post" autocomplete="off">
+
+            <table id="datatable_tipe_pertemuan" class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table">
+              <!-- add `collapsed` by default ... it will be removed by default -->
+              <!-- thead with .sticky-nav -->
+              <thead class="sticky-nav text-secondary-m1 text-uppercase text-85">
+                <tr>
+                  <th class="td-toggle-details border-0 bgc-white shadow-sm">
+                    <i class="fa fa-angle-double-down ml-2"></i>
+                  </th>
+
+                  <th class="border-0 bgc-white pl-3 pl-md-4 shadow-sm">
+                    <input type="checkbox" />
+                  </th>
+
+                  <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
+                    No
+                  </th>
+
+                  <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
+                    Nama
+                  </th>
+
+                  <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
+                    Deskripsi
+                  </th>
+
+                  <th class="border-0 bgc-white shadow-sm w-2">
+                    Aksi
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody class="pos-rel">
+                {% if data_tipe_pertemuan %}
+                {% for data in data_tipe_pertemuan %}
+                <tr class="d-style bgc-h-default-l4">
+                  <td class="td-toggle-details pos-rel">
+                    <!-- this empty table cell will show the `+` sign which toggles the hidden cells in responsive (collapsed) mode -->
+
+                    <div class="position-lc h-95 ml-1px border-l-3 brc-purple-m1">
+                      <!-- this decorative highlight border will be shown only when table is collapsed (responsive) -->
+                    </div>
+                  </td>
+
+                  <td class="pl-3 pl-md-4 align-middle pos-rel">
+                    <input type="checkbox" value="{{ data.id }}" />
+                    <div class="d-n-collapsed position-lc h-95 ml-1px border-l-3 brc-purple-m1">
+                      <!-- this decorative highlight border will be shown only when table is in full mode (not collapsed >> .d-n-collapsed) -->
+                    </div>
+                  </td>
+
+                  <td class="align-middle">
+                    {{ forloop.counter }}
+                  </td>
+
+                  <td class="align-middle">
+                    {{ data.nama }}
+                  </td>
+
+                  <td class="align-middle">
+                    {{ data.deskripsi }}
+                  </td>
+
+                  <td class="align-middle">
+                    <div class="d-flex">
+                      <span class="d-lg-inline mx-1">
+                        <a href="{% url 'main:admin.tipe_pertemuan.update' data.id %}" data-action="edit">
+                          <button type="button" data-rel="tooltip" data-action="edit" title="Edit" class="btn btn-outline-warning shadow-sm btn-bgc-white">
+                              <i class="fas fa-pen-to-square text-100"></i>
+                          </button>
+                        </a>
+                      </span>
+
+                      <span class="d-lg-inline mx-1">
+                        <a data-action="delete" onclick="submit_listid(`{% url 'main:admin.tipe_pertemuan.deletelist' %}`, '{{ data.id }}' )">
+                          <button type="button" data-rel="tooltip" data-action="delete" title="Delete" class="btn btn-outline-danger shadow-sm btn-bgc-white">
+                              <i class="fas fa-trash-can text-100"></i>
+                          </button>
+                        </a>
+                      </span>
+                    </div>
+
+                  </td>
+                </tr>
+                {% endfor %}
+                {% endif %}
+              </tbody>
+            </table>
+
+          </form>
+
+        </div><!-- /.card -->
+      </div><!-- /.col -->
+    </div>
+
+  </div>
+{% endblock %}
+
+
+{% block javascript %}
+<script>
+  $(document).ready(function(){
+    var tableId_tipe_pertemuan = '#datatable_tipe_pertemuan'
+    var $_table_tipe_pertemuan = $(tableId_tipe_pertemuan).DataTable({
+      dom:
+        "<'row'<'col-12 col-sm-4 pl-2'l><'col-12 col-sm-4'B><'col-12 col-sm-4 pr-2 text-right'f>>" +
+        "<'row'<'col-12'tr>>" +
+        "<'row'<'col-12 col-md-5'i><'col-12 col-md-7'p>>",
+      renderer: 'bootstrap',
+      responsive: true,
+      classes: {
+        sLength: "dataTables_length text-left w-auto",
+      },
+      buttons: {
+        dom: {
+          button: {
+            className: 'btn' //remove the default 'btn-secondary'
+          },
+          container: {
+            className: 'dt-buttons btn-group bgc-white-tp2 text-right w-auto'
+          }
+        },
+
+        buttons: [
+          {
+            "extend": "colvis",
+            "text": "<i class='far fa-eye text-125 text-dark-m2' data-toggle='tooltip' title='Show/hide columns'></i> <span class='d-none'>Show/hide columns</span>",
+            "className": "btn-light-default btn-bgc-white btn-h-outline-primary btn-a-outline-primary",
+            columns: ':not(:first)'
+          },
+          {
+            "extend": "copy",
+            "text": "<i class='far fa-copy text-125 text-purple' data-toggle='tooltip' title='Copy to clipboard'></i> <span class='d-none'>Copy to clipboard</span>",
+            "className": "btn-light-default btn-bgc-white btn-h-outline-primary btn-a-outline-primary"
+          },
+          {
+            "extend": "csv",
+            "text": "<i class='fa fa-database text-125 text-success-m1' data-toggle='tooltip' title='CSV'></i> <span class='d-none'>Export to CSV</span>",
+            "className": "btn-light-default btn-bgc-white btn-h-outline-primary btn-a-outline-primary"
+          },
+          {
+            "extend": "excel",
+            "text": "<i class='far fa-file-excel text-125 text-success-m1' data-toggle='tooltip' title='Excel'></i> <span class='d-none'>Export to Excel</span>",
+            "className": "btn-light-default btn-bgc-white btn-h-outline-primary btn-a-outline-primary"
+          },
+          {
+            "extend": "print",
+            "text": "<i class='fa fa-print text-125 text-orange-d1' data-toggle='tooltip' title='Print'></i> <span class='d-none'>Print</span>",
+            "className": "btn-light-default btn-bgc-white  btn-h-outline-primary btn-a-outline-primary",
+            autoPrint: false,
+            message: 'This print was produced using the Print button for DataTables'
+          }	,
+          {
+            "extend": "pdf",
+            "text": "<i class='far fa-file-pdf text-125 text-danger-m1' data-toggle='tooltip' title='Export to PDF'></i> <span class='d-none'>Export to PDF</span>",
+            "className": "btn-light-default btn-bgc-white btn-h-outline-primary btn-a-outline-primary"
+          },
+        ]
+      },
+      // first and last column are not sortable
+      columnDefs: [
+        {
+          orderable: false,
+          className: null,
+          targets:   [0,1,-1]
+        },
+      ],
+      // multiple row selection
+      select: {
+        style: 'multis'
+      },
+      // no specific initial ordering
+      order: [],
+      language: {
+        search: '<i class="fa fa-search pos-abs mt-2 pt-3px ml-35 text-blue-m2"></i>',
+        searchPlaceholder: "Search..."
+      }
+    })
+
+
+    // specify position of table buttons
+    $(tableId_tipe_pertemuan).closest('.card').find('.card-toolbar').append(`
+      <a href="{% url 'main:admin.tipe_pertemuan.add' %}">
+        <button data-rel="tooltip" type="button" class="btn radius-round btn-outline-primary border-2 btn-sm ml-2" title="Add New">
+          <i class="fa fa-plus"></i>
+        </button>
+      </a>
+      <button data-rel="tooltip" type="button" class="btn radius-round btn-outline-danger border-2 btn-sm ml-2" title="Delete" onclick="submit_listid('{% url 'main:admin.tipe_pertemuan.deletelist' %}',get_list_id('${tableId_tipe_pertemuan}'))">
+        <i class="far fa-trash-alt"></i>
+      </button>
+    `)
+
+    $('.dataTables_wrapper').find('.dataTables_filter').find('input').addClass('pl-45 radius-round').removeClass('form-control-sm')
+
+
+    // helper methods to add/remove bgc-h-* class when selecting/deselecting rows
+    var _highlightSelectedRow_tipe_pertemuan = function(row) {
+      row.querySelector('input[type=checkbox]').checked = true
+      row.classList.add('bgc-success-l3')
+      row.classList.remove('bgc-h-default-l4')
+    }
+    var _unhighlightDeselectedRow_tipe_pertemuan = function(row) {
+      row.querySelector('input[type=checkbox]').checked = false
+      row.classList.remove('bgc-success-l3')
+      row.classList.add('bgc-h-default-l4')
+    }
+
+
+    // listen to select/deselect event to highlight rows
+    $_table_tipe_pertemuan.on('select', function (e, dt, type, index) {
+      if ( type == 'row' ) {
+        var row = $_table_tipe_pertemuan.row( index ).node()
+        _highlightSelectedRow_tipe_pertemuan(row)
+      }
+    }).on('deselect', function (e, dt, type, index) {
+      if ( type == 'row' ) {
+        var row = $_table_tipe_pertemuan.row( index ).node()
+        _unhighlightDeselectedRow_tipe_pertemuan(row)
+      }
+    })
+
+
+    // when clicking the checkbox in table header, select/deselect all rows
+    $(tableId_tipe_pertemuan).on('click', 'th input[type=checkbox]', function () {
+      if(this.checked) {
+        $_table_tipe_pertemuan.rows({ search: 'applied' }).select().every(function() {
+          _highlightSelectedRow_tipe_pertemuan(this.node())
+        });
+      }
+      else {
+        $_table_tipe_pertemuan.rows({ search: 'applied' }).deselect().every(function() {
+          _unhighlightDeselectedRow_tipe_pertemuan(this.node())
+        })
+      }
+    })
+
+
+    // add/remove bgc-h-* class to TH when soring columns
+    var previousTh = null
+    var toggleTH_highlight_tipe_pertemuan = function(th) {
+      th.classList.toggle('bgc-yellow-l2')
+      th.classList.toggle('bgc-h-yellow-l3')
+      th.classList.toggle('text-blue-d2')
+    }
+
+    $(tableId_tipe_pertemuan).on('click', 'th:not(.sorting_disabled)', function () {
+      if(previousTh != null) toggleTH_highlight_tipe_pertemuan(previousTh)// unhighlight previous TH
+      toggleTH_highlight_tipe_pertemuan(this)
+      previousTh = this
+    })
+
+
+    // don't select row if we click on the "show details" `plus` sign (td)
+    $(tableId_tipe_pertemuan).on('click', 'td.dtr-control', function (e) {
+      e.stopPropagation()
+    })
+
+  });
+</script>
+
+
+
+<script>
+  $(document).ready(function(){
+    var tableHead = document.querySelector('.sticky-nav')
+    tableHead.addEventListener('sticky-change', function(e) {
+      // when  thead becomes sticky, add is-stuck class to it (which adds a border-bottom to it)
+      this.classList.toggle('is-stuck', e.detail.isSticky)
+    })
+
+
+    // don't select row when clicking on the edit icon
+    $('a[data-action=edit], a[data-action=delete]').on('click', function(e) {
+      // e.preventDefault()
+      e.stopPropagation()// don't select
+    })
+
+    // add a dark border
+    $('.dataTables_wrapper').addClass('border-b-1 border-x-1 brc-default-l2')
+    // highlight DataTable header
+    // also already done in CSS, but you can use custom colors here
+    .find('.row:first-of-type')
+    .addClass('border-b-1 brc-default-l3 bgc-blue-l4')
+    .next().addClass('mt-n1px')// move the next `.row` up by 1px to go below header's border
+
+    // highlight DataTable footer
+    $('.dataTables_wrapper').find('.row:last-of-type').addClass('border-t-1 brc-default-l3 mt-n1px bgc-default-l4')
+
+
+    // if the table has scrollbars, add ace styling to it
+    $('.dataTables_scrollBody').aceScroll({color: "grey"})
+
+  });
+</script>
+{% endblock %}

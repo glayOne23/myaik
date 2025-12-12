@@ -1,0 +1,87 @@
+{% load static %}
+<nav class="navbar navbar-sm navbar-expand-lg navbar-fixed navbar-darkblue">
+  <div class="navbar-inner">
+
+
+    <div class="d-flex h-100 justify-content-xl-between align-items-center">
+
+      <button type="button" class="btn btn-burger burger-arrowed static collapsed ml-2 d-flex d-xl-none" data-toggle-mobile="sidebar" data-target="#sidebar" aria-controls="sidebar" aria-expanded="false" aria-label="Toggle sidebar">
+        <span class="bars text-white-m2"></span>
+      </button><!-- mobile sidebar toggler button -->
+
+      <a class="navbar-brand d-xl-none mx-1 text-white text-130 center" href="#">
+        <!-- <i class="fas fa-desktop mr-2px text-white-m2"></i> -->
+        <img alt="LOGO" src="{{ APP_LOGO }}" class="mx-auto mr-1 align-text-bottom" width="30">
+        {{ APP_SHORT_NAME }}
+      </a>
+
+      <button type="button" class="btn text-white-m2 btn-burger align-self-center mx-2 d-none d-xl-flex btn-h-light-primary" data-toggle="sidebar" data-target="#sidebar" aria-controls="sidebar" aria-expanded="true" aria-label="Toggle sidebar">
+        <span class="bars"></span>
+      </button><!-- sidebar toggler button -->
+
+    </div>
+
+
+
+    <!-- #navbarMenu toggler -->
+    <button class="navbar-toggler ml-1 mr-2 px-1" type="button" data-toggle="collapse" data-target="#navbarMenu" aria-controls="navbarMenu" aria-expanded="false" aria-label="Toggle navbar menu">
+      <img class="mx-0 radius-round border-2 brc-primary-tp3 p-1px" src="{{ request.session.user.image }}" width="36" alt="Image" style="aspect-ratio : 1 / 1;">
+    </button>
+
+
+    <div class="navbar-menu collapse navbar-collapse navbar-backdrop" id="navbarMenu">
+
+      <div class="navbar-nav">
+        <ul class="nav has-active-border">
+
+          <li class="nav-item dropdown order-first order-lg-last">
+            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+              <img id="id-navbar-user-image" class="d-none d-lg-inline-block radius-round border-2 brc-white-tp1 mr-2 w-6" src="{{ request.session.user.image }}" alt="Image" style="aspect-ratio : 1 / 1;">
+              <span class="d-inline-block d-lg-none d-xl-inline-block">
+                        <span class="text-90" id="id-user-welcome">Welcome,</span>
+              <span class="nav-user-name">{{ request.session.user.fullname|title }}</span>
+              </span>
+
+              <i class="caret fa fa-angle-down d-none d-xl-block"></i>
+              <i class="caret fa fa-angle-left d-block d-lg-none"></i>
+            </a>
+
+            <div class="dropdown-menu dropdown-caret dropdown-menu-right dropdown-animated brc-primary-m3 py-1">
+              <div class="d-none d-lg-block d-xl-none">
+                <div class="dropdown-header">
+                  Welcome, {{ request.session.user.fullname|title }}
+                </div>
+                <div class="dropdown-divider"></div>
+              </div>
+
+
+              <a class="mt-1 dropdown-item btn btn-outline-grey bgc-h-primary-l3 btn-h-light-primary btn-a-light-primary" href="{% url 'main:profile' %}">
+                <i class="fa fa-user text-primary-m1 text-105 mr-1"></i>
+                Profile
+              </a>
+              
+              {% if request.user.profile.is_dosen %}
+              <a class="dropdown-item btn btn-outline-grey bgc-h-secondary-l3 btn-h-light-secondary btn-a-light-secondary" onclick="setprofilesync()">
+                <i class="fa-solid fa-rotate text-success-d1 text-105 mr-1"></i>
+                Profile Sync
+              </a>
+              {% endif %}
+
+              <div class="dropdown-divider brc-primary-l2"></div>
+              
+              <a class="dropdown-item btn btn-outline-grey bgc-h-secondary-l3 btn-h-light-secondary btn-a-light-secondary" href="{% url 'authentication:signout' %}">
+                <i class="fa fa-power-off text-warning-d1 text-105 mr-1"></i>
+                Logout
+              </a>
+            </div>
+          </li>
+
+        </ul>
+      </div>
+
+    </div>
+
+
+
+  </div>
+</nav>

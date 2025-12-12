@@ -1,0 +1,10 @@
+[
+  {
+    "model": "authentication.groupdetails",
+    "pk": 1,
+    "fields": {
+      "alias": "System Admins",
+      "description": "Have access rights to all features in the system"
+    }
+  }
+]
