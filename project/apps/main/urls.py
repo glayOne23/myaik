@@ -8,7 +8,8 @@ from apps.main.views import (
     category,
     setting,
     tipe_pertemuan,
-    pertemuan
+    pertemuan,
+    presensi
 )
 
 app_name = 'main'
@@ -74,9 +75,19 @@ urlpatterns = [
             path('table/', pertemuan.AdminPertemuanListView.as_view(), name='admin.pertemuan.table'),
             path('add/', pertemuan.AdminPertemuanCreateView.as_view(), name='admin.pertemuan.add'),
             path('<int:id>/update/', pertemuan.AdminPertemuanUpdateView.as_view(), name='admin.pertemuan.update'),
+            path('<int:pertemuan_id>/presensi/table/', presensi.AdminPresensiListView.as_view(), name='admin.presensi.table'),
             # ==================================================[ SERVICE ]==================================================
             path('deletelist/', pertemuan.AdminPertemuanDeleteListView.as_view(), name='admin.pertemuan.deletelist'),
-            path('table_json/', pertemuan.AdminPertemuanListJsonView.as_view(), name='admin.pertemuan.table_json'),
+        ])),
+    ])),
+
+    path('user/', include([
+        path('pertemuan/', include([
+            # =================================================[ LOAD PAGE ]=================================================
+            path('table/', pertemuan.UserPertemuanListView.as_view(), name='user.pertemuan.table'),
+            path('<int:id>/presensi/add/', presensi.UserPresensiCreateView.as_view(), name='user.presensi.add'),
+            # ==================================================[ SERVICE ]==================================================
+            path('table_json/', pertemuan.UserPertemuanListJsonView.as_view(), name='user.pertemuan.table_json'),
         ])),
     ])),
 ]

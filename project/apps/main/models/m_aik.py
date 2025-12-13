@@ -47,11 +47,14 @@ class Pertemuan(models.Model):
 class Presensi(models.Model):
     pertemuan       = models.ForeignKey(Pertemuan, on_delete=models.CASCADE, null=True)
     peserta         = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    rangkuman       = models.TextField()
+    berkas_rangkuman = models.FileField(null=True, blank=True, upload_to='rangkuman/')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering    = ['id']
+        unique_together = ('pertemuan', 'peserta')
 
     def __str__(self):
         txt = '{\n'

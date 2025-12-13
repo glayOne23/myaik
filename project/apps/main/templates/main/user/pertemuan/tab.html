@@ -3,7 +3,7 @@
 	<ul class="nav nav-justified nav-tabs nav-tabs-static radius-t-1 overflow-hidden mb-2" role="tablist">
 		{% for data in data_tipe_pertemuan %}
 		<li class="nav-item m-1px">
-			<a href="{% url 'main:admin.pertemuan.table' %}?tipe_pertemuan={{data.id}}"
+			<a href="{% url 'main:user.pertemuan.table' %}?tipe_pertemuan={{data.id}}"
 				class="btn btn-light-primary btn-h-light-primary btn-h-text-black btn-a-primary py-2 border-0 radius-0 btn-bold {% if tipe_pertemuan == data.id %}active{% endif %}">
 				{{ data.nama }}
 				{% if data.jumlah_pertemuan %}

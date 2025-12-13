@@ -1,76 +1,40 @@
-from json import dumps
-
 from apps.main.forms.pertemuan import PertemuanForm
 from apps.main.models import Pertemuan, TipePertemuan
+from apps.main.views.base import AdminRequiredMixin, CustomTemplateBaseMixin
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import AccessMixin, LoginRequiredMixin
 from django.db import transaction
-from django.db.models import CharField, F, Value
+from django.db.models import CharField, Count, F, Q, Value, Exists
 from django.db.models.functions import Concat
-from django.http import HttpResponse, HttpResponseForbidden
 from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.views import View
-from django.views.generic import (CreateView, DeleteView, ListView,
+from django.views.generic import (CreateView, DeleteView, FormView, ListView,
                                   TemplateView, UpdateView)
 
 
 # =====================================================================================================
-#                                               MIXINS
+#                                              BASE LOAD PAGE
 # =====================================================================================================
-def in_grup(user, grup_name):
-    if user:
-        return user.groups.filter(name=grup_name).count() > 0
-    return False
-
-
-class AdminRequiredMixin(AccessMixin):
-    """Mixin untuk membatasi akses hanya untuk grup personalia."""
-    def dispatch(self, request, *args, **kwargs):
-        if not in_grup(request.user, 'admin'):
-            return HttpResponseForbidden("Anda tidak memiliki hak akses.")
-        return super().dispatch(request, *args, **kwargs)
-
-
-class CustomTemplateBaseMixin(LoginRequiredMixin):
-    """Mixin dasar untuk semua view"""
+class BasePertemuanListView(CustomTemplateBaseMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # ===[Select CSS and JS Files]===
-        context['datatables']       = True
-        context['select2']          = True
-        context['summernote']       = False
-        context['maxlength']        = False
-        context['inputmask']        = False
-        context['duallistbox']      = False
-        context['moment']           = False
-        context['daterange']        = False
-        context['chartjs']          = False
-        return context
-
-
-# =====================================================================================================
-#                                               LOAD PAGE
-# =====================================================================================================
-class AdminPertemuanListView(AdminRequiredMixin, CustomTemplateBaseMixin, TemplateView):
-    # model = Pertemuan
-    template_name = 'main/admin/pertemuan/table.html'
-    # context_object_name = 'data_pertemuan'
-
-    # def get_queryset(self):
-    #     return self.model.objects.order_by('-id')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # ===[Select CSS and JS Files]===
-        context['data_tipe_pertemuan'] = TipePertemuan.objects.all()
+        now = timezone.now()
+        context['data_tipe_pertemuan'] = TipePertemuan.objects.annotate(jumlah_pertemuan=Count('pertemuan', filter=Q(pertemuan__akhir__gte=now)))
         context['data_tahun_pertemuan'] = Pertemuan.objects.values_list('created_at__year', flat=True).distinct().order_by('-created_at__year')
         context['tipe_pertemuan'] = int(self.request.GET.get('tipe_pertemuan', 1))
         context['tahun_pertemuan'] = context['data_tahun_pertemuan'][0] if context['data_tahun_pertemuan'] else ''
         return context
+
+# =====================================================================================================
+#                                              ADMIN LOAD PAGE
+# =====================================================================================================
+class AdminPertemuanListView(AdminRequiredMixin, BasePertemuanListView):
+    template_name = 'main/admin/pertemuan/table.html'
 
 
 class AdminPertemuanCreateView(AdminRequiredMixin, CustomTemplateBaseMixin, CreateView):
@@ -107,7 +71,7 @@ class AdminPertemuanUpdateView(AdminRequiredMixin, CustomTemplateBaseMixin, Upda
 
 
 # =====================================================================================================
-#                                                SERVICE
+#                                                ADMIN SERVICE
 # =====================================================================================================
 class AdminPertemuanDeleteListView(AdminRequiredMixin, View):
     def post(self, request):
@@ -133,7 +97,17 @@ class AdminPertemuanDeleteListView(AdminRequiredMixin, View):
         return redirect('main:admin.pertemuan.table')
 
 
-class AdminPertemuanListJsonView(AdminRequiredMixin, View):
+# =====================================================================================================
+#                                              KARYAWAN LOAD PAGE
+# =====================================================================================================
+class UserPertemuanListView(BasePertemuanListView):
+    template_name = 'main/user/pertemuan/table.html'
+
+
+# =====================================================================================================
+#                                                USER SERVICE
+# =====================================================================================================
+class UserPertemuanListJsonView(LoginRequiredMixin, View):
     def post(self, request):
         # ------------------------------------------------------------------
         # Queryset dengan filter
@@ -147,6 +121,10 @@ class AdminPertemuanListJsonView(AdminRequiredMixin, View):
             queryset = queryset.filter(created_at__year=tahun_pertemuan)
 
         queryset = queryset.annotate(
+            ada_presensi=Count(
+                'presensi',
+                filter=Q(presensi__peserta=request.user)
+            ),
             materi_url=Concat(
                 Value(settings.MEDIA_URL),
                 F('materi'),
@@ -161,15 +139,16 @@ class AdminPertemuanListJsonView(AdminRequiredMixin, View):
             'tipe_pertemuan__id',
             'tipe_pertemuan__nama',
             'judul',
-            'deskripsi',   # ← Full name user utama
+            'deskripsi',
             'pembicara',
-            'mulai',  # ← Full name dari latest state detail
+            'mulai',
             'akhir',
             'presensi_mulai',
             'presensi_akhir',
             'tautan',
             'materi',
             'materi_url',
+            'ada_presensi',
             'created_at',
             'updated_at'
         )
