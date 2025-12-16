@@ -27,6 +27,7 @@ urlpatterns = [
         path('table/',                              account.table,              name='account_table'),
         path('role/',                               account.role,               name='account_role'),
         path('add/',                                account.add,                name='account_add'),
+        path('generate/',                           account.generate,           name='account_generate'),
         path('edit/<int:id>/',                      account.edit,               name='account_edit'),
         path('edit_group/<int:id>/',                account.edit_group,         name='account_edit_group'),
 
@@ -78,6 +79,10 @@ urlpatterns = [
             path('<int:pertemuan_id>/presensi/table/', presensi.AdminPresensiListView.as_view(), name='admin.presensi.table'),
             # ==================================================[ SERVICE ]==================================================
             path('deletelist/', pertemuan.AdminPertemuanDeleteListView.as_view(), name='admin.pertemuan.deletelist'),
+        ])),
+        path('presensi/', include([
+            path('excel_import/', presensi.AdminPresensiExcelImportView.as_view(), name='admin.presensi.excel_import'),
+            # =================================================[ LOAD PAGE ]=================================================
         ])),
     ])),
 

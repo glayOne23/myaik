@@ -49,58 +49,58 @@
                   <th class="td-toggle-details border-0 bgc-white shadow-sm">
                     <i class="fa fa-angle-double-down ml-2"></i>
                   </th>
-    
+
                   <th class="border-0 bgc-white pl-3 pl-md-4 shadow-sm">
                     <input type="checkbox" />
                   </th>
-    
+
                   <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
                     No
                   </th>
-    
+
                   <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
                     Name / Username
                   </th>
-    
+
                   <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
                     Role
                   </th>
-    
+
                   <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
                     Email
                   </th>
-    
+
                   <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
                     Phone Number
                   </th>
-    
+
                   <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
                     Fungsional
                   </th>
-    
+
                   <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
                     HomeID
                   </th>
-    
+
                   <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
                     Home Base
                   </th>
-    
+
                   <th class="border-0 bgc-white bgc-h-yellow-l3 shadow-sm">
                     Is Active
                   </th>
-    
+
                   <th class="border-0 bgc-white shadow-sm w-2">
                     Action
                   </th>
                 </tr>
               </thead>
-    
+
               <tbody class="pos-rel">
                 <!-- Data loaded with ajax -->
               </tbody>
             </table>
-    
+
           </form>
 
         </div><!-- /.card -->
@@ -125,10 +125,10 @@
         "<'row'<'col-12 col-md-5'i><'col-12 col-md-7'p>>",
       renderer: 'bootstrap'
     })
-    
+
     var $table_account = $(tableid_account).DataTable({
       responsive: true,
-    
+
       classes: {
         sLength: "dataTables_length text-left w-auto",
       },
@@ -180,7 +180,7 @@
         ]
       },
 
-      
+
       // multiple row selection
       select: {
         style: 'multis'
@@ -380,7 +380,13 @@
           <i class="fa fa-plus"></i>
         </button>
       </a>
-      
+
+      <a href="{% url 'main:account_generate' %}">
+        <button data-rel="tooltip" type="button" class="btn radius-round btn-outline-success border-2 btn-sm ml-2" title="Generate dari Data Kepegawaian">
+          <i class="fa fa-users"></i>
+        </button>
+      </a>
+
       <button data-rel="tooltip" type="button" class="btn radius-round btn-outline-green border-2 btn-sm ml-2" title="Profile Sync" onclick="submit_listid('{% url 'main:account_synclist' %}',get_list_id('${tableid_account}'))">
         <i class="fa-solid fa-rotate"></i>
       </button>
@@ -402,7 +408,7 @@
         <i class="far fa-trash-alt"></i>
       </button>
     `)
-    
+
 
     $('.dataTables_wrapper').find('.dataTables_filter').find('input').addClass('pl-45 radius-round').removeClass('form-control-sm')
 
@@ -489,7 +495,7 @@
     .find('.row:first-of-type')
     .addClass('border-b-1 brc-default-l3 bgc-blue-l4')
     .next().addClass('mt-n1px')// move the next `.row` up by 1px to go below header's border
-    
+
     // highlight DataTable footer
     $('.dataTables_wrapper').find('.row:last-of-type').addClass('border-t-1 brc-default-l3 mt-n1px bgc-default-l4')
 

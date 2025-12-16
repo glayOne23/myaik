@@ -1,4 +1,5 @@
 from apps.main.forms.pertemuan import PertemuanForm
+from apps.main.forms.presensi import PresensiExcelForm
 from apps.main.models import Pertemuan, TipePertemuan
 from apps.main.views.base import AdminRequiredMixin, CustomTemplateBaseMixin
 from django.conf import settings
@@ -35,6 +36,12 @@ class BasePertemuanListView(CustomTemplateBaseMixin, TemplateView):
 # =====================================================================================================
 class AdminPertemuanListView(AdminRequiredMixin, BasePertemuanListView):
     template_name = 'main/admin/pertemuan/table.html'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        form = PresensiExcelForm()
+        form.fields['tipe_pertemuan'].queryset = TipePertemuan.objects.all()
+        context['presensi_excel_form'] = form
+        return context
 
 
 class AdminPertemuanCreateView(AdminRequiredMixin, CustomTemplateBaseMixin, CreateView):

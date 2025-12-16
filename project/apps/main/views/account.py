@@ -1,27 +1,21 @@
-from django.http.response import JsonResponse
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.contrib.auth.models import User, Group
-from django.urls import reverse
-from django.db import transaction
-from django.core.paginator import Paginator
-from django.db.models import Q, F, Value
-from django.db.models.functions import Concat
-
-from apps.services.decorators import group_required, login_required
-from apps.services.apigateway import apigateway
-from apps.services.apistar import apistar
-from apps.authentication.models import GroupDetails
-from apps.authentication.forms.auth import FormSignUp
-from apps.services.utils import profilesync
-
-from apps.main.forms import FormProfileEdit, FormUserEdit, FormGroupDetails
-
 from json import dumps
 
-
-
-
+from apps.authentication.forms.auth import FormSignUp
+from apps.authentication.models import GroupDetails
+from apps.main.forms import FormGroupDetails, FormProfileEdit, FormUserEdit
+from apps.services.apigateway import apigateway
+from apps.services.apistar import apistar
+from apps.services.decorators import group_required, login_required
+from apps.services.utils import profilesync
+from django.contrib import messages
+from django.contrib.auth.models import Group, User
+from django.core.paginator import Paginator
+from django.db import transaction
+from django.db.models import F, Q, Value
+from django.db.models.functions import Concat
+from django.http.response import JsonResponse
+from django.shortcuts import redirect, render
+from django.urls import reverse
 
 # =====================================================================================================
 #                                               LOAD PAGE
@@ -45,8 +39,8 @@ def table(request):
 
     # ===[Fetch Data]===
     context['datagroup']        = Group.objects.all()
-    
-    
+
+
     # ===[Render Template]===
     return render(request, 'main/account/table.html', context)
 
@@ -109,7 +103,7 @@ def edit_group(request, id):
             context['formgroupdetails'].save()
 
             messages.success(request, 'Data Edited Successfully', extra_tags=dumps({
-                'redirect'      : reverse('main:account_role'), 
+                'redirect'      : reverse('main:account_role'),
                 'confbtntxt'    : 'Check Data',
                 'denybtntxt'    : 'Cancel',
             }))
@@ -158,9 +152,9 @@ def add(request):
                 profile = context['formprofile'].save(commit=False)
                 profile.user = user
                 profile.save()
-                
+
                 messages.success(request, 'Data Added Successfully', extra_tags=dumps({
-                    'redirect'      : reverse('main:account_table'), 
+                    'redirect'      : reverse('main:account_table'),
                     'confbtntxt'    : 'Check Data',
                     'denybtntxt'    : 'Cancel',
                 }))
@@ -169,11 +163,28 @@ def add(request):
                 messages.error(request, context['formprofile'].get_errors())
         else:
             messages.error(request, context['formsignup'].get_errors())
-    
-    
+
+
     # ===[Render Template]===
     return render(request, 'main/account/add.html', context)
 
+
+
+@login_required
+@group_required('admin')
+def generate(request):
+    # ===[Check ID IsValid]===
+    try:
+        datakaryawan = apigateway.getKaryawan()
+        for karyawan in datakaryawan['data']:
+            if not User.objects.filter(username=karyawan['uniid']).exists():
+                user, is_success = profilesync(karyawan['uniid'])
+    except Exception as e:
+        messages.error(request, f'Terdapat kesalahan pada sistem. {str(e)}')
+        return redirect('main:account_table')
+
+    messages.success(request, 'Berhasil generate akun dari data kepegawaian.')
+    return redirect('main:account_table')
 
 
 @login_required
@@ -190,7 +201,7 @@ def edit(request, id):
     context['moment']           = False
     context['daterange']        = False
     context['chartjs']          = False
-    
+
 
     # ===[Check ID IsValid]===
     try:
@@ -223,7 +234,7 @@ def edit(request, id):
                     if request.POST.get('password1') != request.POST.get('password2'):
                         messages.error(request, 'Confirm password is not the same.')
                         return redirect('main:account_edit', id=id)
-                    
+
                     elif len(request.POST.get('password1')) < 8:
                         messages.error(request, 'Your password must contain at least 8 characters.')
                         return redirect('main:account_edit', id=id)
@@ -231,7 +242,7 @@ def edit(request, id):
                     elif request.POST.get('password1').isnumeric():
                         messages.error(request, 'Your password cannot be entirely numeric.')
                         return redirect('main:account_edit', id=id)
-                    
+
                     else:
                         user.set_password(request.POST.get('password1'))
                         user.save()
@@ -244,12 +255,12 @@ def edit(request, id):
 
 
                 messages.success(request, 'Data Updated Successfully', extra_tags=dumps({
-                    'redirect'      : reverse('main:account_table'), 
+                    'redirect'      : reverse('main:account_table'),
                     'confbtntxt'    : 'Check Data',
                     'denybtntxt'    : 'Cancel',
                 }))
                 return redirect('main:account_edit', id=id)
-                
+
             else:
                 messages.error(request, context['formprofile'].get_errors())
         else:
@@ -286,11 +297,11 @@ def import_user(request):
     context['datakaryawan']     = []
     context['showpopover']      = True
 
-    
+
     if request.GET and request.GET.get('kepeg'):
         context['showpopover']  = False
         context['kepeg']        = request.GET.get('kepeg')
-        
+
         if context['kepeg'] == 'all':
             getkaryawan = apigateway.getKaryawan()
         elif context['kepeg'] == 'dosen':
@@ -317,8 +328,8 @@ def import_user(request):
         except User.DoesNotExist:
             messages.error(request, 'There is an error')
 
-    
-    
+
+
     # ===[Render Template]===
     return render(request, 'main/account/sync.html', context)
 
@@ -385,7 +396,7 @@ def setisactive(request, mode):
                         getuser.is_active = False
                     getuser.save()
                     messages.success(request, 'Data Updated Successfully')
-                    
+
                 except Exception as e:
                     transaction.set_rollback(True)
                     messages.error(request, 'There is an error')
@@ -403,14 +414,14 @@ def setisactive(request, mode):
 def synclist(request):
     if request.POST and request.POST.getlist('list_id'):
         list_id = request.POST.getlist('list_id')
-        
+
         with transaction.atomic():
             for id in list_id:
                 try:
                     user = User.objects.get(id=id)
                     user, is_success = profilesync(user)
                     if is_success:
-                        messages.success(request, 'Profile sync successful') 
+                        messages.success(request, 'Profile sync successful')
                     else:
                         transaction.set_rollback(True)
                         messages.error(request, 'Failed to sync profile')
@@ -432,11 +443,11 @@ def synclist(request):
 @group_required('admin')
 def datatable(request):
     queryset = User.objects.all().exclude(is_superuser=True)
-    
+
     group_id = request.POST.get('group_id')
     if group_id and group_id != 'all':
         queryset = queryset.filter(groups__id=group_id)
-    
+
     keyword = request.POST.get('search[value]', '')
     if keyword:
         queryset = queryset.annotate(
@@ -481,7 +492,7 @@ def datatable(request):
             for data in page_obj
         ],
     }
-    
+
     return JsonResponse(data)
 
 
@@ -493,7 +504,7 @@ def api_data_employee(request):
 
     if request.POST and request.POST.get('kepeg'):
         kepeg = request.POST.get('kepeg')
-        
+
         if kepeg == 'all':
             getkaryawan = apigateway.getKaryawan()
         elif kepeg == 'dosen':

@@ -13,3 +13,15 @@ class PresensiForm(forms.ModelForm, FormErrorsMixin):
         labels  = {
             'berkas_rangkuman' : _('Berkas Rangkuman (Jika Ada)'),
         }
+
+
+class PresensiExcelForm(forms.Form, FormErrorsMixin):
+    tipe_pertemuan = forms.ModelChoiceField(
+        label=_('Tipe Pertemuan'),
+        queryset=None,
+    )
+    excel_file = forms.FileField(
+        label=_('Unggah Berkas Excel'),
+        help_text=_('Unggah berkas Excel yang berisi data presensi.'),
+        widget=forms.ClearableFileInput(attrs={'accept': '.xlsx, .xls'})
+    )
