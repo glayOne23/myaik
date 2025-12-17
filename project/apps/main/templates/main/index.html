@@ -3,42 +3,214 @@
 
 
 {% block content %}
-  <div class="page-content container container-plus">
-    <div class="page-header border-0 pb-3">
-      <h1 class="page-title text-primary-d2 text-150">
-        Dashboard
-        <small class="page-info text-secondary-d2 text-nowrap">
-          <i class="fa fa-angle-double-right text-80"></i>
-          overview &amp; stats
-        </small>
-      </h1>
+<div class="page-content container container-plus">
+	<div class="page-header border-0 pb-3">
+		<h1 class="page-title text-primary-d2 text-150">
+			Dashboard
+			<small class="page-info text-secondary-d2 text-nowrap">
+				<i class="fa fa-angle-double-right text-80"></i>
+				overview &amp; stats
+			</small>
+		</h1>
 
-    </div>
-
-
-    <!-- stat boxes -->
-    <div class="row px-2">
-      <div class="col-12 col-sm-12 col-md-12 px-2 mb-1 mb-md-0">
-
-        <div class="bcard d-flex flex-column text-center px-2 py-3 h-100 shadow mb-3">
-          <div class="mb-1">
-            <span class="d-inline-block p-3 radius-round">
-                <!-- <i class="fab fa-twitter text-success-m1 text-180 w-4"></i> -->                
-                <img src="{{ APP_LOGO }}" alt="" width="150px">
-            </span>
-          </div>
-
-          <div class="mt-1">
-            <div class="text-nowrap text-170 text-dark">Welcome to {{ APP_SHORT_NAME }}</div>      
-            <div class="text-nowrap text-120 text-grey">{{ APP_FULL_NAME }}</div>            
-          </div>
+	</div>
 
 
-        </div>
-      </div>
-    </div>
+	<!-- stat boxes -->
+	<div class="row px-2">
+		<div class="col-12 col-sm-12 col-md-12 px-2 mb-1 mb-md-0">
+
+			<div class="bcard d-flex flex-column text-center px-2 py-3 h-100 shadow mb-3">
+				<div class="mb-1">
+					<span class="d-inline-block p-3 radius-round">
+						<!-- <i class="fab fa-twitter text-success-m1 text-180 w-4"></i> -->
+						<img src="{{ APP_LOGO }}" alt="" width="150px">
+					</span>
+				</div>
+
+				<div class="mt-1">
+					<div class="text-nowrap text-170 text-dark">Welcome to {{ APP_SHORT_NAME }}</div>
+					<div class="text-nowrap text-120 text-grey">{{ APP_FULL_NAME }}</div>
+				</div>
 
 
-  </div>
+			</div>
+		</div>
+	</div>
+
+
+	<!-- =================== [Div Charts] ======================= -->
+	<div class="mt-2 mt-lg-2">
+		<div class="card bcard">
+			<div class="border-t-3 w-100 brc-primary-m1 radius-t-1"></div>
+
+			<div class="card-header brc-primary-l3">
+				<h5 class="card-title pl-1 text-120 text-primary">
+					Bagan AIK
+				</h5>
+
+				<div class="card-toolbar align-self-center">
+
+					<div class="row">
+						<div class="col-md-4">
+							<div class="input-group flex-nowrap mr-1">
+								<span class="input-group-text" id="addon-wrapping">Tahun</span>
+								<select class="select form-control select2bs4" name="tahun" id="tahun">
+									{% for tahun in data_tahun_pertemuan %}
+									<option value="{{tahun}}">{{tahun}}</option>
+									{% endfor %}
+								</select>
+							</div>
+						</div>
+						<div class="col-md-8">
+							<div class="input-group flex-nowrap mr-1">
+								<span class="input-group-text" id="addon-wrapping">Karyawan</span>
+								<select class="select form-control select2bs4" name="karyawan" id="karyawan">
+									{% for karyawan in datakaryawan %}
+									<option value="{{karyawan.id}}">{{karyawan.get_full_name}} |{{karyawan.username}}| |{{karyawan.profile.nip}}|</option>
+									{% endfor %}
+								</select>
+							</div>
+						</div>
+
+					</div>
+
+
+					<a href="#" data-action="toggle" class="card-toolbar-btn text-grey text-110">
+						<i class="fa fa-chevron-up"></i>
+					</a>
+				</div>
+			</div>
+
+			<div class="card-body p-0 border-0">
+				<!-- =================== [Charts] ======================= -->
+				<div class="row mt-3 m-1" id="charts">
+					<!-- charts akan di-generate via JS -->
+				</div>
+				<!-- =================== [End Charts] ======================= -->
+			</div>
+
+		</div>
+
+	</div>
+
+
+</div>
 {% endblock %}
 
+{% block javascript %}
+
+<script>
+	let charts = {};
+
+	tahun = $('#tahun').val();
+	karyawan = $('#karyawan').val();
+
+	$(document).ready(function () {
+		load_chart(tahun, karyawan);
+	});
+
+	$('#tahun, #karyawan').change(function () {
+		tahun = $('#tahun').val();
+		karyawan = $('#karyawan').val();
+		load_chart(tahun, karyawan);
+	});
+
+	function load_chart(tahun, karyawan) {
+		$.ajax({
+			url: "{% url 'main:user.presensi.bagan' %}",
+			type: "GET",
+			data: {
+				tahun: tahun,
+				karyawan: karyawan,
+			},
+			success: function (response) {
+				renderCharts(response);
+			},
+			error: function (xhr, status, error) {
+				console.error("AJAX Error:", error);
+			}
+		});
+	}
+
+	function renderCharts(data) {
+		// hapus chart lama
+		for (const key in charts) {
+			charts[key].destroy();
+		}
+		charts = {};
+
+		$('#charts').html('');
+
+		data.forEach(item => {
+			const chartId = `chart_${item.id}`;
+
+			$('#charts').append(`
+				<div class="col-12 col-md-6 col-lg-3 mt-1">
+					<div class="card shadow-sm h-100">
+						<div class="card-header text-center font-weight-bold">
+							${item.nama}
+						</div>
+						<div class="card-body">
+							<canvas id="${chartId}" height="220"></canvas>
+							<div class="text-center mt-2 small text-muted">
+								Presensi: <b>${item.total_presensi}</b> |
+								Total Pertemuan: <b>${item.total_pertemuan}</b>
+							</div>
+						</div>
+					</div>
+				</div>
+			`);
+
+			const ctx = document.getElementById(chartId);
+
+			charts[item.id] = new Chart(ctx, {
+				type: 'pie',
+				data: {
+					labels: ['Hadir', 'Tidak Hadir'],
+					datasets: [{
+						data: [
+							item.total_presensi,
+							Math.max(item.total_pertemuan - item.total_presensi, 0)
+						],
+						backgroundColor: [
+							'#63BDB2',
+							'#343687'
+						]
+					}]
+				},
+				options: {
+					responsive: true,
+					plugins: {
+						legend: {
+							position: 'bottom'
+						},
+						datalabels: {
+							color: '#fff',
+							font: {
+								weight: 'bold'
+							},
+							formatter: (value, ctx) => {
+								if (value === 0) return '';
+								return value;
+							}
+						},
+						tooltip: {
+							callbacks: {
+								label: function (context) {
+									const label = context.label || '';
+									const value = context.raw;
+									return `${label}: ${value}`;
+								}
+							}
+						}
+					}
+				},
+				plugins: [ChartDataLabels]
+			});
+		});
+	}
+</script>
+
+
+{% endblock javascript %}

@@ -2,4 +2,6 @@
 
 from .m_category import Category
 from .m_setting import Setting
+from .m_lembaga import Lembaga
+from .m_jabatan import Jabatan
 from .m_aik import TipePertemuan, Pertemuan, Presensi

@@ -1,12 +1,12 @@
-from django.shortcuts import render
-from django.contrib import messages
-from django.urls import reverse
-
-from apps.services.decorators import group_required, login_required
 from json import dumps
 
-
-
+from apps.main.models import Jabatan, Lembaga, Pertemuan
+from apps.services.decorators import group_required, login_required
+from django.contrib import messages
+from django.contrib.auth.models import User
+from django.shortcuts import render
+from django.urls import reverse
+from django.db.models import Q
 
 
 # =====================================================================================================
@@ -17,7 +17,7 @@ def index(request):
     context = {}
     # ===[Select CSS and JS Files]===
     context['datatables']       = False
-    context['select2']          = False
+    context['select2']          = True
     context['summernote']       = False
     context['maxlength']        = False
     context['inputmask']        = False
@@ -25,17 +25,24 @@ def index(request):
     context['moment']           = False
     context['daterange']        = False
     context['chartjs']          = False
+    context['chartjsv4']          = True
 
 
-    # Example Notification
-    # extra_tags is optional, used in the notif function located in -> (apps\main\templates\main\layout\javascript.html)
+    # data
+    user = request.user
+    datajabatan = Jabatan.objects.filter(uniid_penjabat=user.username).values_list('unit__id', flat=True)
 
-    # messages.success(request, 'Welcome to Dashboard', extra_tags=dumps({
-    #     'redirect'      : reverse('main:dashboard'), 
-    #     'confbtntxt'    : 'Check Data',
-    #     'denybtntxt'    : 'Cancel',
-    #     'title'         : 'Welcome',
-    # }))
+    context['data_tahun_pertemuan'] = Pertemuan.objects.values_list('created_at__year', flat=True).distinct().order_by('-created_at__year')
+    if user.groups.filter(name='admin').exists():
+        context['datalembaga'] = Lembaga.objects.all()
+        context['datakaryawan'] = User.objects.all().filter(profile__home_id__isnull=False)
+    elif datajabatan:
+        context['datalembaga'] = Lembaga.objects.filter(Q(id__in=datajabatan) | Q(superunit__id__in=datajabatan)).distinct()
+        datakodelembaga = context['datalembaga'].values_list('kode_lembaga', flat=True)
+        context['datakaryawan'] = User.objects.filter(Q(profile__home_id__in=datakodelembaga) | Q(username=request.user.username)).distinct()
+    else:
+        context['datalembaga'] = Lembaga.objects.filter(kode_lembaga=user.profile.home_id).distinct()
+        context['datakaryawan'] = User.objects.filter(username=request.user.username)
 
 
     # ===[Render Template]===

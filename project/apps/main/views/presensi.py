@@ -6,9 +6,11 @@ from apps.services.apigateway import apigateway
 from apps.services.utils import profilesync
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Count, Q
+from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
@@ -207,3 +209,45 @@ class UserPresensiCreateView(CustomTemplateBaseMixin, View):
 
         tipe_id = self.pertemuan.tipe_pertemuan.id
         return redirect(reverse_lazy("main:user.pertemuan.table") + f"?tipe_pertemuan={tipe_id}")
+
+
+class UserPresensiBaganView(LoginRequiredMixin, View):
+    def get(self, request):
+        tahun = request.GET.get('tahun')
+        karyawan_id = request.GET.get('karyawan')
+
+        if not tahun or not karyawan_id:
+            return JsonResponse({"error": "Tahun dan karyawan harus disediakan."}, status=400)
+
+        try:
+            data = (
+                TipePertemuan.objects
+                .annotate(
+                    total_pertemuan=Count(
+                        'pertemuan',
+                        filter=Q(pertemuan__mulai__year=tahun),
+                        distinct=True
+                    ),
+                    total_presensi=Count(
+                        'pertemuan__presensi',
+                        filter=Q(
+                            pertemuan__mulai__year=tahun,
+                            pertemuan__presensi__peserta_id=karyawan_id
+                        ),
+                        distinct=True
+                    )
+                )
+                .values(
+                    'id',
+                    'nama',
+                    'total_pertemuan',
+                    'total_presensi'
+                )
+                .order_by('nama')
+            )
+
+            response_data = list(data)
+            return JsonResponse(response_data, safe=False)
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)

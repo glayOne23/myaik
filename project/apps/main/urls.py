@@ -1,16 +1,8 @@
-from django.urls import path, include
+from apps.main.views import (account, category, dashboard, jabatan, lembaga,
+                             pertemuan, presensi, profile, services, setting,
+                             tipe_pertemuan)
 from django.contrib.auth.decorators import login_required
-from apps.main.views import (
-    services,
-    profile,
-    account,
-    dashboard,
-    category,
-    setting,
-    tipe_pertemuan,
-    pertemuan,
-    presensi
-)
+from django.urls import include, path
 
 app_name = 'main'
 
@@ -52,7 +44,6 @@ urlpatterns = [
         path('deletelist/',                         category.deletelist,        name='category_deletelist'),
     ])),
 
-
     path('setting/', include([
         # =================================================[ LOAD PAGE ]=================================================
         path('edit/',                               setting.edit,               name='setting_edit'),
@@ -61,8 +52,19 @@ urlpatterns = [
         path('deletefile/<int:id>/',                setting.deletefile,         name='setting_deletefile'),
     ])),
 
-
     path('admin/', include([
+        path('lembaga/', include([
+            # =================================================[ LOAD PAGE ]=================================================
+            path('table/', lembaga.AdminLembagaListView.as_view(), name='admin.lembaga.table'),
+            path('generate/', lembaga.AdminLembagaGenerateView.as_view(), name='admin.lembaga.generate'),
+        ])),
+
+        path('jabatan/', include([
+            # =================================================[ LOAD PAGE ]=================================================
+            path('table/', jabatan.AdminJabatanListView.as_view(), name='admin.jabatan.table'),
+            path('generate/', jabatan.AdminJabatanGenerateView.as_view(), name='admin.jabatan.generate'),
+        ])),
+
         path('tipe_pertemuan/', include([
             # =================================================[ LOAD PAGE ]=================================================
             path('table/', tipe_pertemuan.AdminTipePertemuanListView.as_view(), name='admin.tipe_pertemuan.table'),
@@ -93,6 +95,11 @@ urlpatterns = [
             path('<int:id>/presensi/add/', presensi.UserPresensiCreateView.as_view(), name='user.presensi.add'),
             # ==================================================[ SERVICE ]==================================================
             path('table_json/', pertemuan.UserPertemuanListJsonView.as_view(), name='user.pertemuan.table_json'),
+        ])),
+
+        path('presensi/', include([
+            path('bagan/', presensi.UserPresensiBaganView.as_view(), name='user.presensi.bagan'),
+            # =================================================[ LOAD PAGE ]=================================================
         ])),
     ])),
 ]

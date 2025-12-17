@@ -237,6 +237,29 @@
             </li> -->
 
 
+            <li class="nav-item {% setactive req=request url='main:admin.lembaga.table' css='active' %}">
+              <a href="{% url 'main:admin.lembaga.table' %}" class="nav-link">
+                <i class="nav-icon fas fa-building nav-icon-round bgc-purple-tp1"></i>
+                <span class="nav-text fadeable">
+                  <span>Lembaga</span>
+                </span>
+              </a>
+
+              <b class="sub-arrow"></b>
+            </li>
+
+            <li class="nav-item {% setactive req=request url='main:admin.jabatan.table' css='active' %}">
+              <a href="{% url 'main:admin.jabatan.table' %}" class="nav-link">
+                <i class="nav-icon fas fa-briefcase nav-icon-round bgc-purple-tp1"></i>
+                <span class="nav-text fadeable">
+                  <span>Jabatan</span>
+                </span>
+              </a>
+
+              <b class="sub-arrow"></b>
+            </li>
+
+
             <li class="nav-item {% setactive req=request url='main:setting_edit' css='active' %}">
               <a href="{% url 'main:setting_edit' %}" class="nav-link">
                 <i class="nav-icon fas fa-cogs nav-icon-round bgc-grey-tp1"></i>

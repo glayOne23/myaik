@@ -261,6 +261,11 @@
     <script src="{% static 'template/node_modules/chart.js/dist/Chart.js' %}"></script>
     {% endif %}
 
+    {% if chartjsv4 %}
+    <script src="{% static 'template/node_modules/chart.js-v4/chart.min.js' %}"></script>
+    <script src="{% static 'template/node_modules/chart.js-v4/chart-plugin-datalables.min.js' %}"></script>
+    {% endif %}
+
     {% if flatpickr %}
     <script src="{% static 'admin/js/flatpickr.min.js' %}"></script>
     {% endif %}
