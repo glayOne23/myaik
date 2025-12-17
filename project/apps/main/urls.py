@@ -83,7 +83,7 @@ urlpatterns = [
             path('deletelist/', pertemuan.AdminPertemuanDeleteListView.as_view(), name='admin.pertemuan.deletelist'),
         ])),
         path('presensi/', include([
-            path('excel_import/', presensi.AdminPresensiExcelImportView.as_view(), name='admin.presensi.excel_import'),
+            path('excel_import/', presensi.AdminPresensiExcelImportV2View.as_view(), name='admin.presensi.excel_import'),
             # =================================================[ LOAD PAGE ]=================================================
         ])),
     ])),
