@@ -248,18 +248,43 @@
 					orderable: false,
 					render: function (data, type, row) {
 						let presensi_url = "{% url 'main:user.presensi.add' 0 %}".replace('0', data);
-						return `
-							<div>
-								<a href="${presensi_url}" class="btn btn-outline-warning shadow-sm btn-bgc-white d-inline-flex align-items-center" title="Presensi">
-									<i class="fas fa-fingerprint mr-1"></i> Presensi
-								</a>
-								${row.ada_presensi ? '<span class="badge badge-pill badge-success">Sudah Presensi</span>' : ''}
-							</div>
-              			`;
+
+						let datahtml = `
+						<a href="${presensi_url}"
+							class="btn btn-sm btn-outline-warning shadow-sm btn-bgc-white
+									d-inline-flex align-items-center text-nowrap m-1"
+							title="Presensi">
+							<i class="fas fa-fingerprint mr-1"></i>
+							<span>Presensi</span>
+						</a>
+						`;
+
+						if (row.presensi_id && row.tipe_pertemuan__has_sertifikat && row.sertifikat) {
+						let sertifikat_url = "{% url 'main:user.presensi.sertifikat' 0 %}".replace('0', row.presensi_id);
+
+						datahtml += `
+							<a href="${sertifikat_url}"
+							target="_blank"
+							class="btn btn-sm btn-outline-primary
+									d-inline-flex align-items-center text-nowrap">
+							<i class="fa fa-eye m-1"></i>
+							<span>Sertifikat</span>
+							</a>
+						`;
+						}
+
+						return datahtml;
 					}
 				},
 				{
-					data: 'tipe_pertemuan__nama'
+					data: 'tipe_pertemuan__nama',
+					orderable: false,
+					render: function (data, type, row) {
+						return `
+							${data}
+							${row.ada_presensi ? '<span class="badge badge-pill badge-success">Sudah Presensi</span>' : ''}
+              			`;
+					}
 				},
 				{
 					data: 'judul'

@@ -18,7 +18,7 @@ from urllib.parse import urlencode
 
 
 def setsession(request, user: User) -> User:
-    request.session.set_expiry(7200)
+    # request.session.set_expiry(7200)
     request.session['user'] = {
         'username'      : user.username,
         'first_name'    : user.first_name,
@@ -82,12 +82,12 @@ def profilesync(user) -> User:
         username = user.username
     except:
         username = user
-    
+
 
     user, created   = User.objects.get_or_create(username = username)
     if created:
         print('Create a new user {}'.format(username))
-    
+
     profile         = apigateway.getProfile(username) if settings.API_GATEWAY_USERNAME and settings.API_GATEWAY_PASSWORD else None
     is_success      = False # If successful in getting data from the API
 
@@ -95,7 +95,7 @@ def profilesync(user) -> User:
     # check if he is an employee
     if profile and profile['status'] and profile['data'] :
         is_success = True
-        
+
         if type(profile['data']) == list:
             data = profile['data'][0]
         else:
@@ -125,15 +125,15 @@ def profilesync(user) -> User:
         if 'fname' in data and data['fname']:
             user.first_name             = data['fname']
 
-        if 'lname' in data and data['lname']:    
-            user.last_name              = data['lname']   
+        if 'lname' in data and data['lname']:
+            user.last_name              = data['lname']
 
         if 'nama_bergelar' in data and data['nama_bergelar']:
             first_name, last_name = split_full_name(full_name=data['nama_bergelar'], max_len=100)
             user.first_name = first_name
             user.last_name = last_name
 
-        if username:        
+        if username:
             user.email              = '{}@ums.ac.id'.format(str(username).lower())
 
 
@@ -157,7 +157,7 @@ def profilesync(user) -> User:
                 is_success = True
             else:
                 getmhs = False
-        
+
 
         # If successful in getting student data from the API
         if getmhs:
@@ -184,8 +184,8 @@ def send_otp_by_email(request, user: User, viewname):
     otp_params  = { 'email': user.email, 'otp': user.profile.otp }
     otp_url     += '?' + urlencode(otp_params)
 
-    data = {                
-        'name'                      : user.get_full_name() if user.get_full_name() else user.username,    
+    data = {
+        'name'                      : user.get_full_name() if user.get_full_name() else user.username,
         'url'                       : otp_url,
         'staticurl'                 : staticurl,
         'APP_SHORT_NAME'            : settings.APP_SHORT_NAME,
@@ -196,11 +196,11 @@ def send_otp_by_email(request, user: User, viewname):
     message = render_to_string('authentication/verify_email.html', data)
 
     return send_mail(
-        subject         = 'Your email needs to be verified', 
-        message         = message, 
-        from_email      = settings.EMAIL_HOST_USER, 
-        recipient_list  = [user.email], 
-        fail_silently   = False, 
+        subject         = 'Your email needs to be verified',
+        message         = message,
+        from_email      = settings.EMAIL_HOST_USER,
+        recipient_list  = [user.email],
+        fail_silently   = False,
         html_message    = message
     )
 
@@ -225,7 +225,7 @@ def username_in_cas(username:str) -> bool:
                 return True
             else:
                 return False
-            
+
         else:
             getuser = apistar.getMhsProfileWithoutAuth(username)
             if getuser and getuser['success'] and str(getuser['success']).lower() != 'false':

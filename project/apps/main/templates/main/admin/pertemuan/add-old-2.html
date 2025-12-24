@@ -125,105 +125,71 @@
 					<li class="nav-item">
 						<a class="nav-link">
 							<div class="row m-1">
-								<div class="col-1">
+								<div class="col-2">
 									<div class="form-check">
 										<input class="form-check-input" type="checkbox" id="nip1" name="nip1">
 									</div>
 								</div>
-								<div class="col-5">
+								<div class="col-6">
 									<span class="nav-text fadeable text-85 align-middle">NIP Surat</span>
 								</div>
-								<div class="col-3">
-									<select class="form-control" id="nip1_align">
-										<option value="left">Left</option>
-										<option value="center">Center</option>
-										<option value="right">Right</option>
-									  </select>
-								</div>
-								<div class="col-3">
-									<input type="number" class="form form-control" id="nip1_size" name="nip1_size" placeholder="px">
+								<div class="col-4">
+									<input type="number" class="form form-control" id="nip1_size" name="nip1_size"
+										placeholder="px">
 								</div>
 							</div>
 							<div class="row m-1">
-								<div class="col-1">
+								<div class="col-2">
 									<div class="form-check">
 										<input class="form-check-input" type="checkbox" id="nama1" name="nama1">
 									</div>
 								</div>
-								<div class="col-5">
+								<div class="col-6">
 									<span class="nav-text fadeable text-85 align-middle">Nama Lengkap di Surat</span>
 								</div>
-								<div class="col-3">
-									<select class="form-control" id="nama1_align">
-										<option value="left">Left</option>
-										<option value="center">Center</option>
-										<option value="right">Right</option>
-									  </select>
-								</div>
-								<div class="col-3">
+								<div class="col-4">
 									<input type="number" class="form form-control" id="nama1_size" name="nama1_size"
 										placeholder="px">
 								</div>
 							</div>
 							<div class="row m-1">
-								<div class="col-1">
+								<div class="col-2">
 									<div class="form-check">
 										<input class="form-check-input" type="checkbox" id="homebase" name="homebase">
 									</div>
 								</div>
-								<div class="col-5">
+								<div class="col-6">
 									<span class="nav-text fadeable text-85 align-middle">Unit Kerja</span>
 								</div>
-								<div class="col-3">
-									<select class="form-control" id="homebase_align">
-										<option value="left">Left</option>
-										<option value="center">Center</option>
-										<option value="right">Right</option>
-									  </select>
-								</div>
-								<div class="col-3">
+								<div class="col-4">
 									<input type="number" class="form form-control" id="homebase_size"
 										name="homebase_size" placeholder="px">
 								</div>
 							</div>
 							<div class="row m-1">
-								<div class="col-1">
+								<div class="col-2">
 									<div class="form-check">
 										<input class="form-check-input" type="checkbox" id="nip2" name="nip2">
 									</div>
 								</div>
-								<div class="col-5">
+								<div class="col-6">
 									<span class="nav-text fadeable text-85 align-middle">NIP Sertifikat</span>
 								</div>
-								<div class="col-3">
-									<select class="form-control" id="nip2_align">
-										<option value="left">Left</option>
-										<option value="center">Center</option>
-										<option value="right">Right</option>
-									  </select>
-								</div>
-								<div class="col-3">
+								<div class="col-4">
 									<input type="number" class="form form-control" id="nip2_size" name="nip2_size"
 										placeholder="px">
 								</div>
 							</div>
 							<div class="row m-1">
-								<div class="col-1">
+								<div class="col-2">
 									<div class="form-check">
 										<input class="form-check-input" type="checkbox" id="nama2" name="nama2">
 									</div>
 								</div>
-								<div class="col-5">
+								<div class="col-6">
 									<span class="nav-text fadeable text-85 align-middle">Nama Lengkap di Sertifikat</span>
 								</div>
-								<div class="col-3">
-									<select class="form-control" id="nama2_align">
-										<option value="left">Left</option>
-										<option value="center">Center</option>
-										<option value="right">Right</option>
-									  </select>
-								</div>
-								<div class="col-3">
+								<div class="col-4">
 									<input type="number" class="form form-control" id="nama2_size" name="nama2_size"
 										placeholder="px">
 								</div>
@@ -273,11 +239,11 @@
 	   FIELD CONFIG
 	===================================================== */
 	const FIELDS = {
-	  nip1: { checkbox: "nip1", size: "nip1_size", label: "NIP Surat", align: "nip1_align" },
-	  nama1: { checkbox: "nama1", size: "nama1_size", label: "Nama Lengkap di Surat", align: "nama1_align" },
-	  homebase: { checkbox: "homebase", size: "homebase_size", label: "Unit Kerja", align: "homebase_align" },
-	  nip2: { checkbox: "nip2", size: "nip2_size", label: "NIP Sertifikat", align: "nip2_align" },
-	  nama2: { checkbox: "nama2", size: "nama2_size", label: "Nama Lengkap di Sertifikat", align: "nama2_align" },
+	  nip1: { checkbox: "nip1", size: "nip1_size", label: "NIP Surat" },
+	  nama1: { checkbox: "nama1", size: "nama1_size", label: "Nama Lengkap di Surat" },
+	  homebase: { checkbox: "homebase", size: "homebase_size", label: "Unit Kerja" },
+	  nip2: { checkbox: "nip2", size: "nip2_size", label: "NIP Sertifikat" },
+	  nama2: { checkbox: "nama2", size: "nama2_size", label: "Nama Lengkap di Sertifikat" }
 	};
 
 	/* =====================================================
@@ -287,12 +253,12 @@
 	const fileInput = document.getElementById("id_sertifikat");
 	const previewBtn = document.getElementById("previewSertifikat");
 	const form = document.querySelector("form");
-	const hiddenPos = document.getElementById("id_sertifikat_position");
 	const existingUrl = fileInput?.dataset.existingUrl;
 
 	/* =====================================================
-	   LOAD SAVED POSITION (UPDATE MODE)
+	   INIT FROM UPDATE (LOAD POSITION)
 	===================================================== */
+	const hiddenPos = document.getElementById("id_sertifikat_position");
 	if (hiddenPos?.value) {
 	  try {
 		fieldState = JSON.parse(hiddenPos.value);
@@ -302,21 +268,17 @@
 	}
 
 	/* =====================================================
-	   ALIGN HELPER (IMPORTANT)
+	   RESET UI
 	===================================================== */
-	function applyAlignment(el, align) {
-	  el.style.transform = "none";
-	  el.style.textAlign = align;
-
-	  if (align === "center") {
-		el.style.transform = "translateX(-50%)";
-	  } else if (align === "right") {
-		el.style.transform = "translateX(-100%)";
-	  }
+	function resetFieldUI() {
+	  Object.values(FIELDS).forEach(f => {
+		document.getElementById(f.checkbox).checked = false;
+		document.getElementById(f.size).value = "";
+	  });
 	}
 
 	/* =====================================================
-	   LOAD PDF FROM URL (UPDATE)
+	   LOAD PDF FROM URL (UPDATE MODE)
 	===================================================== */
 	async function loadPdfFromUrl(url) {
 	  const res = await fetch(url);
@@ -329,19 +291,20 @@
 	   FILE UPLOAD
 	===================================================== */
 	fileInput?.addEventListener("change", function () {
-	  if (!this.files[0]) return;
+	  const file = this.files[0];
+	  if (!file) return;
 
-	  cachedPdfFile = this.files[0];
+	  cachedPdfFile = file;
 	  fieldState = {};
+	  resetFieldUI();
 
-	  renderPdf(cachedPdfFile);
+	  renderPdf(file);
 	  $('#sertifikatModal').modal('show');
-
 	  this.value = "";
 	});
 
 	/* =====================================================
-	   PREVIEW BUTTON
+	   PREVIEW BUTTON (CREATE + UPDATE)
 	===================================================== */
 	previewBtn?.addEventListener("click", async () => {
 	  if (cachedPdfFile) {
@@ -349,9 +312,10 @@
 	  } else if (existingUrl) {
 		await loadPdfFromUrl(existingUrl);
 	  } else {
-		alert("File sertifikat belum tersedia");
+		alert("File sertifikat belum tersedia.");
 		return;
 	  }
+
 	  $('#sertifikatModal').modal('show');
 	});
 
@@ -384,6 +348,7 @@
 	  const canvas = document.createElement("canvas");
 	  canvas.width = viewport.width;
 	  canvas.height = viewport.height;
+	//   canvas.style.width = "100%";
 
 	  wrapper.appendChild(canvas);
 	  pdfContainer.appendChild(wrapper);
@@ -407,7 +372,7 @@
 	  if (!page) return;
 
 	  page.classList.add("active-page");
-	  syncUI(pageNum);
+	  syncCheckboxUI(pageNum);
 	  renderFields(pageNum);
 	}
 
@@ -431,12 +396,11 @@
 	/* =====================================================
 	   SYNC UI
 	===================================================== */
-	function syncUI(pageNum) {
+	function syncCheckboxUI(pageNum) {
 	  Object.keys(FIELDS).forEach(key => {
-		const data = fieldState[pageNum]?.[key];
-		document.getElementById(FIELDS[key].checkbox).checked = !!data;
-		document.getElementById(FIELDS[key].size).value = data?.size || "";
-		document.getElementById(FIELDS[key].align).value = data?.align || "left";
+		const exists = fieldState[pageNum]?.[key];
+		document.getElementById(FIELDS[key].checkbox).checked = !!exists;
+		document.getElementById(FIELDS[key].size).value = exists ? exists.size : "";
 	  });
 	}
 
@@ -452,25 +416,20 @@
 
 	  Object.keys(fieldState[pageNum]).forEach(key => {
 		const d = fieldState[pageNum][key];
-
 		const el = document.createElement("div");
 		el.className = "pdf-overlay-text";
 		el.dataset.field = key;
 		el.textContent = FIELDS[key].label;
-
 		el.style.left = d.x + "px";
 		el.style.top = d.y + "px";
 		el.style.fontSize = d.size + "px";
-
-		applyAlignment(el, d.align || "left");
 		makeDraggable(el, pageNum, key);
-
 		page.appendChild(el);
 	  });
 	}
 
 	/* =====================================================
-	   DRAG HANDLER
+	   DRAG
 	===================================================== */
 	function makeDraggable(el, pageNum, key) {
 	  el.onmousedown = e => {
@@ -496,24 +455,18 @@
 	}
 
 	/* =====================================================
-	   UI CONTROLS
+	   CHECKBOX + SIZE
 	===================================================== */
 	Object.keys(FIELDS).forEach(key => {
 	  const cb = document.getElementById(FIELDS[key].checkbox);
 	  const size = document.getElementById(FIELDS[key].size);
-	  const align = document.getElementById(FIELDS[key].align);
 
 	  cb.onchange = () => {
 		if (!currentPage) return;
 		fieldState[currentPage] ??= {};
 
 		if (cb.checked) {
-		  fieldState[currentPage][key] = {
-			x: 40,
-			y: 40,
-			size: parseInt(size.value) || 12,
-			align: align.value || "left"
-		  };
+		  fieldState[currentPage][key] = { x: 40, y: 40, size: parseInt(size.value) || 14 };
 		} else {
 		  delete fieldState[currentPage][key];
 		}
@@ -522,19 +475,14 @@
 
 	  size.oninput = () => {
 		if (!fieldState[currentPage]?.[key]) return;
-		fieldState[currentPage][key].size = parseInt(size.value) || 12;
-		renderFields(currentPage);
-	  };
-
-	  align.onchange = () => {
-		if (!fieldState[currentPage]?.[key]) return;
-		fieldState[currentPage][key].align = align.value;
-		renderFields(currentPage);
+		fieldState[currentPage][key].size = parseInt(size.value) || 14;
+		const el = document.querySelector(`.pdf-overlay-text[data-field="${key}"]`);
+		if (el) el.style.fontSize = fieldState[currentPage][key].size + "px";
 	  };
 	});
 
 	/* =====================================================
-	   SAVE POSITION
+	   SAVE
 	===================================================== */
 	document.getElementById("savesertifikat").onclick = () => {
 	  hiddenPos.value = JSON.stringify(fieldState);
@@ -542,7 +490,7 @@
 	};
 
 	/* =====================================================
-	   FORM SUBMIT (RE-INJECT FILE)
+	   SUBMIT (RE-INJECT FILE)
 	===================================================== */
 	form.onsubmit = () => {
 	  if (!cachedPdfFile) return;
@@ -551,7 +499,6 @@
 	  fileInput.files = dt.files;
 	};
 </script>
-
 
 
 {% endblock javascript %}

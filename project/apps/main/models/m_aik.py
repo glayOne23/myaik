@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 class TipePertemuan(models.Model):
     nama            = models.CharField(max_length=50)
     deskripsi       = models.TextField(blank=True, null=True)
+    has_sertifikat = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -26,6 +27,8 @@ class Pertemuan(models.Model):
     presensi_akhir  = models.DateTimeField(null=True, blank=True)
     tautan          = models.URLField(max_length=200, blank=True, null=True)
     materi          = models.FileField(null=True, blank=True, upload_to='materi/')
+    sertifikat = models.FileField(null=True, blank=True, upload_to='sertifikat/')
+    sertifikat_position = models.JSONField(blank=True, null=True)
     created_at      = models.DateTimeField(auto_now_add=True)
     updated_at      = models.DateTimeField(auto_now=True)
 

@@ -1,12 +1,13 @@
 from apps.main.forms.pertemuan import PertemuanForm
 from apps.main.forms.presensi import PresensiExcelForm
-from apps.main.models import Pertemuan, TipePertemuan
+from apps.main.models import Pertemuan, TipePertemuan, Presensi
 from apps.main.views.base import AdminRequiredMixin, CustomTemplateBaseMixin
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import AccessMixin, LoginRequiredMixin
 from django.db import transaction
-from django.db.models import CharField, Count, F, Q, Value, Exists
+from django.db.models import (CharField, Count, Exists, F, OuterRef, Q,
+                              Subquery, Value, IntegerField)
 from django.db.models.functions import Concat
 from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -127,11 +128,18 @@ class UserPertemuanListJsonView(LoginRequiredMixin, View):
         if tahun_pertemuan := request.POST.get('tahun_pertemuan'):
             queryset = queryset.filter(created_at__year=tahun_pertemuan)
 
+        # 🔑 SUBQUERY FOR PRESENSI ID
+        presensi_subquery = Presensi.objects.filter(
+            pertemuan=OuterRef('pk'),
+            peserta=request.user
+        ).values('id')[:1]
+
         queryset = queryset.annotate(
             ada_presensi=Count(
                 'presensi',
                 filter=Q(presensi__peserta=request.user)
             ),
+            presensi_id=Subquery(presensi_subquery, output_field=IntegerField()),
             materi_url=Concat(
                 Value(settings.MEDIA_URL),
                 F('materi'),
@@ -145,6 +153,7 @@ class UserPertemuanListJsonView(LoginRequiredMixin, View):
             'id',
             'tipe_pertemuan__id',
             'tipe_pertemuan__nama',
+            'tipe_pertemuan__has_sertifikat',
             'judul',
             'deskripsi',
             'pembicara',
@@ -156,6 +165,8 @@ class UserPertemuanListJsonView(LoginRequiredMixin, View):
             'materi',
             'materi_url',
             'ada_presensi',
+            'presensi_id',
+            'sertifikat',
             'created_at',
             'updated_at'
         )

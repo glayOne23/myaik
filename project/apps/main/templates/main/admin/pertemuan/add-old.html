@@ -1,0 +1,504 @@
+{% extends 'main/layout/base.html' %}
+{% load main_tags %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block head %}
+
+
+<style>
+	.pdf-page {
+		border: 2px solid transparent;
+		position: relative;
+		transition: border-color 0.2s ease, box-shadow 0.2s ease;
+	}
+
+	.pdf-page.active-page {
+		border-color: #F5C139;
+		box-shadow: 0 0 0 2px rgba(245,193,57,0.5);
+	}
+
+	.pdf-overlay-text {
+		position: absolute;
+		color: #000;
+		font-weight: bold;
+		white-space: nowrap;
+		user-select: none;
+		cursor: move;
+		background: rgba(255,255,255,0.4);
+		padding: 2px 4px;
+		border-radius: 4px;
+	}
+</style>
+
+
+{% endblock head %}
+
+
+{% block content %}
+<div class="page-content container container-plus">
+	<div class="page-header border-0 pb-3">
+		<h1 class="page-title text-primary-d2 text-150">
+			Admin
+			<small class="page-info text-secondary-d2 text-nowrap">
+				<i class="fa fa-angle-double-right text-80"></i>
+				AIK
+			</small>
+		</h1>
+
+		<div class="page-tools mt-3 mt-sm-0 mb-sm-n1">
+			<!-- dataTables search box will be inserted here dynamically -->
+		</div>
+	</div>
+
+
+	<div class="row">
+		<div class="col-12 col-sm-12 mt-3 mt-sm-0 cards-container">
+			<div class="card dcard overflow-hidden">
+				<div class="border-t-3 w-100 brc-primary-m1 radius-t-1"></div>
+				<div class="card-header">
+					<h5 class="card-title text-110 text-primary-d2 pt-1">
+						Form
+					</h5>
+
+					<div class="card-toolbar no-border">
+						<a href="#" data-action="expand"
+							class="card-toolbar-btn btn btn-sm radius-1 btn-outline-success mx-2px d-style">
+							<i class="fa fa-expand d-n-active"></i>
+							<i class="fa fa-compress d-active"></i>
+						</a>
+
+						<a href="#" data-action="toggle"
+							class="card-toolbar-btn btn btn-sm radius-1 btn-outline-default mx-2px">
+							<i class="fa fa-chevron-up w-2 mx-1px"></i>
+						</a>
+					</div>
+				</div><!-- /.card-header -->
+
+				<form method="post" class="mt-lg-3" autocomplete="off" enctype="multipart/form-data">
+					{% csrf_token %}
+					<div class="card-body bg-white">
+						{{ form|crispy }}
+					</div><!-- /.card-body -->
+
+					<div class="mx-n25 py-3 brc-dark-l3 d-flex border-t-1 bgc-secondary-l5 px-3">
+						<div class="offset-md-3 col-md-9 text-nowrap">
+							<button class="btn btn-warning btn-bold px-4" type="button"
+								onclick="window.history.back();"><i class="fas fa-angle-left mr-1"></i> Cancel</button>
+
+							<button class="btn btn-info btn-bold px-4" type="submit">
+								<i class="fa fa-check mr-1"></i>
+								Submit
+							</button>
+
+							<button class="btn btn-lightgrey btn-bold px-4" type="reset"><i
+									class="fa fa-undo mr-1"></i>Reset</button>
+						</div>
+					</div><!-- /.card-footer -->
+				</form>
+
+			</div><!-- /.card -->
+		</div><!-- /.col -->
+	</div>
+
+</div>
+
+
+<!-- ==================== [Modal File Fix dengan QR] ==================== -->
+<div class="modal fade" id="sertifikatModal" tabindex="-1" aria-hidden="true" data-backdrop="static"
+	data-keyboard="false">
+	<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">
+					Posisikan Isi Sertifikat
+				</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="row">
+				<div class="col-lg-3 col-12 bg-light">
+					<li class="nav-item">
+						<a class="nav-link">
+							<div class="row m-1">
+								<div class="col-2">
+									<div class="form-check">
+										<input class="form-check-input" type="checkbox" id="nip1" name="nip1">
+									</div>
+								</div>
+								<div class="col-6">
+									<span class="nav-text fadeable text-85 align-middle">NIP Surat</span>
+								</div>
+								<div class="col-4">
+									<input type="number" class="form form-control" id="nip1_size" name="nip1_size"
+										placeholder="px">
+								</div>
+							</div>
+							<div class="row m-1">
+								<div class="col-2">
+									<div class="form-check">
+										<input class="form-check-input" type="checkbox" id="nama1" name="nama1">
+									</div>
+								</div>
+								<div class="col-6">
+									<span class="nav-text fadeable text-85 align-middle">Nama Lengkap di Surat</span>
+								</div>
+								<div class="col-4">
+									<input type="number" class="form form-control" id="nama1_size" name="nama1_size"
+										placeholder="px">
+								</div>
+							</div>
+							<div class="row m-1">
+								<div class="col-2">
+									<div class="form-check">
+										<input class="form-check-input" type="checkbox" id="homebase" name="homebase">
+									</div>
+								</div>
+								<div class="col-6">
+									<span class="nav-text fadeable text-85 align-middle">Unit Kerja</span>
+								</div>
+								<div class="col-4">
+									<input type="number" class="form form-control" id="homebase_size"
+										name="homebase_size" placeholder="px">
+								</div>
+							</div>
+							<div class="row m-1">
+								<div class="col-2">
+									<div class="form-check">
+										<input class="form-check-input" type="checkbox" id="nip2" name="nip2">
+									</div>
+								</div>
+								<div class="col-6">
+									<span class="nav-text fadeable text-85 align-middle">NIP Sertifikat</span>
+								</div>
+								<div class="col-4">
+									<input type="number" class="form form-control" id="nip2_size" name="nip2_size"
+										placeholder="px">
+								</div>
+							</div>
+							<div class="row m-1">
+								<div class="col-2">
+									<div class="form-check">
+										<input class="form-check-input" type="checkbox" id="nama2" name="nama2">
+									</div>
+								</div>
+								<div class="col-6">
+									<span class="nav-text fadeable text-85 align-middle">Nama Lengkap di Sertifikat</span>
+								</div>
+								<div class="col-4">
+									<input type="number" class="form form-control" id="nama2_size" name="nama2_size"
+										placeholder="px">
+								</div>
+							</div>
+						</a>
+					</li>
+				</div>
+				<div class="col-lg-9 col-12 bg-secondary">
+					<div class="modal-body d-flex flex-column align-items-center" id="pdf-container"
+						style="max-height: 75vh; overflow-y: auto;">
+						<!-- Canvases will be injected here -->
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+				<button id="savesertifikat" type="button" class="btn btn-primary">Simpan Posisi</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+{% endblock %}
+
+
+{% block javascript %}
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+
+<script>
+/* =====================================================
+   PDF.JS CONFIG
+===================================================== */
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+/* =====================================================
+   GLOBAL STATE
+===================================================== */
+let pdfDoc = null;
+let currentPage = null;
+let observer = null;
+let cachedPdfFile = null;
+
+/*
+fieldState = {
+  1: { nip1: {x,y,size}, nama1:{x,y,size} },
+  2: { nip2: {x,y,size} }
+}
+*/
+let fieldState = {};
+
+/* =====================================================
+   FIELD CONFIG
+===================================================== */
+const FIELDS = {
+  nip1: { checkbox: "nip1", size: "nip1_size", label: "NIP Surat" },
+  nama1: { checkbox: "nama1", size: "nama1_size", label: "Nama Lengkap di Surat" },
+  homebase: { checkbox: "homebase", size: "homebase_size", label: "Unit Kerja" },
+  nip2: { checkbox: "nip2", size: "nip2_size", label: "NIP Sertifikat" },
+  nama2: { checkbox: "nama2", size: "nama2_size", label: "Nama Lengkap di Sertifikat" }
+};
+
+/* =====================================================
+   DOM
+===================================================== */
+const pdfContainer = document.getElementById("pdf-container");
+const fileInput = document.getElementById("id_sertifikat");
+const form = document.querySelector("form");
+
+/* =====================================================
+   RESET UI (CRITICAL FIX)
+===================================================== */
+function resetFieldUI() {
+  Object.keys(FIELDS).forEach(key => {
+    const cb = document.getElementById(FIELDS[key].checkbox);
+    const size = document.getElementById(FIELDS[key].size);
+    if (cb) cb.checked = false;
+    if (size) size.value = "";
+  });
+}
+
+/* =====================================================
+   FILE INPUT (SAME FILE FIX)
+===================================================== */
+fileInput?.addEventListener("change", function () {
+  const file = this.files[0];
+  if (!file || file.type !== "application/pdf") return;
+
+  cachedPdfFile = file;
+  fieldState = {};
+  resetFieldUI();
+
+  renderPdf(file);
+  $('#sertifikatModal').modal('show');
+
+  // allow re-upload same file
+  this.value = "";
+});
+
+/* =====================================================
+   RENDER PDF
+===================================================== */
+async function renderPdf(file) {
+  const loadingTask = pdfjsLib.getDocument(URL.createObjectURL(file));
+  pdfDoc = await loadingTask.promise;
+
+  pdfContainer.innerHTML = "";
+  currentPage = null;
+
+  for (let i = 1; i <= pdfDoc.numPages; i++) {
+    await renderPage(i);
+  }
+
+  initScrollSpy();
+  setActivePage(1);
+}
+
+async function renderPage(pageNum) {
+  const page = await pdfDoc.getPage(pageNum);
+  const viewport = page.getViewport({ scale: 1.2 });
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "pdf-page my-2 position-relative";
+  wrapper.dataset.page = pageNum;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+  canvas.style.width = "100%";
+
+  wrapper.appendChild(canvas);
+  pdfContainer.appendChild(wrapper);
+
+  await page.render({
+    canvasContext: canvas.getContext("2d"),
+    viewport
+  }).promise;
+}
+
+/* =====================================================
+   ACTIVE PAGE
+===================================================== */
+function setActivePage(pageNum) {
+  currentPage = pageNum;
+
+  document.querySelectorAll(".pdf-page").forEach(p =>
+    p.classList.remove("active-page")
+  );
+
+  const page = document.querySelector(`.pdf-page[data-page="${pageNum}"]`);
+  if (!page) return;
+
+  page.classList.add("active-page");
+  syncCheckboxUI(pageNum);
+  renderFields(pageNum);
+}
+
+/* =====================================================
+   SCROLL SPY
+===================================================== */
+function initScrollSpy() {
+  observer?.disconnect();
+
+  observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        setActivePage(parseInt(e.target.dataset.page));
+      }
+    });
+  }, { root: pdfContainer, threshold: 0.6 });
+
+  document.querySelectorAll(".pdf-page").forEach(p =>
+    observer.observe(p)
+  );
+}
+
+/* =====================================================
+   SYNC CHECKBOX WITH PAGE
+===================================================== */
+function syncCheckboxUI(pageNum) {
+  Object.keys(FIELDS).forEach(key => {
+    const cb = document.getElementById(FIELDS[key].checkbox);
+    const size = document.getElementById(FIELDS[key].size);
+
+    const exists = fieldState[pageNum]?.[key];
+    if (cb) cb.checked = !!exists;
+    if (size && exists) size.value = exists.size;
+    if (size && !exists) size.value = "";
+  });
+}
+
+/* =====================================================
+   RENDER FIELDS
+===================================================== */
+function renderFields(pageNum) {
+  const page = document.querySelector(`.pdf-page[data-page="${pageNum}"]`);
+  if (!page) return;
+
+  page.querySelectorAll(".pdf-overlay-text").forEach(e => e.remove());
+  if (!fieldState[pageNum]) return;
+
+  for (const key in fieldState[pageNum]) {
+    createOverlay(page, pageNum, key, fieldState[pageNum][key]);
+  }
+}
+
+function createOverlay(page, pageNum, key, data) {
+  const el = document.createElement("div");
+  el.className = "pdf-overlay-text";
+  el.dataset.field = key;
+  el.textContent = FIELDS[key].label;
+
+  el.style.left = data.x + "px";
+  el.style.top = data.y + "px";
+  el.style.fontSize = data.size + "px";
+
+  makeDraggable(el, pageNum, key);
+  page.appendChild(el);
+}
+
+/* =====================================================
+   DRAGGING
+===================================================== */
+function makeDraggable(el, pageNum, key) {
+  let offsetX, offsetY;
+
+  el.onmousedown = e => {
+    offsetX = e.offsetX;
+    offsetY = e.offsetY;
+
+    document.onmousemove = ev => {
+      const rect = el.parentElement.getBoundingClientRect();
+      const x = ev.clientX - rect.left - offsetX;
+      const y = ev.clientY - rect.top - offsetY;
+
+      el.style.left = x + "px";
+      el.style.top = y + "px";
+
+      fieldState[pageNum][key].x = x;
+      fieldState[pageNum][key].y = y;
+    };
+
+    document.onmouseup = () => {
+      document.onmousemove = null;
+      document.onmouseup = null;
+    };
+  };
+}
+
+/* =====================================================
+   CHECKBOX HANDLER
+===================================================== */
+Object.keys(FIELDS).forEach(key => {
+  const cb = document.getElementById(FIELDS[key].checkbox);
+  const sizeInput = document.getElementById(FIELDS[key].size);
+
+  cb?.addEventListener("change", () => {
+    if (!currentPage) return;
+
+    fieldState[currentPage] ??= {};
+
+    if (cb.checked) {
+      fieldState[currentPage][key] = {
+        x: 40,
+        y: 40,
+        size: parseInt(sizeInput.value) || 14
+      };
+    } else {
+      delete fieldState[currentPage][key];
+    }
+
+    renderFields(currentPage);
+  });
+
+  sizeInput?.addEventListener("input", () => {
+    if (!currentPage) return;
+    if (!fieldState[currentPage]?.[key]) return;
+
+    const size = parseInt(sizeInput.value) || 14;
+    fieldState[currentPage][key].size = size;
+
+    const el = document.querySelector(
+      `.pdf-page.active-page .pdf-overlay-text[data-field="${key}"]`
+    );
+    if (el) el.style.fontSize = size + "px";
+  });
+});
+
+/* =====================================================
+   SAVE BUTTON
+===================================================== */
+document.getElementById("savesertifikat")?.addEventListener("click", () => {
+  const hidden = document.getElementById("id_sertifikat_position");
+  if (hidden) hidden.value = JSON.stringify(fieldState);
+  $('#sertifikatModal').modal('hide');
+});
+
+/* =====================================================
+   FORM SUBMIT (RE-INJECT FILE)
+===================================================== */
+form?.addEventListener("submit", () => {
+  if (!cachedPdfFile) return;
+
+  const dt = new DataTransfer();
+  dt.items.add(cachedPdfFile);
+  fileInput.files = dt.files;
+});
+</script>
+
+
+{% endblock javascript %}

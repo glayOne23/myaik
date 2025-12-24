@@ -111,7 +111,11 @@
 
                   <td class="align-middle">
                     <div class="d-flex">
-                      -
+                      {% if data.pertemuan.tipe_pertemuan.has_sertifikat and data.pertemuan.sertifikat %}
+                        <a class="btn btn-sm btn-outline-primary" target="_blank" href="{% url 'main:user.presensi.sertifikat' data.id %}"><i class="fa fa-eye"></i>  Lihat Sertifikat</a>
+                      {% else %}
+                        -
+                      {% endif %}
                     </div>
 
                   </td>

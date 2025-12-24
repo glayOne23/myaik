@@ -1,15 +1,16 @@
 import openpyxl
 from apps.main.forms.presensi import PresensiExcelForm, PresensiForm
 from apps.main.models import Pertemuan, Presensi, TipePertemuan
-from apps.main.views.base import AdminRequiredMixin, CustomTemplateBaseMixin
-from apps.services.apigateway import apigateway
+from apps.main.views.base import (AdminRequiredMixin, CustomTemplateBaseMixin,
+                                  in_grup)
+from apps.services.stream_pdf import stream_sertifikat_pdf
 from apps.services.utils import profilesync
-from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import AccessMixin, LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.db.models import Count, Q
+from django.http import HttpResponse, HttpResponseForbidden
 from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
@@ -18,6 +19,17 @@ from django.utils.safestring import mark_safe
 from django.views import View
 from django.views.generic import (CreateView, DeleteView, FormView, ListView,
                                   TemplateView, UpdateView)
+
+
+# =====================================================================================================
+#                                              MIXINS
+# =====================================================================================================
+class AdminorUserPresensiRequiredMixin(AccessMixin):
+    def dispatch(self, request, *args, **kwargs):
+        presensi_obj = get_object_or_404(Presensi, id=kwargs.get("presensi_id"))
+        if in_grup(request.user, 'admin') or presensi_obj.peserta == request.user:
+            return super().dispatch(request, *args, **kwargs)
+        return HttpResponseForbidden("Anda tidak memiliki hak akses.")
 
 
 # =====================================================================================================
@@ -365,3 +377,32 @@ class UserPresensiBaganView(LoginRequiredMixin, View):
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
+
+
+class UserPresensiSertifikatView(AdminorUserPresensiRequiredMixin, CustomTemplateBaseMixin, View):
+    def get(self, request, *args, **kwargs):
+        presensi_obj = get_object_or_404(Presensi, id=kwargs.get("presensi_id"))
+
+        context_data = {
+            "nip1": presensi_obj.peserta.profile.nip,
+            "nama1": presensi_obj.peserta.get_full_name(),
+            "homebase": presensi_obj.peserta.profile.homebase,
+            "nip2": presensi_obj.peserta.profile.nip,
+            "nama2": presensi_obj.peserta.get_full_name(),
+        }
+
+        pdf_stream = stream_sertifikat_pdf(
+            template_path=presensi_obj.pertemuan.sertifikat.path,
+            position_data=presensi_obj.pertemuan.sertifikat_position,
+            context_data=context_data,
+        )
+
+        response = HttpResponse(
+            pdf_stream.getvalue(),
+            content_type="application/pdf"
+        )
+
+        # 🔑 inline = preview, attachment = download
+        response["Content-Disposition"] = 'inline; filename="sertifikat-preview.pdf"'
+
+        return response

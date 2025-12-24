@@ -99,6 +99,7 @@ urlpatterns = [
 
         path('presensi/', include([
             path('bagan/', presensi.UserPresensiBaganView.as_view(), name='user.presensi.bagan'),
+            path('<int:presensi_id>/sertifikat/', presensi.UserPresensiSertifikatView.as_view(), name='user.presensi.sertifikat'),
             # =================================================[ LOAD PAGE ]=================================================
         ])),
     ])),
