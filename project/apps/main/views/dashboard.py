@@ -32,7 +32,7 @@ def index(request):
     user = request.user
     datajabatan = Jabatan.objects.filter(uniid_penjabat=user.username).values_list('unit__id', flat=True)
 
-    context['data_tahun_pertemuan'] = Pertemuan.objects.values_list('created_at__year', flat=True).distinct().order_by('-created_at__year')
+    context['data_tahun_pertemuan'] = Pertemuan.objects.values_list('mulai__year', flat=True).distinct().order_by('-mulai__year')
     if user.groups.filter(name='admin').exists():
         context['datalembaga'] = Lembaga.objects.all()
         context['datakaryawan'] = User.objects.all().filter(profile__home_id__isnull=False)

@@ -100,6 +100,9 @@ class AdminPertemuanExcelImportView(AdminRequiredMixin, View):
             messages.error(request, f"Gagal membaca file Excel: {e}")
             return redirect('main:admin.pertemuan.table')
 
+        def col_is_valid(val):
+            return val not in (None, '', 0)
+
         try:
             with transaction.atomic():
                 for sheet in workbook.worksheets:
@@ -107,7 +110,7 @@ class AdminPertemuanExcelImportView(AdminRequiredMixin, View):
                     if sheet.max_row < 2:
                         continue
 
-                    for idx, row in enumerate(sheet.iter_rows(min_row=2, values_only=True), start=3):
+                    for idx, row in enumerate(sheet.iter_rows(min_row=4, values_only=True), start=3):
                         if not any(row):
                             continue
 
@@ -122,6 +125,36 @@ class AdminPertemuanExcelImportView(AdminRequiredMixin, View):
                             webinar_ke = row[8]
 
                             print(f"{ql_tanggal}|{ql_ke}|{tafsir_tanggal}|{tafsir_ke}|{tarjih_tanggal}|{tarjih_ke}|{webinar_tanggal}|{webinar_ke}")
+
+                            mapping = [
+                                ('Kajian Qiyamul Lail', ql_tanggal, ql_ke),
+                                ('Kajian Tafsir', tafsir_tanggal, tafsir_ke),
+                                ('Kajian Tarjih', tarjih_tanggal, tarjih_ke),
+                                ('Webinar', webinar_tanggal, webinar_ke),
+                            ]
+
+                            for nama, tanggal, ke in mapping:
+                                if not (col_is_valid(tanggal) and col_is_valid(ke)):
+                                    continue
+
+                                tipe_pertemuan = get_object_or_404(
+                                    TipePertemuan,
+                                    nama__iexact=nama
+                                )
+
+                                if timezone.is_naive(tanggal):
+                                    tanggal = timezone.make_aware(tanggal)
+
+                                Pertemuan.objects.update_or_create(
+                                    tipe_pertemuan=tipe_pertemuan,
+                                    judul=f'Ke-{int(ke)}',
+                                    defaults={
+                                        'mulai': tanggal,
+                                        'akhir': tanggal + timezone.timedelta(hours=2),
+                                        'presensi_mulai': tanggal,
+                                        'presensi_akhir': tanggal + timezone.timedelta(hours=2),
+                                    }
+                                )
 
                         except Exception as e:
                             raise Exception(f"Sheet='{sheet.title}' " f"Baris={idx} " f"Error={e}")
