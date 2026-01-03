@@ -29,7 +29,7 @@ class BasePertemuanListView(CustomTemplateBaseMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         now = timezone.now()
         context['data_tipe_pertemuan'] = TipePertemuan.objects.annotate(jumlah_pertemuan=Count('pertemuan', filter=Q(pertemuan__akhir__gte=now)))
-        context['data_tahun_pertemuan'] = Pertemuan.objects.values_list('created_at__year', flat=True).distinct().order_by('-created_at__year')
+        context['data_tahun_pertemuan'] = Pertemuan.objects.values_list('mulai__year', flat=True).distinct().order_by('-mulai__year')
         context['tipe_pertemuan'] = int(self.request.GET.get('tipe_pertemuan', 1))
         context['tahun_pertemuan'] = context['data_tahun_pertemuan'][0] if context['data_tahun_pertemuan'] else ''
         return context
@@ -223,7 +223,7 @@ class UserPertemuanListJsonView(LoginRequiredMixin, View):
             queryset = queryset.filter(tipe_pertemuan__id=tipe_pertemuan_id)
         # filter tahun
         if tahun_pertemuan := request.POST.get('tahun_pertemuan'):
-            queryset = queryset.filter(created_at__year=tahun_pertemuan)
+            queryset = queryset.filter(mulai__year=tahun_pertemuan)
 
         # 🔑 SUBQUERY FOR PRESENSI ID
         presensi_subquery = Presensi.objects.filter(
