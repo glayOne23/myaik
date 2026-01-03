@@ -82,8 +82,9 @@ TEMPLATES = [
                 'django.template.context_processors.media',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-
+                # custom tempat
                 'apps.services.context_processors.global_settings',
+                'apps.services.context_processors.pertemuan_count',
             ],
         },
     },

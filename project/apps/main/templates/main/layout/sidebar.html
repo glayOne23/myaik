@@ -109,7 +109,7 @@
             <a href="{% url 'main:user.pertemuan.table' %}" class="nav-link">
               <i class="nav-icon fas fa-cube nav-icon-round bgc-primary-tp1"></i>
               <span class="nav-text fadeable">
-                <span>AIK</span>
+                <span>AIK <span class="badge badge-pill badge-danger">{{ PERTEMUAN_COUNT }}</span></span>
               </span>
             </a>
 
@@ -128,7 +128,7 @@
               <a href="{% url 'main:admin.pertemuan.table' %}" class="nav-link">
                 <i class="nav-icon fas fa-cube nav-icon-round bgc-primary-tp1"></i>
                 <span class="nav-text fadeable">
-                  <span>AIK</span>
+                  <span>AIK <span class="badge badge-pill badge-danger">{{ PERTEMUAN_COUNT }}</span></span>
                 </span>
               </a>
 

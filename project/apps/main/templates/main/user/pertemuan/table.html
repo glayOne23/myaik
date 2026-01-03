@@ -126,6 +126,22 @@
 		var $_table_pertemuan = $(tableId_pertemuan).DataTable({
 			responsive: true,
 
+			// cek apakah tanggal sekarang antara mulai dan akhir, jika iya highlight
+			rowCallback: function (row, data) {
+				if (!data.mulai || !data.akhir) return;
+
+				const now = new Date();
+				const mulai = new Date(data.mulai);
+				const akhir = new Date(data.akhir);
+
+				if (now >= mulai && now <= akhir) {
+					row.classList.add(
+						'bgc-primary-l1',   // background
+						'fw-bold'          // bold text (Bootstrap 5)
+					);
+				}
+			},
+
 			classes: {
 				sLength: "dataTables_length text-left w-auto",
 			},
