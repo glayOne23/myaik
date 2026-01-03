@@ -50,3 +50,11 @@ class PertemuanForm(forms.ModelForm, FormErrorsMixin):
             self.fields["sertifikat"].widget.attrs.update({
                 "data-existing-url": self.instance.sertifikat.url
             })
+
+
+class PertemuanExcelForm(forms.Form, FormErrorsMixin):
+    excel_file = forms.FileField(
+        label=_('Unggah Berkas Excel'),
+        help_text=_('Unggah berkas Excel yang berisi data kajian'),
+        widget=forms.ClearableFileInput(attrs={'accept': '.xlsx, .xls'})
+    )

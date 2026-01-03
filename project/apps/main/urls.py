@@ -77,6 +77,7 @@ urlpatterns = [
             # =================================================[ LOAD PAGE ]=================================================
             path('table/', pertemuan.AdminPertemuanListView.as_view(), name='admin.pertemuan.table'),
             path('add/', pertemuan.AdminPertemuanCreateView.as_view(), name='admin.pertemuan.add'),
+            path('excel_import/', pertemuan.AdminPertemuanExcelImportView.as_view(), name='admin.pertemuan.excel_import'),
             path('<int:id>/update/', pertemuan.AdminPertemuanUpdateView.as_view(), name='admin.pertemuan.update'),
             path('<int:pertemuan_id>/presensi/table/', presensi.AdminPresensiListView.as_view(), name='admin.presensi.table'),
             # ==================================================[ SERVICE ]==================================================

@@ -108,7 +108,6 @@
 
 
 <!-- imporPresensiModal -->
-<!-- Modal -->
 <div class="modal fade" id="imporPresensiModal" tabindex="-1" aria-labelledby="imporPresensiModalLabel" aria-hidden="true">
 	<form action="{% url 'main:admin.presensi.excel_import' %}" method="post" enctype="multipart/form-data">
 		{% csrf_token %}
@@ -131,6 +130,33 @@
 		</div>
 	</form>
 </div>
+
+
+
+<!-- imporPertemuanModal -->
+<div class="modal fade" id="imporPertemuanModal" tabindex="-1" aria-labelledby="imporPertemuanModalLabel" aria-hidden="true">
+	<form action="{% url 'main:admin.pertemuan.excel_import' %}" method="post" enctype="multipart/form-data">
+		{% csrf_token %}
+		<div class="modal-dialog modal-dialog-centered">
+		  <div class="modal-content">
+			<div class="modal-header">
+			  <h5 class="modal-title" id="imporPertemuanModalLabel">Impor Kajian Excel</h5>
+			  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			  </button>
+			</div>
+			<div class="modal-body">
+			  {{pertemuan_excel_form|crispy}}
+			</div>
+			<div class="modal-footer">
+			  <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+			  <button type="submit" class="btn btn-primary">Impor</button>
+			</div>
+		  </div>
+		</div>
+	</form>
+</div>
+
 {% endblock %}
 
 
@@ -382,6 +408,11 @@
 	  <button data-rel="tooltip" type="button" class="btn radius-round btn-outline-success border-2 btn-sm ml-2" title="Impor Presensi dengan Excel" data-toggle="modal" data-target="#imporPresensiModal">
         <i class="fa fa-file-excel"></i>
       </button>
+	  {% if request.user.username == "mhi595" %}
+		<button data-rel="tooltip" type="button" class="btn radius-round btn-outline-success border-2 btn-sm ml-2" title="Impor Pertemuan dengan Excel" data-toggle="modal" data-target="#imporPertemuanModal">
+			<i class="fa fa-cubes"></i>
+		</button>
+	  {% endif %}
       <button data-rel="tooltip" type="button" class="btn radius-round btn-outline-danger border-2 btn-sm ml-2" title="Hapus" onclick="submit_listid('{% url 'main:admin.pertemuan.deletelist' %}',get_list_id('${tableId_pertemuan}'))">
         <i class="far fa-trash-alt"></i>
       </button>

@@ -1,18 +1,20 @@
-from apps.main.forms.pertemuan import PertemuanForm
+import openpyxl
+from apps.main.forms.pertemuan import PertemuanExcelForm, PertemuanForm
 from apps.main.forms.presensi import PresensiExcelForm
-from apps.main.models import Pertemuan, TipePertemuan, Presensi
+from apps.main.models import Pertemuan, Presensi, TipePertemuan
 from apps.main.views.base import AdminRequiredMixin, CustomTemplateBaseMixin
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import AccessMixin, LoginRequiredMixin
 from django.db import transaction
-from django.db.models import (CharField, Count, Exists, F, OuterRef, Q,
-                              Subquery, Value, IntegerField)
+from django.db.models import (CharField, Count, Exists, F, IntegerField,
+                              OuterRef, Q, Subquery, Value)
 from django.db.models.functions import Concat
 from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 from django.views import View
 from django.views.generic import (CreateView, DeleteView, FormView, ListView,
                                   TemplateView, UpdateView)
@@ -39,9 +41,14 @@ class AdminPertemuanListView(AdminRequiredMixin, BasePertemuanListView):
     template_name = 'main/admin/pertemuan/table.html'
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        form = PresensiExcelForm()
-        form.fields['tipe_pertemuan'].queryset = TipePertemuan.objects.all()
-        context['presensi_excel_form'] = form
+
+        presensi_excel_form = PresensiExcelForm()
+        presensi_excel_form.fields['tipe_pertemuan'].queryset = TipePertemuan.objects.all()
+        context['presensi_excel_form'] = presensi_excel_form
+
+        pertemuan_excel_form = PertemuanExcelForm()
+        context['pertemuan_excel_form'] = pertemuan_excel_form
+
         return context
 
 
@@ -78,6 +85,55 @@ class AdminPertemuanUpdateView(AdminRequiredMixin, CustomTemplateBaseMixin, Upda
         return response
 
 
+
+class AdminPertemuanExcelImportView(AdminRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        form = PertemuanExcelForm(request.POST, request.FILES)
+
+        if not form.is_valid():
+            messages.error(request, f"Form tidak valid. {form.get_form_errors()}")
+            return redirect('main:admin.pertemuan.table')
+
+        try:
+            workbook = openpyxl.load_workbook(request.FILES['excel_file'], data_only=True)
+        except Exception as e:
+            messages.error(request, f"Gagal membaca file Excel: {e}")
+            return redirect('main:admin.pertemuan.table')
+
+        try:
+            with transaction.atomic():
+                for sheet in workbook.worksheets:
+
+                    if sheet.max_row < 2:
+                        continue
+
+                    for idx, row in enumerate(sheet.iter_rows(min_row=2, values_only=True), start=3):
+                        if not any(row):
+                            continue
+
+                        try:
+                            ql_tanggal = row[1]
+                            ql_ke = row[2]
+                            tafsir_tanggal = row[3]
+                            tafsir_ke = row[4]
+                            tarjih_tanggal = row[5]
+                            tarjih_ke = row[6]
+                            webinar_tanggal = row[7]
+                            webinar_ke = row[8]
+
+                            print(f"{ql_tanggal}|{ql_ke}|{tafsir_tanggal}|{tafsir_ke}|{tarjih_tanggal}|{tarjih_ke}|{webinar_tanggal}|{webinar_ke}")
+
+                        except Exception as e:
+                            raise Exception(f"Sheet='{sheet.title}' " f"Baris={idx} " f"Error={e}")
+
+        except Exception as e:
+            messages.error(request, f"Gagal impor Excel. {e}")
+            return redirect('main:admin.pertemuan.table')
+
+        messages.success(request, "Import selesai. Semua data kajian berhasil diunggah.")
+        return redirect('main:admin.pertemuan.table')
+
+
 # =====================================================================================================
 #                                                ADMIN SERVICE
 # =====================================================================================================
@@ -91,18 +147,26 @@ class AdminPertemuanDeleteListView(AdminRequiredMixin, View):
 
         try:
             with transaction.atomic():
-                # delete sekaligus (lebih cepat & aman)
-                deleted_count, _ = Pertemuan.objects.filter(id__in=list_id).delete()
+                pertemuandata = Pertemuan.objects.filter(id__in=list_id)
 
-            if deleted_count > 0:
-                messages.success(request, f'{deleted_count} data berhasil dihapus')
-            else:
-                messages.warning(request, 'Tidak ada data dipilih untuk dihapus')
+                if not pertemuandata.exists():
+                    messages.warning(request, 'Tidak ada data dipilih untuk dihapus')
+                    return redirect('main:admin.pertemuan.table')
+
+                # simpan tipe sebelum delete
+                pertemuan_obj = pertemuandata.first()
+                tipe_id = pertemuan_obj.tipe_pertemuan.id
+
+                deleted_count = pertemuandata.count()
+                pertemuandata.delete()
+
+            messages.success(request, f'{deleted_count} data berhasil dihapus')
 
         except Exception as e:
-            messages.error(request, f'Terdapat kesalahan ketika menghapus data {str(e)}')
+            messages.error(request, f'Terdapat kesalahan ketika menghapus data: {str(e)}')
+            return redirect('main:admin.pertemuan.table')
 
-        return redirect('main:admin.pertemuan.table')
+        return redirect(reverse_lazy('main:admin.pertemuan.table') + f'?tipe_pertemuan={tipe_id}')
 
 
 # =====================================================================================================
