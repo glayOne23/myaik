@@ -25,3 +25,11 @@ class PresensiExcelForm(forms.Form, FormErrorsMixin):
         help_text=_('Unggah berkas Excel yang berisi data presensi.'),
         widget=forms.ClearableFileInput(attrs={'accept': '.xlsx, .xls'})
     )
+
+
+class PresensiTotalExcelForm(forms.Form, FormErrorsMixin):
+    excel_file = forms.FileField(
+        label=_('Unggah Berkas Excel'),
+        help_text=_('Unggah berkas Excel yang berisi data presensi.'),
+        widget=forms.ClearableFileInput(attrs={'accept': '.xlsx, .xls'})
+    )

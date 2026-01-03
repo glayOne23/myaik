@@ -1,5 +1,8 @@
+import datetime
+
 import openpyxl
-from apps.main.forms.presensi import PresensiExcelForm, PresensiForm
+from apps.main.forms.presensi import (PresensiExcelForm, PresensiForm,
+                                      PresensiTotalExcelForm)
 from apps.main.models import Pertemuan, Presensi, TipePertemuan
 from apps.main.views.base import (AdminRequiredMixin, CustomTemplateBaseMixin,
                                   in_grup)
@@ -9,7 +12,8 @@ from django.contrib import messages
 from django.contrib.auth.mixins import AccessMixin, LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.db import transaction
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Value
+from django.db.models.functions import Replace
 from django.http import HttpResponse, HttpResponseForbidden
 from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -277,6 +281,64 @@ class AdminPresensiExcelImportV2View(AdminRequiredMixin, View):
         return redirect('main:admin.pertemuan.table')
 
 
+
+
+class AdminPresensiTotalExcelImportView(AdminRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        form = PresensiTotalExcelForm(request.POST, request.FILES)
+
+        if not form.is_valid():
+            messages.error(request, f"Form tidak valid. {form.get_form_errors()}")
+            return redirect('main:admin.pertemuan.table')
+
+        try:
+            workbook = openpyxl.load_workbook(request.FILES['excel_file'], data_only=True)
+        except Exception as e:
+            messages.error(request, f"Gagal membaca file Excel: {e}")
+            return redirect('main:admin.pertemuan.table')
+
+        def col_is_valid(val):
+            return val not in (None, '', 0)
+
+        try:
+            with transaction.atomic():
+                sheet = workbook['Sheet1']
+
+                for idx, row in enumerate(sheet.iter_rows(min_row=2, values_only=True), start=3):
+                    if not any(row):
+                        continue
+
+                    try:
+                        nip = row[0]
+                        tahun = row[15]
+                        ql = row[3]
+                        webinar = row[4]
+                        tarjih = row[5]
+
+                        # print(f"{type(nip)} - {type(tahun)} - QL:{ql} Webinar:{webinar} Tarjih:{tarjih}")
+
+                        if tahun == 2025:
+                            queryset = User.objects.annotate(
+                                nip_normalized=Replace('profile__nip', Value('.'), Value(''))
+                            ).filter(nip_normalized=nip)
+
+                            if len(queryset) == 0:
+                                print(f"NIP '{nip}' tidak ditemukan.")
+
+                            if len(queryset) > 1:
+                                print(f"NIP '{nip}' terdapat lebih dari 1")
+
+                    except Exception as e:
+                        raise Exception(f"Sheet='{sheet.title}' " f"Baris={idx} " f"Error={e}")
+
+        except Exception as e:
+            messages.error(request, f"Gagal impor Excel. {e}")
+            return redirect('main:admin.pertemuan.table')
+
+        messages.success(request, "Import selesai. Semua data total presensi berhasil diunggah.")
+        return redirect('main:admin.pertemuan.table')
+
+
 # =====================================================================================================
 #                                              USER LOAD PAGE
 # =====================================================================================================
@@ -345,19 +407,33 @@ class UserPresensiBaganView(LoginRequiredMixin, View):
         if not tahun or not karyawan_id:
             return JsonResponse({"error": "Tahun dan karyawan harus disediakan."}, status=400)
 
+        karyawan_obj = get_object_or_404(User, id=karyawan_id)
+        tanggalmulaimasuk = None
+        if karyawan_obj.profile.tanggalmulaimasuk:
+            tanggalmulaimasuk = datetime.datetime.strptime(
+                karyawan_obj.profile.tanggalmulaimasuk,
+                "%Y-%m-%d"
+            ).date()
+
         try:
+            pertemuan_filter = Q(pertemuan__mulai__year=tahun)
+
+            if tanggalmulaimasuk:
+                pertemuan_filter &= Q(
+                    pertemuan__mulai__date__gte=tanggalmulaimasuk
+                )
+
             data = (
                 TipePertemuan.objects
                 .annotate(
                     total_pertemuan=Count(
                         'pertemuan',
-                        filter=Q(pertemuan__mulai__year=tahun),
+                        filter=pertemuan_filter,
                         distinct=True
                     ),
                     total_presensi=Count(
                         'pertemuan__presensi',
-                        filter=Q(
-                            pertemuan__mulai__year=tahun,
+                        filter=pertemuan_filter & Q(
                             pertemuan__presensi__peserta_id=karyawan_id
                         ),
                         distinct=True
@@ -372,8 +448,62 @@ class UserPresensiBaganView(LoginRequiredMixin, View):
                 .order_by('nama')
             )
 
-            response_data = list(data)
-            return JsonResponse(response_data, safe=False)
+            return JsonResponse(list(data), safe=False)
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+
+class LembagaPresensiGrafikView(LoginRequiredMixin, View):
+    def get(self, request):
+        tahun = request.GET.get('tahun')
+        kode_lembaga = request.GET.get('lembaga')
+
+        if not tahun or not kode_lembaga:
+            return JsonResponse({"error": "Tahun dan lembaga harus disediakan."}, status=400)
+
+        try:
+            # ---------------------------------------------------
+            # Query Pertemuan + aggregate presensi
+            # ---------------------------------------------------
+            pertemuandata = Pertemuan.objects.all().order_by('mulai')
+            if kode_lembaga != 'all':
+                pertemuandata = pertemuandata.filter(mulai__year=tahun, presensi__peserta__profile__home_id=kode_lembaga)
+            pertemuan_qs = (
+                pertemuandata
+                .annotate(
+                    total_presensi=Count('presensi', distinct=True)
+                )
+                .select_related('tipe_pertemuan')
+                .order_by('tipe_pertemuan__id', 'mulai')
+            )
+
+            # ---------------------------------------------------
+            # Grouping by TipePertemuan
+            # ---------------------------------------------------
+            result = {}
+
+            for p in pertemuan_qs:
+                tipe = p.tipe_pertemuan
+                if not tipe:
+                    continue
+
+                if tipe.id not in result:
+                    result[tipe.id] = {
+                        "tipe_id": tipe.id,
+                        "tipe_nama": tipe.nama,
+                        "has_sertifikat": tipe.has_sertifikat,
+                        "pertemuan": []
+                    }
+
+                result[tipe.id]["pertemuan"].append({
+                    "pertemuan_id": p.id,
+                    "judul": p.judul,
+                    "mulai": p.mulai.isoformat() if p.mulai else None,
+                    "total_presensi": p.total_presensi
+                })
+
+            return JsonResponse(list(result.values()), safe=False)
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)

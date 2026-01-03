@@ -128,6 +128,9 @@ def profilesync(user) -> User:
         if 'lname' in data and data['lname']:
             user.last_name              = data['lname']
 
+        if 'tanggalmulaimasuk' in data and data['tanggalmulaimasuk']:
+            user.profile.tanggalmulaimasuk      = data['tanggalmulaimasuk']
+
         if 'nama_bergelar' in data and data['nama_bergelar']:
             first_name, last_name = split_full_name(full_name=data['nama_bergelar'], max_len=100)
             user.first_name = first_name

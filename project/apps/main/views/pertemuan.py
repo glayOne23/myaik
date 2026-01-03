@@ -1,6 +1,6 @@
 import openpyxl
 from apps.main.forms.pertemuan import PertemuanExcelForm, PertemuanForm
-from apps.main.forms.presensi import PresensiExcelForm
+from apps.main.forms.presensi import PresensiExcelForm, PresensiTotalExcelForm
 from apps.main.models import Pertemuan, Presensi, TipePertemuan
 from apps.main.views.base import AdminRequiredMixin, CustomTemplateBaseMixin
 from django.conf import settings
@@ -49,6 +49,9 @@ class AdminPertemuanListView(AdminRequiredMixin, BasePertemuanListView):
         pertemuan_excel_form = PertemuanExcelForm()
         context['pertemuan_excel_form'] = pertemuan_excel_form
 
+        presensi_total_excel_form = PresensiTotalExcelForm()
+        context['presensi_total_excel_form'] = presensi_total_excel_form
+
         return context
 
 
@@ -83,7 +86,6 @@ class AdminPertemuanUpdateView(AdminRequiredMixin, CustomTemplateBaseMixin, Upda
         response = super().form_valid(form)
         messages.success(self.request, "Data AIK berhasil diperbarui")
         return response
-
 
 
 class AdminPertemuanExcelImportView(AdminRequiredMixin, View):

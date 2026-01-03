@@ -27,7 +27,6 @@ def index(request):
     context['chartjs']          = False
     context['chartjsv4']          = True
 
-
     # data
     user = request.user
     datajabatan = Jabatan.objects.filter(uniid_penjabat=user.username).values_list('unit__id', flat=True)

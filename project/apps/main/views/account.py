@@ -513,3 +513,23 @@ def api_data_employee(request):
             getkaryawan = apigateway.getKaryawan('tendik')
 
     return JsonResponse(getkaryawan)
+
+
+@login_required
+def by_lembaga_json(request):
+    lembaga = request.GET.get('lembaga')
+
+    qs = User.objects.select_related('profile')
+
+    if lembaga != 'all':
+        qs = qs.filter(profile__home_id=lembaga)
+
+    data = [
+        {
+            "id": u.id,
+            "text": f"{u.get_full_name()} | {u.username} | {u.profile.nip}"
+        }
+        for u in qs
+    ]
+
+    return JsonResponse(data, safe=False)

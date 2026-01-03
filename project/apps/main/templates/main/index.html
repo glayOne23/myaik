@@ -1,6 +1,6 @@
 {% extends 'main/layout/base.html' %}
 {% load static %}
-
+{% load main_tags %}
 
 {% block content %}
 <div class="page-content container container-plus">
@@ -39,35 +39,48 @@
 	</div>
 
 
-	<!-- =================== [Div Charts] ======================= -->
+	<!-- =================== [Div Bagan Presensi AIK Per Individu] ======================= -->
 	<div class="mt-2 mt-lg-2">
 		<div class="card bcard">
 			<div class="border-t-3 w-100 brc-primary-m1 radius-t-1"></div>
 
 			<div class="card-header brc-primary-l3">
 				<h5 class="card-title pl-1 text-120 text-primary">
-					Bagan AIK
+					Bagan Presensi AIK Per Individu
 				</h5>
 
 				<div class="card-toolbar align-self-center">
 
 					<div class="row">
-						<div class="col-md-4">
+						<div class="col-md-3">
 							<div class="input-group flex-nowrap mr-1">
 								<span class="input-group-text" id="addon-wrapping">Tahun</span>
 								<select class="select form-control select2bs4" name="tahun" id="tahun">
 									{% for tahun in data_tahun_pertemuan %}
-									<option value="{{tahun}}">{{tahun}}</option>
+										<option value="{{tahun}}">{{tahun}}</option>
 									{% endfor %}
 								</select>
 							</div>
 						</div>
-						<div class="col-md-8">
+						<div class="col-md-4">
+							<div class="input-group flex-nowrap mr-1">
+								<span class="input-group-text" id="addon-wrapping">Lembaga</span>
+								<select class="select form-control select2bs4" name="lembaga" id="lembaga">
+									{% if request|has_group:'admin' %}
+										<option value="all">Semua</option>
+									{% endif %}
+									{% for lembaga in datalembaga %}
+										<option value="{{lembaga.kode_lembaga}}">{{lembaga.nama}}</option>
+									{% endfor %}
+								</select>
+							</div>
+						</div>
+						<div class="col-md-5">
 							<div class="input-group flex-nowrap mr-1">
 								<span class="input-group-text" id="addon-wrapping">Karyawan</span>
 								<select class="select form-control select2bs4" name="karyawan" id="karyawan">
 									{% for karyawan in datakaryawan %}
-									<option value="{{karyawan.id}}">{{karyawan.get_full_name}} |{{karyawan.username}}| |{{karyawan.profile.nip}}|</option>
+										<option value="{{karyawan.id}}">{{karyawan.get_full_name}} |{{karyawan.username}}| |{{karyawan.profile.nip}}|</option>
 									{% endfor %}
 								</select>
 							</div>
@@ -95,12 +108,72 @@
 	</div>
 
 
+
+	<!-- =================== [Div Bagan AIK] ======================= -->
+	<div class="mt-2 mt-lg-2">
+		<div class="card bcard">
+			<div class="border-t-3 w-100 brc-primary-m1 radius-t-1"></div>
+
+			<div class="card-header brc-primary-l3">
+				<h5 class="card-title pl-1 text-120 text-primary">
+					Bagan Presensi AIK
+				</h5>
+
+				<div class="card-toolbar align-self-center">
+
+					<div class="row">
+						<div class="col-md-4">
+							<div class="input-group flex-nowrap mr-1">
+								<span class="input-group-text" id="addon-wrapping">Tahun</span>
+								<select class="select form-control select2bs4" name="tahun2" id="tahun2">
+									{% for tahun in data_tahun_pertemuan %}
+										<option value="{{tahun}}">{{tahun}}</option>
+									{% endfor %}
+								</select>
+							</div>
+						</div>
+						<div class="col-md-8">
+							<div class="input-group flex-nowrap mr-1">
+								<span class="input-group-text" id="addon-wrapping">Lembaga</span>
+								<select class="select form-control select2bs4" name="lembaga2" id="lembaga2">
+									{% if request|has_group:'admin' %}
+										<option value="all">Semua</option>
+									{% endif %}
+									{% for lembaga in datalembaga %}
+										<option value="{{lembaga.kode_lembaga}}">{{lembaga.nama}}</option>
+									{% endfor %}
+								</select>
+							</div>
+						</div>
+					</div>
+
+
+					<a href="#" data-action="toggle" class="card-toolbar-btn text-grey text-110">
+						<i class="fa fa-chevron-up"></i>
+					</a>
+				</div>
+			</div>
+
+			<div class="card-body p-0 border-0">
+				<!-- =================== [Charts] ======================= -->
+				<div class="row mt-3 m-1" id="charts2">
+					<!-- charts akan di-generate via JS -->
+				</div>
+				<!-- =================== [End Charts] ======================= -->
+			</div>
+
+		</div>
+
+	</div>
+
+
 </div>
 {% endblock %}
 
 {% block javascript %}
 
 <script>
+	// chart presensi
 	let charts = {};
 
 	tahun = $('#tahun').val();
@@ -122,7 +195,7 @@
 			type: "GET",
 			data: {
 				tahun: tahun,
-				karyawan: karyawan,
+				karyawan: karyawan
 			},
 			success: function (response) {
 				renderCharts(response);
@@ -207,6 +280,186 @@
 					}
 				},
 				plugins: [ChartDataLabels]
+			});
+		});
+	}
+</script>
+
+
+<script>
+	// ketika lembaga diubah, load karyawan sesuai lembaga
+	$('#lembaga').on('change', function () {
+		let lembaga = $(this).val();
+
+		$.ajax({
+			url: "{% url 'main:account_by_lembaga_json' %}",
+			type: "GET",
+			data: { lembaga: lembaga },
+			success: function (response) {
+				let $karyawan = $('#karyawan');
+
+				// clear select
+				$karyawan.empty();
+
+				if (response.length > 0) {
+					response.forEach((item, index) => {
+						// select option pertama
+						let isSelected = index === 0;
+						$karyawan.append(
+							new Option(item.text, item.id, isSelected, isSelected)
+						);
+					});
+				}
+
+				// trigger change untuk select2
+				$karyawan.trigger('change');
+
+				// ambil karyawan terpilih
+				let selected_karyawan = $karyawan.val();
+
+				// reload chart
+				let tahun = $('#tahun').val();
+				load_chart(tahun, selected_karyawan);
+			},
+			error: function () {
+				console.error('Gagal load karyawan');
+			}
+		});
+	});
+</script>
+
+
+
+
+<script>
+	// chart grafik
+	let charts2 = {};
+
+	tahun2 = $('#tahun2').val();
+	lembaga2 = $('#lembaga2').val();
+
+	$(document).ready(function () {
+		load_chart2(tahun2, lembaga2);
+	});
+
+	$('#tahun2, #lembaga2').change(function () {
+		tahun2 = $('#tahun2').val();
+		lembaga2 = $('#lembaga2').val();
+		load_chart2(tahun2, lembaga2);
+	});
+
+	function load_chart2(tahun2, lembaga2) {
+		$.ajax({
+			url: "{% url 'main:user.presensi.grafik' %}",
+			type: "GET",
+			data: {
+				tahun: tahun2,
+				lembaga: lembaga2
+			},
+			success: function (response) {
+				renderCharts2(response);
+			},
+			error: function (xhr, status, error) {
+				console.error("AJAX Error:", error);
+			}
+		});
+	}
+
+
+	function renderCharts2(data) {
+		// destroy chart lama
+		for (const key in charts2) {
+			charts2[key].destroy();
+		}
+		charts2 = {};
+
+		$('#charts2').html('');
+
+		data.forEach(tipe => {
+			const chartId = `line_chart_${tipe.tipe_id}`;
+
+			// ambil data pertemuan
+			const labels = [];
+			const values = [];
+
+			tipe.pertemuan.forEach(p => {
+				// if (p.mulai) {
+				// 	const date = new Date(p.mulai);
+				// 	labels.push(date.toLocaleDateString('id-ID'));
+				// 	values.push(p.total_presensi);
+				// }
+
+				labels.push(p.judul);
+				values.push(p.total_presensi);
+			});
+
+			// skip jika tidak ada data
+			if (labels.length === 0) return;
+
+			// append canvas
+			$('#charts2').append(`
+				<div class="col-12 col-md-6 mt-2">
+					<div class="card shadow-sm h-100">
+						<div class="card-header text-center font-weight-bold">
+							${tipe.tipe_nama}
+						</div>
+						<div class="card-body">
+							<canvas id="${chartId}" height="220"></canvas>
+						</div>
+					</div>
+				</div>
+			`);
+
+			const ctx = document.getElementById(chartId).getContext('2d');
+
+			charts2[tipe.tipe_id] = new Chart(ctx, {
+				type: 'line',
+				data: {
+					labels: labels,
+					datasets: [{
+						label: 'Total Presensi',
+						data: values,
+						fill: false,
+						borderColor: '#63BDB2',
+						// '#63BDB2',
+						// '#343687'
+						tension: 0.3,
+						pointRadius: 4,
+						pointHoverRadius: 6
+					}]
+				},
+				options: {
+					responsive: true,
+					maintainAspectRatio: false,
+					scales: {
+						y: {
+							beginAtZero: true,
+							title: {
+								display: true,
+								text: 'Jumlah Presensi'
+							}
+						},
+						x: {
+							title: {
+								display: true,
+								text: 'Kajian'
+							}
+						}
+					},
+					plugins: {
+						legend: {
+							display: true,
+							position: 'bottom'
+						},
+						tooltip: {
+							callbacks: {
+								label: function (ctx) {
+									return `Presensi: ${ctx.raw}`;
+								}
+							}
+						}
+					}
+				}
 			});
 		});
 	}

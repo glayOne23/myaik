@@ -29,6 +29,7 @@ class Profile(models.Model):
     is_dosen        = models.IntegerField(null=True, blank=True)
     home_id         = models.CharField(max_length=20, null=True, blank=True)
     homebase        = models.CharField(max_length=255, null=True, blank=True)
+    tanggalmulaimasuk = models.CharField(max_length=255, null=True, blank=True)
     image           = PrivateImageField(null=True, blank=True, upload_to=path_image, validators=[FileExtensionValidator(allowed_extensions=['jpg','jpeg','png','webp'])])
     otp             = models.CharField(max_length=100, null=True, blank=True)
 

@@ -31,6 +31,7 @@ urlpatterns = [
         path('datatable/',                          account.datatable,          name='account_datatable'),
         path('import/',                             account.import_user,        name='account_import'),
         path('data_employee/',                      account.api_data_employee,  name='account_data_employee'),
+        path('by_lembaga_json/',                    account.by_lembaga_json,  name='account_by_lembaga_json'),
     ])),
 
 
@@ -85,6 +86,7 @@ urlpatterns = [
         ])),
         path('presensi/', include([
             path('excel_import/', presensi.AdminPresensiExcelImportV2View.as_view(), name='admin.presensi.excel_import'),
+            path('taotal_excel_import/', presensi.AdminPresensiTotalExcelImportView.as_view(), name='admin.presensi.total_excel_import'),
             # =================================================[ LOAD PAGE ]=================================================
         ])),
     ])),
@@ -100,6 +102,7 @@ urlpatterns = [
 
         path('presensi/', include([
             path('bagan/', presensi.UserPresensiBaganView.as_view(), name='user.presensi.bagan'),
+            path('grafik/', presensi.LembagaPresensiGrafikView.as_view(), name='user.presensi.grafik'),
             path('<int:presensi_id>/sertifikat/', presensi.UserPresensiSertifikatView.as_view(), name='user.presensi.sertifikat'),
             # =================================================[ LOAD PAGE ]=================================================
         ])),

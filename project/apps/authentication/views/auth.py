@@ -1,15 +1,12 @@
-from django.shortcuts import render, redirect, HttpResponse
-from django.contrib.auth import authenticate, logout, login
-from django.contrib import messages
-from django.conf import settings
-from django.contrib.auth.models import User
-
-from apps.authentication.forms.auth import FormSignUp, FormSignUpProfile, FormSignIn, FormResetPassword
+from apps.authentication.forms.auth import (FormResetPassword, FormSignIn,
+                                            FormSignUp, FormSignUpProfile)
 from apps.services.decorators import logout_required
-from apps.services.utils import setsession, send_otp_by_email, username_in_cas
-
-
-
+from apps.services.utils import send_otp_by_email, setsession, username_in_cas
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
+from django.shortcuts import HttpResponse, redirect, render
 
 # =====================================================================================================
 #                                               LOAD PAGE
@@ -41,12 +38,12 @@ def signin(request):
             else:
                 messages.warning(request, 'Please check your credentials and try again.')
                 # return redirect('authentication:signin')
-        else:            
-            if '__all__' in context['formsignin'].errors.get_json_data():                
+        else:
+            if '__all__' in context['formsignin'].errors.get_json_data():
                 messages.error(request, context['formsignin'].errors.get_json_data()['__all__'][0]['message'])
             else:
-                messages.error(request, context['formsignin'].get_errors())            
-    
+                messages.error(request, context['formsignin'].get_errors())
+
 
     return render(request, 'authentication/signin.html', context)
 
@@ -65,11 +62,11 @@ def signup(request):
                 if User.objects.filter(email=request.POST.get('email')).exists():
                     messages.error(request, 'Email has been used')
                     return redirect('authentication:signup')
-                
+
                 if username_in_cas(request.POST.get('username')):
                     messages.warning(request, 'The username has been registered in the cas system, please log in using cas')
                     return redirect('authentication:signup')
-                
+
                 user = context['formsignup'].save(commit=False)
                 user.is_active = False
                 user.save()
@@ -90,7 +87,7 @@ def signup(request):
                 else:
                     messages.success(request, 'Congratulations, your account has been successfully created.')
                     return redirect('authentication:signin')
-                
+
             else:
                 messages.error(request, context['formsignupprofile'].get_errors())
         else:
@@ -152,10 +149,9 @@ def reset_password(request):
 # =====================================================================================================
 #                                                SERVICE
 # =====================================================================================================
-
 def signout(request):
     logout(request)
-    
+
     storage = messages.get_messages(request)
     if storage:
         for message in storage:
