@@ -84,17 +84,16 @@
 
                   <div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-6 offset-lg-3 d-flex flex-column align-items-center justify-content-center">
                     <hr class="brc-default-l2 w-100 mb-2" />
-                    <div class="mt-n4 bgc-white-tp2 px-3 py-1 text-secondary-d3 text-90">Or Login With</div> 
+                    <div class="mt-n4 bgc-white-tp2 px-3 py-1 text-secondary-d3 text-90">Or Login With</div>
                   </div>
 
                   <div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-6 offset-lg-3 flex-column align-items-center justify-content-center">
-                    <a href="{% url 'authentication:cas_ng_login' %}">
+                    <a href="{% url 'authentication:cas_ng_login' %}?next={{ request.GET.next|urlencode }}">
                       <button type="button" class="btn btn-orange btn-block px-4 btn-bold mt-2 mb-4">
-                        <i class="fas fa-arrow-right-to-bracket mr-1"></i>
-                        UMS CAS
-                        <!-- <img id="id-navbar-user-image" class="d-none d-lg-inline-block w-4" src="{% static 'images/logo/cas_logo.png' %}" alt="Image"> -->
+                          <i class="fas fa-arrow-right-to-bracket mr-1"></i>
+                          UMS CAS
                       </button>
-                    </a>
+                  </a>
                   </div>
                 </form>
 

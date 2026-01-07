@@ -328,14 +328,18 @@
 					}
 				},
 				{
-					data: 'tautan',
+					data: null,
 					render: function (data, type, row) {
-						if (!data) return "";
+						let kajian_url = "-"
+						if (row.tautan) {
+							kajian_url = `<a href="${row.tautan}" target="_blank">${row.tautan}</a>`
+						}
+						let presensi_path = "{% url 'main:user.presensi.add' 0 %}".replace('0', row.id);
+						let presensi_url = window.location.origin + presensi_path;
 						return `
-							<a
-								href="${data}" target="_blank">
-								${data}
-							</a>
+							Tautan Kajian: ${kajian_url}
+							<br/>
+							Tautan Presensi: <a href="${presensi_url}" target="_blank">Tautan Presensi</a>
 						`;
 					}
 				},

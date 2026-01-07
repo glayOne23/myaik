@@ -366,14 +366,29 @@
 					}
 				},
 				{
-					data: 'tautan',
+					data: null,
 					render: function (data, type, row) {
-						if (!data) return "";
+						let kajian_url = "-"
+						if (row.tautan) {
+							kajian_button = `
+								<div class="btn-group m-1" role="group">
+									<a class="btn btn-sm btn-outline-primary" href="${row.tautan}" target="_blank" rel="noopener noreferrer">Tautan Kajian</a>
+									<button type="button" class="btn btn-sm btn-outline-primary" onclick="copyToClipboard('${row.tautan}', this)" title="Salin Tautan"><i class="fas fa-copy"></i></button>
+								</div>
+							`;
+						}
+						let presensi_path = "{% url 'main:user.presensi.add' 0 %}".replace('0', row.id);
+						let presensi_url = window.location.origin + presensi_path;
+						let presensi_button = `
+							<div class="btn-group m-1" role="group">
+								<a class="btn btn-sm btn-outline-primary" href="${presensi_url}" target="_blank" rel="noopener noreferrer">Tautan Presensi</a>
+								<button type="button" class="btn btn-sm btn-outline-primary" onclick="copyToClipboard('${presensi_url}', this)" title="Salin Tautan"><i class="fas fa-copy"></i></button>
+							</div>
+						`;
 						return `
-							<a
-								href="${data}" target="_blank">
-								${data}
-							</a>
+							${kajian_button}
+							<br/>
+							${presensi_button}
 						`;
 					}
 				},

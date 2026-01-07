@@ -347,3 +347,61 @@
         form.submit();
       }
     </script>
+
+
+    <script>
+      function copyToClipboard(text, btn) {
+          if (navigator.clipboard && window.isSecureContext) {
+              navigator.clipboard.writeText(text)
+                  .then(() => copiedFeedback(btn))
+                  .catch(() => fallbackCopy(text, btn));
+          } else {
+              fallbackCopy(text, btn);
+          }
+      }
+
+      function fallbackCopy(text, btn) {
+          const textarea = document.createElement("textarea");
+          textarea.value = text;
+          textarea.style.position = "fixed";
+          textarea.style.opacity = "0";
+          document.body.appendChild(textarea);
+          textarea.focus();
+          textarea.select();
+
+          try {
+              document.execCommand("copy");
+              copiedFeedback(btn);
+          } catch (err) {
+              Swal.fire({
+                  icon: 'error',
+                  title: 'Gagal',
+                  text: 'Tidak bisa menyalin tautan',
+              });
+              console.error(err);
+          }
+
+          document.body.removeChild(textarea);
+      }
+
+      function copiedFeedback(btn) {
+          // Icon feedback
+          const original = btn.innerHTML;
+          btn.innerHTML = '<i class="fas fa-check text-success"></i>';
+
+          setTimeout(() => {
+              btn.innerHTML = original;
+          }, 1500);
+
+          // SweetAlert toast
+          Swal.fire({
+              toast: true,
+              position: 'top-end',
+              icon: 'success',
+              title: 'Tautan berhasil disalin',
+              showConfirmButton: false,
+              timer: 1500,
+              timerProgressBar: true
+          });
+      }
+      </script>

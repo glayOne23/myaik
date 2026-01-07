@@ -1,16 +1,15 @@
 # =========================================
 # Created by Ridwan Renaldi, S.Kom. (rr867)
 # =========================================
+from apps.services.utils import profilesync, setsession
+from django.conf import settings
+from django.contrib.auth.models import Group, User, update_last_login
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.contrib.auth.models import update_last_login
-from django.contrib.auth.models import User, Group
+from django.shortcuts import redirect
 from django.urls import reverse
-
+from django.utils.http import url_has_allowed_host_and_scheme
 from django_cas_ng.backends import CASBackend
 from django_cas_ng.views import LoginView
-
-
-from apps.services.utils import profilesync, setsession
 
 
 class CustomLoginView(LoginView):
@@ -32,9 +31,19 @@ class CustomLoginView(LoginView):
             user = request.user
 
         setsession(request, user)
-          
+
         update_last_login(None, user)
-        return HttpResponseRedirect(next_page)
+
+        # 🚀 PRIORITAS: next
+        if next_page and url_has_allowed_host_and_scheme(
+            next_page,
+            allowed_hosts={request.get_host()},
+            require_https=request.is_secure()
+        ):
+            return redirect(next_page)
+
+        # fallback
+        return redirect(settings.LOGIN_REDIRECT_URL)
 
 
 
