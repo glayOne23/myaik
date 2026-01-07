@@ -177,8 +177,9 @@ def generate(request):
     try:
         datakaryawan = apigateway.getKaryawan()
         for karyawan in datakaryawan['data']:
-            if not User.objects.filter(username=karyawan['uniid']).exists():
-                user, is_success = profilesync(karyawan['uniid'])
+            # if not User.objects.filter(username=karyawan['uniid']).exists():
+            print(karyawan['uniid'])
+            user, is_success = profilesync(karyawan['uniid'])
     except Exception as e:
         messages.error(request, f'Terdapat kesalahan pada sistem. {str(e)}')
         return redirect('main:account_table')

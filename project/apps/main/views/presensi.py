@@ -315,7 +315,7 @@ class AdminPresensiTotalExcelImportView(AdminRequiredMixin, View):
                         webinar = row[4]
                         tarjih = row[5]
 
-                        # print(f"{type(nip)} - {type(tahun)} - QL:{ql} Webinar:{webinar} Tarjih:{tarjih}")
+                        print(f"{type(nip)} - {type(tahun)} - QL:{ql} Webinar:{webinar} Tarjih:{tarjih}")
 
                         if tahun == 2025:
                             queryset = User.objects.annotate(
