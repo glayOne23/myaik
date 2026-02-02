@@ -297,9 +297,6 @@ class AdminPresensiTotalExcelImportView(AdminRequiredMixin, View):
             messages.error(request, f"Gagal membaca file Excel: {e}")
             return redirect('main:admin.pertemuan.table')
 
-        def col_is_valid(val):
-            return val not in (None, '', 0)
-
         try:
             with transaction.atomic():
                 sheet = workbook['Sheet1']
@@ -315,7 +312,7 @@ class AdminPresensiTotalExcelImportView(AdminRequiredMixin, View):
                         webinar = row[4]
                         tarjih = row[5]
 
-                        print(f"{type(nip)} - {type(tahun)} - QL:{ql} Webinar:{webinar} Tarjih:{tarjih}")
+                        # print(f"{type(nip)} - {tahun} - QL:{ql} Webinar:{webinar} Tarjih:{tarjih}")
 
                         if tahun == 2025:
                             queryset = User.objects.annotate(
