@@ -281,9 +281,8 @@ class AdminPresensiExcelImportV2View(AdminRequiredMixin, View):
         return redirect('main:admin.pertemuan.table')
 
 
-
-
 class AdminPresensiTotalExcelImportView(AdminRequiredMixin, View):
+
     def post(self, request, *args, **kwargs):
         form = PresensiTotalExcelForm(request.POST, request.FILES)
 
@@ -292,41 +291,69 @@ class AdminPresensiTotalExcelImportView(AdminRequiredMixin, View):
             return redirect('main:admin.pertemuan.table')
 
         try:
-            workbook = openpyxl.load_workbook(request.FILES['excel_file'], data_only=True)
+            workbook = openpyxl.load_workbook(
+                request.FILES['excel_file'],
+                data_only=True
+            )
         except Exception as e:
             messages.error(request, f"Gagal membaca file Excel: {e}")
             return redirect('main:admin.pertemuan.table')
+
+        nip_errors = []
 
         try:
             with transaction.atomic():
                 sheet = workbook['Sheet1']
 
-                for idx, row in enumerate(sheet.iter_rows(min_row=2, values_only=True), start=3):
+                for idx, row in enumerate(sheet.iter_rows(min_row=2, values_only=True), start=2):
+
                     if not any(row):
                         continue
 
-                    try:
-                        nip = row[0]
-                        tahun = row[15]
-                        ql = row[3]
-                        webinar = row[4]
-                        tarjih = row[5]
+                    nip = row[0]
+                    tahun = row[15]
+                    ql = row[3]
+                    webinar = row[4]
+                    tarjih = row[5]
 
-                        # print(f"{type(nip)} - {tahun} - QL:{ql} Webinar:{webinar} Tarjih:{tarjih}")
+                    if tahun != 2025:
+                        continue
 
-                        if tahun == 2025:
-                            queryset = User.objects.annotate(
-                                nip_normalized=Replace('profile__nip', Value('.'), Value(''))
-                            ).filter(nip_normalized=nip)
+                    queryset = User.objects.annotate(nip_normalized=Replace('profile__nip', Value('.'), Value(''))).filter(nip_normalized=str(nip))
 
-                            if len(queryset) == 0:
-                                print(f"NIP '{nip}' tidak ditemukan.")
+                    if queryset.count() == 0:
+                        nip_errors.append(f"Baris {idx}: NIP '{nip}' tidak ditemukan")
 
-                            if len(queryset) > 1:
-                                print(f"NIP '{nip}' terdapat lebih dari 1")
+                    elif queryset.count() > 1:
+                        nip_errors.append(f"Baris {idx}: NIP '{nip}' lebih dari 1 user")
 
-                    except Exception as e:
-                        raise Exception(f"Sheet='{sheet.title}' " f"Baris={idx} " f"Error={e}")
+                    else:
+                        user = queryset.first()
+                        total_ql_2025 = Pertemuan.objects.filter(tipe_pertemuan__nama__iexact='Kajian Qiyamul Lail', mulai__year=2025).count()
+                        total_webinar_2025 = Pertemuan.objects.filter(tipe_pertemuan__nama__iexact='Webinar', mulai__year=2025).count()
+                        total_tarjih_2025 = Pertemuan.objects.filter(tipe_pertemuan__nama__iexact='Kajian Tarjih', mulai__year=2025).count()
+
+                        print(ql, total_ql_2025)
+                        print(webinar, total_webinar_2025)
+                        print(tarjih, total_tarjih_2025)
+
+                        # TODO: simpan data total presensi di sini
+                        # contoh:
+                        # TotalPresensi.objects.update_or_create(
+                        #     user=user,
+                        #     tahun=tahun,
+                        #     defaults={
+                        #         'ql': ql,
+                        #         'webinar': webinar,
+                        #         'tarjih': tarjih,
+                        #     }
+                        # )
+
+                # ⬅️ tampilkan error seperti versi regular
+                if nip_errors:
+                    error_text = "<br>".join(nip_errors)
+                    messages.warning(request, mark_safe(f"Import selesai dengan error:<br>{error_text}"))
+                    return redirect('main:admin.pertemuan.table')
 
         except Exception as e:
             messages.error(request, f"Gagal impor Excel. {e}")
