@@ -86,7 +86,7 @@ urlpatterns = [
         ])),
         path('presensi/', include([
             path('excel_import/', presensi.AdminPresensiExcelImportV2View.as_view(), name='admin.presensi.excel_import'),
-            path('taotal_excel_import/', presensi.AdminPresensiTotalExcelImportView.as_view(), name='admin.presensi.total_excel_import'),
+            path('total_excel_import/', presensi.AdminPresensiTotalExcelImportView.as_view(), name='admin.presensi.total_excel_import'),
             # =================================================[ LOAD PAGE ]=================================================
         ])),
     ])),

@@ -283,6 +283,42 @@ class AdminPresensiExcelImportV2View(AdminRequiredMixin, View):
 
 class AdminPresensiTotalExcelImportView(AdminRequiredMixin, View):
 
+    def _sync_presensi(self, user, pertemuan_qs, total_excel):
+        pertemuan_list = list(pertemuan_qs.order_by('id'))
+
+        if not pertemuan_list:
+            return
+
+        # Batasi total sesuai jumlah pertemuan tersedia
+        total_excel = min(int(total_excel or 0), len(pertemuan_list))
+
+        existing = Presensi.objects.filter(
+            peserta=user,
+            pertemuan__in=pertemuan_list
+        ).order_by('id')
+
+        current_total = existing.count()
+
+        # Jika kurang → tambahkan
+        if current_total < total_excel:
+            need = total_excel - current_total
+
+            # ambil pertemuan yang belum ada presensinya
+            existing_pertemuan_ids = set(existing.values_list('pertemuan_id', flat=True))
+
+            available = [
+                p for p in pertemuan_list
+                if p.id not in existing_pertemuan_ids
+            ]
+
+            for p in available[:need]:
+                Presensi.objects.create(
+                    peserta=user,
+                    pertemuan=p,
+                    rangkuman="Auto import dari total Excel 2025"
+                )
+
+
     def post(self, request, *args, **kwargs):
         form = PresensiTotalExcelForm(request.POST, request.FILES)
 
@@ -305,6 +341,10 @@ class AdminPresensiTotalExcelImportView(AdminRequiredMixin, View):
             with transaction.atomic():
                 sheet = workbook['Sheet1']
 
+                ql_2025 = Pertemuan.objects.filter(tipe_pertemuan__nama__iexact='Kajian Qiyamul Lail', mulai__year=2025)
+                webinar_2025 = Pertemuan.objects.filter(tipe_pertemuan__nama__iexact='Webinar', mulai__year=2025)
+                tarjih_2025 = Pertemuan.objects.filter(tipe_pertemuan__nama__iexact='Kajian Tarjih', mulai__year=2025)
+
                 for idx, row in enumerate(sheet.iter_rows(min_row=2, values_only=True), start=2):
 
                     if not any(row):
@@ -312,12 +352,14 @@ class AdminPresensiTotalExcelImportView(AdminRequiredMixin, View):
 
                     nip = row[0]
                     tahun = row[15]
-                    ql = row[3]
-                    webinar = row[4]
-                    tarjih = row[5]
+                    ql = row[8]
+                    webinar = row[9]
+                    tarjih = row[10]
 
                     if tahun != 2025:
                         continue
+
+                    print(nip, ql, webinar, tarjih)
 
                     queryset = User.objects.annotate(nip_normalized=Replace('profile__nip', Value('.'), Value(''))).filter(nip_normalized=str(nip))
 
@@ -329,25 +371,10 @@ class AdminPresensiTotalExcelImportView(AdminRequiredMixin, View):
 
                     else:
                         user = queryset.first()
-                        total_ql_2025 = Pertemuan.objects.filter(tipe_pertemuan__nama__iexact='Kajian Qiyamul Lail', mulai__year=2025).count()
-                        total_webinar_2025 = Pertemuan.objects.filter(tipe_pertemuan__nama__iexact='Webinar', mulai__year=2025).count()
-                        total_tarjih_2025 = Pertemuan.objects.filter(tipe_pertemuan__nama__iexact='Kajian Tarjih', mulai__year=2025).count()
-
-                        print(ql, total_ql_2025)
-                        print(webinar, total_webinar_2025)
-                        print(tarjih, total_tarjih_2025)
-
-                        # TODO: simpan data total presensi di sini
-                        # contoh:
-                        # TotalPresensi.objects.update_or_create(
-                        #     user=user,
-                        #     tahun=tahun,
-                        #     defaults={
-                        #         'ql': ql,
-                        #         'webinar': webinar,
-                        #         'tarjih': tarjih,
-                        #     }
-                        # )
+                        # simpan data total presensi di sini
+                        self._sync_presensi(user, ql_2025, ql)
+                        self._sync_presensi(user, webinar_2025, webinar)
+                        self._sync_presensi(user, tarjih_2025, tarjih)
 
                 # ⬅️ tampilkan error seperti versi regular
                 if nip_errors:
