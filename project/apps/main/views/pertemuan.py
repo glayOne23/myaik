@@ -9,7 +9,7 @@ from django.contrib.auth.mixins import AccessMixin, LoginRequiredMixin
 from django.db import transaction
 from django.db.models import (CharField, Count, Exists, F, IntegerField,
                               OuterRef, Q, Subquery, Value)
-from django.db.models.functions import Concat, ExtractYear
+from django.db.models.functions import Concat
 from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
@@ -29,23 +29,7 @@ class BasePertemuanListView(CustomTemplateBaseMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         now = timezone.now()
         context['data_tipe_pertemuan'] = TipePertemuan.objects.annotate(jumlah_pertemuan=Count('pertemuan', filter=Q(pertemuan__akhir__gte=now)))
-        # context['data_tahun_pertemuan'] = Pertemuan.objects.values_list('mulai__year', flat=True).distinct().order_by('-mulai__year')
-        print(Pertemuan.objects.all())
-        # context['data_tahun_pertemuan'] = (
-        #     Pertemuan.objects
-        #     .annotate(tahun=ExtractYear('mulai'))
-        #     .values_list('tahun', flat=True)
-        #     .exclude(tahun__isnull=True)
-        #     .distinct().order_by('-tahun')
-        # )
-        context['data_tahun_pertemuan'] = (
-            Pertemuan.objects
-            .values_list('mulai__year', flat=True)
-            .exclude(mulai__isnull=True)
-            .distinct()
-            .order_by('-mulai__year')
-        )
-        print(context['data_tahun_pertemuan'])
+        context['data_tahun_pertemuan'] = Pertemuan.objects.values_list('mulai__year', flat=True).distinct().order_by('-mulai__year')
         context['tipe_pertemuan'] = int(self.request.GET.get('tipe_pertemuan', 1))
         context['tahun_pertemuan'] = context['data_tahun_pertemuan'][0] if context['data_tahun_pertemuan'] else ''
         return context
