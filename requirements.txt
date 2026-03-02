@@ -31,3 +31,7 @@ crispy-bootstrap4==2025.6
 openpyxl==3.1.5
 reportlab==4.4.7
 PyPDF2==3.0.1
+
+djangorestframework==3.16.1
+Markdown==3.10.2
+django-filter==25.2
