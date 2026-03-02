@@ -122,6 +122,12 @@ def profilesync(user) -> User:
         if 'homebase' in data and data['homebase']:
             user.profile.homebase       = data['homebase']
 
+        if 'kepegawaian' in data and data['kepegawaian']:
+            user.profile.kepegawaian       = data['kepegawaian']
+
+        if 'status' in data and data['status']:
+            user.profile.status       = data['status']
+
         if 'fname' in data and data['fname']:
             user.first_name             = data['fname']
 

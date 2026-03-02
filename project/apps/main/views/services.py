@@ -12,11 +12,11 @@ def setprofilesync(request):
         user, is_success = profilesync(request.user)
         if is_success:
             setsession(request, user)
-            messages.success(request, 'Profile sync successful') 
+            messages.success(request, 'Profile sync successful')
         else:
-            messages.error(request, 'Failed to sync profile')            
-    else: 
-        messages.error(request, 'Invalid request!')      
+            messages.error(request, 'Failed to sync profile')
+    else:
+        messages.error(request, 'Invalid request!')
 
     # ===[Redirect]===
     return redirect(request.META.get('HTTP_REFERER', 'main:dashboard'))

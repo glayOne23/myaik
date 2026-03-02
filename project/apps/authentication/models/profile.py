@@ -30,6 +30,8 @@ class Profile(models.Model):
     home_id         = models.CharField(max_length=20, null=True, blank=True)
     homebase        = models.CharField(max_length=255, null=True, blank=True)
     tanggalmulaimasuk = models.CharField(max_length=255, null=True, blank=True)
+    kepegawaian     = models.CharField(max_length=255, null=True, blank=True)
+    status          = models.CharField(max_length=255, null=True, blank=True)
     image           = PrivateImageField(null=True, blank=True, upload_to=path_image, validators=[FileExtensionValidator(allowed_extensions=['jpg','jpeg','png','webp'])])
     otp             = models.CharField(max_length=100, null=True, blank=True)
 
@@ -44,6 +46,8 @@ class Profile(models.Model):
         txt += 'IS_DOSEN \t: {},\n'.format(str(self.is_dosen))
         txt += 'HOME_ID \t: {},\n'.format(str(self.home_id))
         txt += 'HOMEBASE \t: {},\n'.format(str(self.homebase))
+        txt += 'KEPEGAWAIAN \t: {},\n'.format(str(self.homebase))
+        txt += 'STATUS \t: {},\n'.format(str(self.homebase))
         txt += 'IMAGE \t: {},\n'.format(str(self.image))
         txt += 'OTP \t: {},\n'.format(str(self.otp))
         txt += '}\n'
