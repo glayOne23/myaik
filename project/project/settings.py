@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'private_storage',
     'crispy_forms',
     "crispy_bootstrap4",
+    'rest_framework',
     # =======[My Own Apps]=======
     'apps.services',
     'apps.landingpage',
@@ -125,6 +126,34 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'EXCEPTION_HANDLER': 'apps.services.api.exception.custom_exception_handler',
+    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination'
+    'DEFAULT_PAGINATION_CLASS': 'apps.services.api.response.CustomPagination',
+
+    # ================================ [Throttling] ================================
+    # 'DEFAULT_THROTTLE_CLASSES': [
+    #     # 'rest_framework.throttling.AnonRateThrottle',
+    #     # 'rest_framework.throttling.UserRateThrottle'
+    #     # 'helpers.throttling.CustomAnonThrottle'
+    # ],
+    # 'DEFAULT_THROTTLE_RATES': {
+    #     # 'anon': '1000/day',
+    #     # 'user': '1000/day',
+    #     # 'custom_anon': '20/minute',
+    # }
+}
+
+# ================================ [Custom Throttling Configuration] ================================
+# CUSTOM_THROTTLING_ALLOW_ALL_ORIGINS = config('CUSTOM_THROTTLING_ALLOW_ALL_ORIGINS', False)
+# CUSTOM_THROTTLING_ALLOWED_ORIGINS = [
+#     '127.0.0.1', '192.168.0.1'
+# ]
 
 
 # Internationalization
