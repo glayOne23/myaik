@@ -11,8 +11,8 @@ class Command(BaseCommand):
         try:
             datakaryawan = apigateway.getKaryawan()
             for karyawan in datakaryawan['data']:
-                if not User.objects.filter(username=karyawan['uniid']).exists():
-                    user, is_success = profilesync(karyawan['uniid'])
-                    self.stdout.write(self.style.SUCCESS(f'generated user: {user.username}'))
+                # if not User.objects.filter(username=karyawan['uniid']).exists():
+                user, is_success = profilesync(karyawan['uniid'])
+                self.stdout.write(self.style.SUCCESS(f'generated user: {user.username}'))
         except Exception as e:
             self.stdout.write(self.style.ERROR(f'Gagal generate users: {str(e)}'))
