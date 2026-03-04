@@ -520,7 +520,8 @@ class LembagaPresensiGrafikView(LoginRequiredMixin, View):
                     profile__home_id__isnull=False,
                     profile__status="Aktif"
                 )
-                .exclude(profile__kepegawaian="Dosen Tidak Tetap"))
+                .exclude(profile__kepegawaian="Dosen Tidak Tetap")
+            )
 
             # ---------------------------------------------------
             # Query Pertemuan + aggregate presensi
@@ -532,8 +533,19 @@ class LembagaPresensiGrafikView(LoginRequiredMixin, View):
 
             pertemuan_qs = (
                 pertemuandata
+                # .annotate(
+                #     total_presensi=Count('presensi', distinct=True)
+                # )
                 .annotate(
-                    total_presensi=Count('presensi', distinct=True)
+                    total_presensi=Count(
+                        'presensi',
+                        filter=Q(
+                            presensi__peserta__profile__status="Aktif"
+                        ) & ~Q(
+                            presensi__peserta__profile__kepegawaian="Dosen Tidak Tetap"
+                        ),
+                        distinct=True
+                    )
                 )
                 .select_related('tipe_pertemuan')
                 .order_by('tipe_pertemuan__id', 'mulai')
