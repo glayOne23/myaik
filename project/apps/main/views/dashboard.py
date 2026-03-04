@@ -31,14 +31,34 @@ def index(request):
     user = request.user
     datajabatan = Jabatan.objects.filter(uniid_penjabat=user.username).values_list('unit__id', flat=True)
 
+    # Base filter karyawan aktif & bukan DTT
+    base_karyawan_qs = (
+        User.objects
+        .filter(
+            profile__home_id__isnull=False,
+            profile__status="Aktif"
+        )
+        .exclude(profile__kepegawaian="Dosen Tidak Tetap")
+    )
+
     context['data_tahun_pertemuan'] = Pertemuan.objects.values_list('mulai__year', flat=True).distinct().order_by('-mulai__year')
     if user.groups.filter(name='admin').exists():
         context['datalembaga'] = Lembaga.objects.all()
-        context['datakaryawan'] = User.objects.all().filter(profile__home_id__isnull=False)
+        context['datakaryawan'] = (
+            base_karyawan_qs
+            .distinct()
+        )
     elif datajabatan:
         context['datalembaga'] = Lembaga.objects.filter(Q(id__in=datajabatan) | Q(superunit__id__in=datajabatan)).distinct()
         datakodelembaga = context['datalembaga'].values_list('kode_lembaga', flat=True)
-        context['datakaryawan'] = User.objects.filter(Q(profile__home_id__in=datakodelembaga) | Q(username=request.user.username)).distinct()
+        context['datakaryawan'] = (
+            base_karyawan_qs
+            .filter(
+                Q(profile__home_id__in=datakodelembaga) |
+                Q(username=request.user.username)
+            )
+            .distinct()
+        )
     else:
         context['datalembaga'] = Lembaga.objects.filter(kode_lembaga=user.profile.home_id).distinct()
         context['datakaryawan'] = User.objects.filter(username=request.user.username)

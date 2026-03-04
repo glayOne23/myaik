@@ -173,6 +173,17 @@
 {% block javascript %}
 
 <script>
+	// helper function untuk format persentase
+	function formatPercentage(totalPresensi, totalPertemuan) {
+		if (!totalPresensi || !totalPertemuan) return 0;
+
+		const percent = (totalPresensi / totalPertemuan) * 100;
+		return Number.isInteger(percent) ? percent : percent.toFixed(2);
+	}
+</script>
+
+
+<script>
 	// chart presensi
 	let charts = {};
 
@@ -227,7 +238,7 @@
 						<div class="card-body">
 							<canvas id="${chartId}" height="220"></canvas>
 							<div class="text-center mt-2 small text-muted">
-								Presensi: <b>${item.total_presensi}</b> |
+								Presensi: <b>${item.total_presensi} (${formatPercentage(item.total_presensi, item.total_pertemuan)}%)</b> |
 								Total Pertemuan: <b>${item.total_pertemuan}</b>
 							</div>
 						</div>
@@ -381,16 +392,12 @@
 			// ambil data pertemuan
 			const labels = [];
 			const values = [];
+			const percentages = [];
 
 			tipe.pertemuan.forEach(p => {
-				// if (p.mulai) {
-				// 	const date = new Date(p.mulai);
-				// 	labels.push(date.toLocaleDateString('id-ID'));
-				// 	values.push(p.total_presensi);
-				// }
-
 				labels.push(p.judul);
 				values.push(p.total_presensi);
+				percentages.push(formatPercentage(p.total_presensi, p.total_user))
 			});
 
 			// skip jika tidak ada data
@@ -417,7 +424,7 @@
 				data: {
 					labels: labels,
 					datasets: [{
-						label: 'Total Presensi',
+						label: 'Jumlah Presensi',
 						data: values,
 						fill: false,
 						borderColor: '#63BDB2',
@@ -454,7 +461,9 @@
 						tooltip: {
 							callbacks: {
 								label: function (ctx) {
-									return `Presensi: ${ctx.raw}`;
+									const presensi = ctx.raw;
+									const percent = percentages[ctx.dataIndex];
+									return `Presensi: ${presensi} (${percent}%)`;
 								}
 							}
 						}

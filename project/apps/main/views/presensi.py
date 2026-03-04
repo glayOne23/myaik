@@ -514,12 +514,22 @@ class LembagaPresensiGrafikView(LoginRequiredMixin, View):
             return JsonResponse({"error": "Tahun dan lembaga harus disediakan."}, status=400)
 
         try:
+            # peserta
+            userdata = User.objects.select_related('profile')
+            userdata = (userdata.filter(
+                    profile__home_id__isnull=False,
+                    profile__status="Aktif"
+                )
+                .exclude(profile__kepegawaian="Dosen Tidak Tetap"))
+
             # ---------------------------------------------------
             # Query Pertemuan + aggregate presensi
             # ---------------------------------------------------
             pertemuandata = Pertemuan.objects.all().order_by('mulai')
             if kode_lembaga != 'all':
                 pertemuandata = pertemuandata.filter(mulai__year=tahun, presensi__peserta__profile__home_id=kode_lembaga)
+                userdata = userdata.filter(profile__home_id=kode_lembaga)
+
             pertemuan_qs = (
                 pertemuandata
                 .annotate(
@@ -528,6 +538,8 @@ class LembagaPresensiGrafikView(LoginRequiredMixin, View):
                 .select_related('tipe_pertemuan')
                 .order_by('tipe_pertemuan__id', 'mulai')
             )
+
+            total_user = userdata.distinct().count()
 
             # ---------------------------------------------------
             # Grouping by TipePertemuan
@@ -551,7 +563,8 @@ class LembagaPresensiGrafikView(LoginRequiredMixin, View):
                     "pertemuan_id": p.id,
                     "judul": p.judul,
                     "mulai": p.mulai.isoformat() if p.mulai else None,
-                    "total_presensi": p.total_presensi
+                    "total_presensi": p.total_presensi,
+                    "total_user": total_user,
                 })
 
             return JsonResponse(list(result.values()), safe=False)

@@ -521,6 +521,11 @@ def by_lembaga_json(request):
     lembaga = request.GET.get('lembaga')
 
     qs = User.objects.select_related('profile')
+    qs = (qs.filter(
+            profile__home_id__isnull=False,
+            profile__status="Aktif"
+        )
+        .exclude(profile__kepegawaian="Dosen Tidak Tetap"))
 
     if lembaga != 'all':
         qs = qs.filter(profile__home_id=lembaga)
