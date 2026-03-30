@@ -76,5 +76,52 @@
     </div>
 
   </div>
+
+
+
+<!-- Modal Konfirmasi -->
+<div class="modal fade" id="konfirmasiModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Konfirmasi</h5>
+      </div>
+      <div class="modal-body text-center">
+        <p>Benarkah anda mengikuti kajian?</p>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" id="btnYa" class="btn btn-success px-4">Ya</button>
+        <button type="button" id="btnTidak" class="btn btn-danger px-4">Tidak</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 {% endblock %}
+
+
+{% block javascript %}
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // tampilkan modal saat halaman dibuka
+    $('#konfirmasiModal').modal({
+      backdrop: 'static',
+      keyboard: false
+    });
+  });
+
+  // tombol YA → lanjut (tutup modal)
+  document.getElementById("btnYa").addEventListener("click", function() {
+    $('#konfirmasiModal').modal('hide');
+  });
+
+  // tombol TIDAK → redirect ke halaman list
+  document.getElementById("btnTidak").addEventListener("click", function() {
+    window.location.href = "{% url 'main:user.pertemuan.table' %}";
+  });
+</script>
+
+{% endblock javascript %}
 

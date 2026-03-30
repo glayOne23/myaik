@@ -95,6 +95,7 @@ urlpatterns = [
         path('pertemuan/', include([
             # =================================================[ LOAD PAGE ]=================================================
             path('table/', pertemuan.UserPertemuanListView.as_view(), name='user.pertemuan.table'),
+            path('<int:id>/tautan/', pertemuan.UserPertemuanTrackView.as_view(), name='user.pertemuan.track'),
             path('<int:id>/presensi/add/', presensi.UserPresensiCreateView.as_view(), name='user.presensi.add'),
             # ==================================================[ SERVICE ]==================================================
             path('table_json/', pertemuan.UserPertemuanListJsonView.as_view(), name='user.pertemuan.table_json'),

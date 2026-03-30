@@ -26,6 +26,7 @@ class Pertemuan(models.Model):
     presensi_mulai  = models.DateTimeField(null=True, blank=True)
     presensi_akhir  = models.DateTimeField(null=True, blank=True)
     tautan          = models.URLField(max_length=200, blank=True, null=True)
+    jumlah_pengunjung_tautan = models.IntegerField(default=0)
     materi          = models.FileField(null=True, blank=True, upload_to='materi/')
     sertifikat = models.FileField(null=True, blank=True, upload_to='sertifikat/')
     sertifikat_position = models.JSONField(blank=True, null=True)

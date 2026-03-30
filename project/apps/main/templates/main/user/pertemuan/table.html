@@ -332,7 +332,8 @@
 					render: function (data, type, row) {
 						let kajian_url = "-"
 						if (row.tautan) {
-							kajian_url = `<a href="${row.tautan}" target="_blank">${row.tautan}</a>`
+							let track_url = "{% url 'main:user.pertemuan.track' 0 %}".replace('0', row.id);
+							kajian_url = `<a href="${track_url}" target="_blank">${row.tautan}</a>`;
 						}
 						let presensi_path = "{% url 'main:user.presensi.add' 0 %}".replace('0', row.id);
 						let presensi_url = window.location.origin + presensi_path;

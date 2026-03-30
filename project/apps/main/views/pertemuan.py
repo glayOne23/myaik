@@ -262,6 +262,7 @@ class UserPertemuanListJsonView(LoginRequiredMixin, View):
             'presensi_akhir',
             'tautan',
             'materi',
+            'jumlah_pengunjung_tautan',
             'materi_url',
             'ada_presensi',
             'presensi_id',
@@ -271,3 +272,12 @@ class UserPertemuanListJsonView(LoginRequiredMixin, View):
         )
 
         return JsonResponse(list(data), safe=False)
+
+
+class UserPertemuanTrackView(LoginRequiredMixin, View):
+
+    def get(self, request, id):
+        pertemuan = get_object_or_404(Pertemuan, id=id)
+        pertemuan.jumlah_pengunjung_tautan = F('jumlah_pengunjung_tautan') + 1
+        pertemuan.save(update_fields=['jumlah_pengunjung_tautan'])
+        return redirect(pertemuan.tautan)
