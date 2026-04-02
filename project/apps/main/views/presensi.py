@@ -550,6 +550,11 @@ class UserPresensiPresentaseView(LoginRequiredMixin, View):
         # USERS QUERY
         # =========================
         users_qs = User.objects.select_related('profile')
+        users_qs = (users_qs.filter(
+                profile__home_id__isnull=False,
+                profile__status="Aktif"
+            )
+            .exclude(profile__kepegawaian="Dosen Tidak Tetap"))
 
         if lembaga_id:
             users_qs = users_qs.filter(profile__home_id=lembaga_id)
