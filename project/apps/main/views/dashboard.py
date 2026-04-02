@@ -16,7 +16,7 @@ from django.db.models import Q
 def index(request):
     context = {}
     # ===[Select CSS and JS Files]===
-    context['datatables']       = False
+    context['datatables']       = True
     context['select2']          = True
     context['summernote']       = False
     context['maxlength']        = False

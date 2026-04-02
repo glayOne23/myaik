@@ -46,7 +46,7 @@
 
 			<div class="card-header brc-primary-l3">
 				<h5 class="card-title pl-1 text-120 text-primary">
-					Presensi AIK
+					Bagan Presensi AIK Per Individu
 				</h5>
 
 				<div class="card-toolbar align-self-center">
@@ -67,7 +67,7 @@
 								<span class="input-group-text" id="addon-wrapping">Lembaga</span>
 								<select class="select form-control select2bs4" name="lembaga" id="lembaga">
 									{% if request|has_group:'admin' %}
-										<option value="">Semua</option>
+										<option value="all">Semua</option>
 									{% endif %}
 									{% for lembaga in datalembaga %}
 										<option value="{{lembaga.kode_lembaga}}">{{lembaga.nama}}</option>
@@ -79,7 +79,6 @@
 							<div class="input-group flex-nowrap mr-1">
 								<span class="input-group-text" id="addon-wrapping">Karyawan</span>
 								<select class="select form-control select2bs4" name="karyawan" id="karyawan">
-									<option value="">Semua</option>
 									{% for karyawan in datakaryawan %}
 										<option value="{{karyawan.id}}">{{karyawan.get_full_name}} |{{karyawan.username}}| |{{karyawan.profile.nip}}|</option>
 									{% endfor %}
@@ -96,71 +95,12 @@
 				</div>
 			</div>
 
-			<div class="card-body table-responsive">
-				<table id="datatable" class="d-style w-100 table text-dark-m1 text-95 border-y-1 bgc-h-primary-l3 collapsed dtr-table">
-					<thead class="sticky-nav text-secondary-m1 text-uppercase text-85">
-						<tr>
-						  <th class="border-0 bgc-grey-l2 font-weight-bold text-dark shadow-sm">
-							NIP
-						  </th>
-						  <th class="border-0 bgc-grey-l2 font-weight-bold text-dark shadow-sm">
-							Nama
-						  </th>
-						  <th class="border-0 bgc-grey-l2 font-weight-bold text-dark shadow-sm">
-							Unit/Fakultas
-						  </th>
-						  <th class="border-0 bgc-grey-l2 font-weight-bold text-dark shadow-sm">
-							Tarjih %
-						  </th>
-						  <th class="border-0 bgc-grey-l2 font-weight-bold text-dark shadow-sm">
-							Tafsir %
-						  </th>
-						  <th class="border-0 bgc-grey-l2 font-weight-bold text-dark shadow-sm">
-							Qiyamul Lail %
-						  </th>
-						  <th class="border-0 bgc-grey-l2 font-weight-bold text-dark shadow-sm">
-							Webinar %
-						  </th>
-						</tr>
-					</thead>
-					<tbody>
-					</tbody>
-				</table>
-				<table id="datatable2" class="d-style w-100 table text-dark-m1 text-95 border-y-1 bgc-h-primary-l3 collapsed dtr-table">
-					<thead class="sticky-nav text-secondary-m1 text-uppercase text-85">
-						<tr>
-						  <th class="border-0 bgc-grey-l2 font-weight-bold text-dark shadow-sm">
-							Nama
-						  </th>
-						  <th class="border-0 bgc-grey-l2 font-weight-bold text-dark shadow-sm">
-							Jumlah Tarjih
-						  </th>
-						  <th class="border-0 bgc-grey-l2 font-weight-bold text-dark shadow-sm">
-							Tarjih Diikuti
-						  </th>
-						  <th class="border-0 bgc-grey-l2 font-weight-bold text-dark shadow-sm">
-							Jumlah Tafsir
-						  </th>
-						  <th class="border-0 bgc-grey-l2 font-weight-bold text-dark shadow-sm">
-							Tafsir Diikuti
-						  </th>
-						  <th class="border-0 bgc-grey-l2 font-weight-bold text-dark shadow-sm">
-							Jumlah Qiyamul Lail
-						  </th>
-						  <th class="border-0 bgc-grey-l2 font-weight-bold text-dark shadow-sm">
-							Qiyamul Lail Diikuti
-						  </th>
-						  <th class="border-0 bgc-grey-l2 font-weight-bold text-dark shadow-sm">
-							Jumlah Webinar
-						  </th>
-						  <th class="border-0 bgc-grey-l2 font-weight-bold text-dark shadow-sm">
-							Webinar Diikuti
-						  </th>
-						</tr>
-					</thead>
-					<tbody>
-					</tbody>
-				</table>
+			<div class="card-body p-0 border-0">
+				<!-- =================== [Charts] ======================= -->
+				<div class="row mt-3 m-1" id="charts">
+					<!-- charts akan di-generate via JS -->
+				</div>
+				<!-- =================== [End Charts] ======================= -->
 			</div>
 
 		</div>
@@ -231,6 +171,7 @@
 {% endblock %}
 
 {% block javascript %}
+
 <script>
 	// helper function untuk format persentase
 	function formatPercentage(totalPresensi, totalPertemuan) {
@@ -238,6 +179,120 @@
 
 		const percent = (totalPresensi / totalPertemuan) * 100;
 		return Number.isInteger(percent) ? percent : percent.toFixed(2);
+	}
+</script>
+
+
+<script>
+	// chart presensi
+	let charts = {};
+
+	tahun = $('#tahun').val();
+	karyawan = $('#karyawan').val();
+
+	$(document).ready(function () {
+		load_chart(tahun, karyawan);
+	});
+
+	$('#tahun, #karyawan').change(function () {
+		tahun = $('#tahun').val();
+		karyawan = $('#karyawan').val();
+		load_chart(tahun, karyawan);
+	});
+
+	function load_chart(tahun, karyawan) {
+		$.ajax({
+			url: "{% url 'main:user.presensi.bagan' %}",
+			type: "GET",
+			data: {
+				tahun: tahun,
+				karyawan: karyawan
+			},
+			success: function (response) {
+				renderCharts(response);
+			},
+			error: function (xhr, status, error) {
+				console.error("AJAX Error:", error);
+			}
+		});
+	}
+
+	function renderCharts(data) {
+		// hapus chart lama
+		for (const key in charts) {
+			charts[key].destroy();
+		}
+		charts = {};
+
+		$('#charts').html('');
+
+		data.forEach(item => {
+			const chartId = `chart_${item.id}`;
+
+			$('#charts').append(`
+				<div class="col-12 col-md-6 col-lg-3 mt-1">
+					<div class="card shadow-sm h-100">
+						<div class="card-header text-center font-weight-bold">
+							${item.nama}
+						</div>
+						<div class="card-body">
+							<canvas id="${chartId}" height="220"></canvas>
+							<div class="text-center mt-2 small text-muted">
+								Presensi: <b>${item.total_presensi} (${formatPercentage(item.total_presensi, item.total_pertemuan)}%)</b> |
+								Total Pertemuan: <b>${item.total_pertemuan}</b>
+							</div>
+						</div>
+					</div>
+				</div>
+			`);
+
+			const ctx = document.getElementById(chartId);
+
+			charts[item.id] = new Chart(ctx, {
+				type: 'pie',
+				data: {
+					labels: ['Hadir', 'Tidak Hadir'],
+					datasets: [{
+						data: [
+							item.total_presensi,
+							Math.max(item.total_pertemuan - item.total_presensi, 0)
+						],
+						backgroundColor: [
+							'#63BDB2',
+							'#343687'
+						]
+					}]
+				},
+				options: {
+					responsive: true,
+					plugins: {
+						legend: {
+							position: 'bottom'
+						},
+						datalabels: {
+							color: '#fff',
+							font: {
+								weight: 'bold'
+							},
+							formatter: (value, ctx) => {
+								if (value === 0) return '';
+								return value;
+							}
+						},
+						tooltip: {
+							callbacks: {
+								label: function (context) {
+									const label = context.label || '';
+									const value = context.raw;
+									return `${label}: ${value}`;
+								}
+							}
+						}
+					}
+				},
+				plugins: [ChartDataLabels]
+			});
+		});
 	}
 </script>
 
@@ -258,18 +313,24 @@
 				$karyawan.empty();
 
 				if (response.length > 0) {
-
-					$karyawan.append(new Option("Semua", ""))
-
 					response.forEach((item, index) => {
+						// select option pertama
+						let isSelected = index === 0;
 						$karyawan.append(
-							new Option(item.text, item.id)
+							new Option(item.text, item.id, isSelected, isSelected)
 						);
 					});
 				}
 
 				// trigger change untuk select2
 				$karyawan.trigger('change');
+
+				// ambil karyawan terpilih
+				let selected_karyawan = $karyawan.val();
+
+				// reload chart
+				let tahun = $('#tahun').val();
+				load_chart(tahun, selected_karyawan);
 			},
 			error: function () {
 				console.error('Gagal load karyawan');
@@ -279,102 +340,6 @@
 </script>
 
 
-<script>
-let table1, table2;
-
-function getFilterParams() {
-    return {
-        tahun: $('#tahun').val(),
-        lembaga: $('#lembaga').val(),
-        karyawan: $('#karyawan').val()
-    };
-}
-
-
-$(document).ready(function () {
-
-    // =========================
-    // COMMON AJAX CONFIG
-    // =========================
-    function buildAjax() {
-        return {
-            url: '{% url "main:user.presensi.presentase" %}',
-            data: function (d) {
-
-                // convert DataTables → backend pagination
-                return {
-                    ...getFilterParams(),
-                    page: (d.start / d.length) + 1,
-                    page_size: d.length,
-                    draw: d.draw
-                };
-            },
-            dataSrc: function (json) {
-                // map response
-                json.recordsTotal = json.pagination.total;
-                json.recordsFiltered = json.pagination.total;
-                return json.data;
-            }
-        };
-    }
-
-    // =========================
-    // TABLE 1 (PERCENTAGE)
-    // =========================
-	table1 = $('#datatable').DataTable({
-		processing: true,
-		serverSide: true,
-		pageLength: 5,
-		lengthMenu: [5, 10, 25, 50, 100],
-		searching: false,
-		ajax: buildAjax(),
-		columns: [
-			{ data: 'nip', defaultContent: '-' },
-			{ data: 'nama', defaultContent: '-' },
-			{ data: 'homebase', defaultContent: '-' },
-			{ data: 'kajian_tarjih_persen', render: d => d + '%' },
-			{ data: 'kajian_tafsir_persen', render: d => d + '%' },
-			{ data: 'kajian_qiyamul_lail_persen', render: d => d + '%' },
-			{ data: 'webinar_persen', render: d => d + '%' }
-		]
-	});
-
-    // =========================
-    // TABLE 2 (DETAIL)
-    // =========================
-	table2 = $('#datatable2').DataTable({
-		processing: true,
-		serverSide: true,
-		pageLength: 5,
-		lengthMenu: [5, 10, 25, 50, 100],
-		searching: false,
-		ajax: buildAjax(),
-		columns: [
-			{ data: 'nama', defaultContent: '-' },
-
-			{ data: 'kajian_tarjih_total', defaultContent: 0 },
-			{ data: 'kajian_tarjih_diikuti', defaultContent: 0 },
-
-			{ data: 'kajian_tafsir_total', defaultContent: 0 },
-			{ data: 'kajian_tafsir_diikuti', defaultContent: 0 },
-
-			{ data: 'kajian_qiyamul_lail_total', defaultContent: 0 },
-			{ data: 'kajian_qiyamul_lail_diikuti', defaultContent: 0 },
-
-			{ data: 'webinar_total', defaultContent: 0 },
-			{ data: 'webinar_diikuti', defaultContent: 0 }
-		]
-	});
-
-
-	$('#tahun, #lembaga, #karyawan').on('change', function () {
-		table1.ajax.reload(null, true); // reset to page 1
-		table2.ajax.reload(null, true);
-	});
-
-});
-
-</script>
 
 
 <script>

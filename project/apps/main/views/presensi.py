@@ -1,5 +1,5 @@
 import datetime
-from django.conf import settings
+from collections import defaultdict
 
 import openpyxl
 from apps.main.forms.presensi import (PresensiExcelForm, PresensiForm,
@@ -9,13 +9,15 @@ from apps.main.views.base import (AdminRequiredMixin, CustomTemplateBaseMixin,
                                   in_grup)
 from apps.services.stream_pdf import stream_sertifikat_pdf
 from apps.services.utils import profilesync
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import AccessMixin, LoginRequiredMixin
 from django.contrib.auth.models import User
+from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Count, Q, Value
+from django.db.models import Count, Prefetch, Q, Value
 from django.db.models.functions import Replace
-from django.http import HttpResponse, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
@@ -510,3 +512,162 @@ class UserPresensiSertifikatView(AdminorUserPresensiRequiredMixin, CustomTemplat
         response["Content-Disposition"] = 'inline; filename="sertifikat-preview.pdf"'
 
         return response
+
+
+class UserPresensiPresentaseView(LoginRequiredMixin, View):
+    def get(self, request):
+        # =========================
+        # PARAMS
+        # =========================
+        tahun = request.GET.get('tahun')
+        lembaga_id = request.GET.get('lembaga')
+        karyawan_id = request.GET.get('karyawan')
+
+        page = int(request.GET.get('page', 1))
+        page_size = int(request.GET.get('page_size', 10))
+
+        if not tahun:
+            return JsonResponse({"error": "Tahun wajib diisi"}, status=400)
+
+        tahun = int(tahun)
+
+        # =========================
+        # BASE QUERY: PERTEMUAN
+        # =========================
+        pertemuan_qs = (
+            Pertemuan.objects
+            .select_related('tipe_pertemuan')
+            .filter(mulai__year=tahun)
+        )
+        pertemuan_list = list(pertemuan_qs)
+
+        # =========================
+        # TIPE LIST
+        # =========================
+        tipe_list = list(TipePertemuan.objects.all())
+
+        # =========================
+        # USERS QUERY
+        # =========================
+        users_qs = User.objects.select_related('profile')
+
+        if lembaga_id:
+            users_qs = users_qs.filter(profile__home_id=lembaga_id)
+
+        if karyawan_id:
+            users_qs = users_qs.filter(id=karyawan_id)
+
+        # =========================
+        # PAGINATION
+        # =========================
+        paginator = Paginator(users_qs, page_size)
+        page_obj = paginator.get_page(page)
+
+        users = page_obj.object_list
+
+        # =========================
+        # PREFETCH PRESENSI
+        # =========================
+        presensi_qs = (
+            Presensi.objects
+            .select_related('pertemuan__tipe_pertemuan')
+            .filter(pertemuan__mulai__year=tahun)
+        )
+
+        users = users.prefetch_related(
+            Prefetch('presensi_set', queryset=presensi_qs)
+        )
+
+        # =========================
+        # BUILD DATA
+        # =========================
+        data = []
+
+        for user in users:
+            profile = getattr(user, 'profile', None)
+
+            tanggalmulaimasuk = self.parse_tanggal_masuk(
+                profile.tanggalmulaimasuk if profile else None
+            )
+
+            # filter pertemuan per user
+            if tanggalmulaimasuk:
+                pertemuan_user = [
+                    p for p in pertemuan_list
+                    if p.mulai and p.mulai.date() >= tanggalmulaimasuk
+                ]
+            else:
+                pertemuan_user = pertemuan_list
+
+            pertemuan_ids = {p.id for p in pertemuan_user}
+
+            # total
+            total_per_tipe = defaultdict(int)
+            for p in pertemuan_user:
+                if p.tipe_pertemuan_id:
+                    total_per_tipe[p.tipe_pertemuan_id] += 1
+
+            # diikuti
+            diikuti_per_tipe = defaultdict(int)
+            seen_pertemuan = set()
+
+            for presensi in user.presensi_set.all():
+                pertemuan = presensi.pertemuan
+
+                if not pertemuan or not pertemuan.tipe_pertemuan_id:
+                    continue
+
+                if pertemuan.id not in pertemuan_ids:
+                    continue
+
+                if pertemuan.id in seen_pertemuan:
+                    continue
+
+                seen_pertemuan.add(pertemuan.id)
+
+                diikuti_per_tipe[pertemuan.tipe_pertemuan_id] += 1
+
+            # build row
+            row = {
+                'nip': getattr(profile, 'nip', user.username),
+                'nama': user.get_full_name(),
+                'homebase': getattr(profile, 'homebase', '') if profile else ''
+            }
+
+            for tipe in tipe_list:
+                key = tipe.nama.lower().replace(' ', '_')
+
+                total = total_per_tipe.get(tipe.id, 0)
+                diikuti = diikuti_per_tipe.get(tipe.id, 0)
+
+                persen = round((diikuti / total) * 100, 2) if total > 0 else 0
+                persen = min(persen, 100)
+
+                row[f'{key}_persen'] = persen
+                row[f'{key}_total'] = total
+                row[f'{key}_diikuti'] = diikuti
+
+            data.append(row)
+
+        # =========================
+        # RESPONSE
+        # =========================
+        return JsonResponse({
+            'data': data,
+            'pagination': {
+                'page': page_obj.number,
+                'page_size': page_size,
+                'total': paginator.count,
+                'num_pages': paginator.num_pages,
+                'has_next': page_obj.has_next(),
+                'has_previous': page_obj.has_previous(),
+            }
+        })
+
+    def parse_tanggal_masuk(self, value):
+        if not value:
+            return None
+        try:
+            return datetime.datetime.strptime(value, "%Y-%m-%d").date()
+        except Exception:
+            return None

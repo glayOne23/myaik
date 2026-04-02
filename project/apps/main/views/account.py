@@ -527,7 +527,7 @@ def by_lembaga_json(request):
         )
         .exclude(profile__kepegawaian="Dosen Tidak Tetap"))
 
-    if lembaga != 'all':
+    if lembaga != '':
         qs = qs.filter(profile__home_id=lembaga)
 
     data = [
