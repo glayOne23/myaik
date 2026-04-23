@@ -182,36 +182,18 @@
 					Bagan Presensi AIK
 				</h5>
 
-				<div class="card-toolbar align-self-center">
+				<div class="card-toolbar align-self-center" style="flex:1; min-width:0;">
 
-					<div class="row">
-						<div class="col-md-4">
-							<div class="input-group flex-nowrap mr-1">
-								<span class="input-group-text" id="addon-wrapping">Tahun</span>
-								<select class="select form-control select2bs4" name="tahun2" id="tahun2">
-									{% for tahun in data_tahun_pertemuan %}
-										<option value="{{tahun}}">{{tahun}}</option>
-									{% endfor %}
-								</select>
-							</div>
-						</div>
-						<div class="col-md-8">
-							<div class="input-group flex-nowrap mr-1">
-								<span class="input-group-text" id="addon-wrapping">Lembaga</span>
-								<select class="select form-control select2bs4" name="lembaga2" id="lembaga2">
-									{% if request|has_group:'admin' %}
-										<option value="all">Semua</option>
-									{% endif %}
-									{% for lembaga in datalembaga %}
-										<option value="{{lembaga.kode_lembaga}}">{{lembaga.nama}}</option>
-									{% endfor %}
-								</select>
-							</div>
-						</div>
+					<div class="input-group flex-nowrap">
+						<span class="input-group-text" id="addon-wrapping2">Tahun</span>
+						<select class="select form-control select2bs4" name="tahun2" id="tahun2">
+							{% for tahun in data_tahun_pertemuan %}
+								<option value="{{tahun}}">{{tahun}}</option>
+							{% endfor %}
+						</select>
 					</div>
 
-
-					<a href="#" data-action="toggle" class="card-toolbar-btn text-grey text-110">
+					<a href="#" data-action="toggle" class="card-toolbar-btn text-grey text-110 ml-2">
 						<i class="fa fa-chevron-up"></i>
 					</a>
 				</div>
@@ -390,30 +372,30 @@ $(document).ready(function () {
 
 
 <script>
-	// chart grafik
+	// chart pie Bagan Presensi AIK per Fakultas/Unit
 	let charts2 = {};
 
-	tahun2 = $('#tahun2').val();
-	lembaga2 = $('#lembaga2').val();
+	const PIE_COLORS = [
+		'#4e4e4e', '#e74c3c', '#2ecc71', '#3498db', '#9b59b6',
+		'#e67e22', '#1abc9c', '#e91e63', '#00bcd4', '#ff9800',
+		'#8bc34a', '#ff5722', '#607d8b', '#9c27b0', '#cddc39',
+		'#795548', '#03a9f4', '#673ab7', '#f44336', '#009688',
+		'#ffc107', '#5c6bc0'
+	];
 
 	$(document).ready(function () {
-		load_chart2(tahun2, lembaga2);
+		load_chart2($('#tahun2').val(), $('#lembaga2').val());
 	});
 
-	$('#tahun2, #lembaga2').change(function () {
-		tahun2 = $('#tahun2').val();
-		lembaga2 = $('#lembaga2').val();
-		load_chart2(tahun2, lembaga2);
+	$('#tahun2').change(function () {
+		load_chart2($('#tahun2').val());
 	});
 
-	function load_chart2(tahun2, lembaga2) {
+	function load_chart2(tahun2) {
 		$.ajax({
-			url: "{% url 'main:user.presensi.grafik' %}",
+			url: "{% url 'main:user.presensi.pie' %}",
 			type: "GET",
-			data: {
-				tahun: tahun2,
-				lembaga: lembaga2
-			},
+			data: { tahun: tahun2 },
 			success: function (response) {
 				renderCharts2(response);
 			},
@@ -423,42 +405,30 @@ $(document).ready(function () {
 		});
 	}
 
-
 	function renderCharts2(data) {
-		// destroy chart lama
 		for (const key in charts2) {
 			charts2[key].destroy();
 		}
 		charts2 = {};
-
 		$('#charts2').html('');
 
 		data.forEach(tipe => {
-			const chartId = `line_chart_${tipe.tipe_id}`;
+			if (!tipe.data || tipe.data.length === 0) return;
 
-			// ambil data pertemuan
-			const labels = [];
-			const values = [];
-			const percentages = [];
+			const chartId = `pie_chart_${tipe.tipe_id}`;
+			const labels   = tipe.data.map(d => d.lembaga);
+			const values   = tipe.data.map(d => d.count);
+			const percents = tipe.data.map(d => d.percent);
+			const colors   = labels.map((_, i) => PIE_COLORS[i % PIE_COLORS.length]);
 
-			tipe.pertemuan.forEach(p => {
-				labels.push(p.judul);
-				values.push(p.total_presensi);
-				percentages.push(formatPercentage(p.total_presensi, p.total_user))
-			});
-
-			// skip jika tidak ada data
-			if (labels.length === 0) return;
-
-			// append canvas
 			$('#charts2').append(`
 				<div class="col-12 col-md-6 mt-2">
 					<div class="card shadow-sm h-100">
 						<div class="card-header text-center font-weight-bold">
-							${tipe.tipe_nama}
+							${tipe.tipe_nama} Fakultas/Unit
 						</div>
 						<div class="card-body">
-							<canvas id="${chartId}" height="220"></canvas>
+							<canvas id="${chartId}"></canvas>
 						</div>
 					</div>
 				</div>
@@ -467,52 +437,45 @@ $(document).ready(function () {
 			const ctx = document.getElementById(chartId).getContext('2d');
 
 			charts2[tipe.tipe_id] = new Chart(ctx, {
-				type: 'line',
+				type: 'doughnut',
+				plugins: [ChartDataLabels],
 				data: {
 					labels: labels,
 					datasets: [{
-						label: 'Jumlah Presensi',
 						data: values,
-						fill: false,
-						borderColor: '#63BDB2',
-						// '#63BDB2',
-						// '#343687'
-						tension: 0.3,
-						pointRadius: 4,
-						pointHoverRadius: 6
+						backgroundColor: colors,
+						borderWidth: 1
 					}]
 				},
 				options: {
 					responsive: true,
-					maintainAspectRatio: false,
-					scales: {
-						y: {
-							beginAtZero: true,
-							title: {
-								display: true,
-								text: 'Jumlah Presensi'
-							}
-						},
-						x: {
-							title: {
-								display: true,
-								text: 'Kajian'
-							}
-						}
-					},
+					maintainAspectRatio: true,
+					cutout: '50%',
 					plugins: {
 						legend: {
 							display: true,
-							position: 'bottom'
+							position: 'right',
+							labels: {
+								boxWidth: 12,
+								font: { size: 11 }
+							}
 						},
 						tooltip: {
 							callbacks: {
 								label: function (ctx) {
-									const presensi = ctx.raw;
-									const percent = percentages[ctx.dataIndex];
-									return `Presensi: ${presensi} (${percent}%)`;
+									return `${ctx.label}: ${percents[ctx.dataIndex]}%`;
 								}
 							}
+						},
+						datalabels: {
+							display: function (ctx) {
+								return percents[ctx.dataIndex] >= 5;
+							},
+							formatter: function (value, ctx) {
+								return percents[ctx.dataIndex] + '%';
+							},
+							color: '#fff',
+							font: { weight: 'bold', size: 11 }
 						}
 					}
 				}

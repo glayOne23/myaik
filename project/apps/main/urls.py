@@ -106,6 +106,7 @@ urlpatterns = [
             path('presentase/export/', presensi.UserPresensiPresentasePDFView.as_view(), name='user.presensi.presentase.export'),
             path('bagan/', presensi.UserPresensiBaganView.as_view(), name='user.presensi.bagan'),
             path('grafik/', presensi.LembagaPresensiGrafikView.as_view(), name='user.presensi.grafik'),
+            path('pie/', presensi.LembagaPresensiPieView.as_view(), name='user.presensi.pie'),
             path('<int:presensi_id>/sertifikat/', presensi.UserPresensiSertifikatView.as_view(), name='user.presensi.sertifikat'),
             # =================================================[ LOAD PAGE ]=================================================
         ])),

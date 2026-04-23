@@ -4,7 +4,7 @@ from collections import defaultdict
 import openpyxl
 from apps.main.forms.presensi import (PresensiExcelForm, PresensiForm,
                                       PresensiTotalExcelForm)
-from apps.main.models import Pertemuan, Presensi, TipePertemuan
+from apps.main.models import Lembaga, Pertemuan, Presensi, TipePertemuan
 from apps.main.views.base import (AdminRequiredMixin, CustomTemplateBaseMixin,
                                   in_grup)
 from apps.services.cetak_pdf import render_to_pdf
@@ -481,6 +481,79 @@ class LembagaPresensiGrafikView(LoginRequiredMixin, View):
                 })
 
             return JsonResponse(list(result.values()), safe=False)
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+
+class LembagaPresensiPieView(LoginRequiredMixin, View):
+    def get(self, request):
+        tahun = request.GET.get('tahun')
+
+        if not tahun:
+            return JsonResponse({"error": "Tahun harus disediakan."}, status=400)
+
+        try:
+            # Build effective lembaga map: home_id → display label (jenis_id 1 or 3 only)
+            lembaga_map = {}
+            for lb in Lembaga.objects.select_related('superunit', 'superunit__superunit').all():
+                if lb.jenis_id in [1, 3]:
+                    lembaga_map[lb.kode_lembaga] = lb.namasingkat or lb.nama
+                else:
+                    sup = lb.superunit
+                    if sup and sup.jenis_id in [1, 3]:
+                        lembaga_map[lb.kode_lembaga] = sup.namasingkat or sup.nama
+                    elif sup and sup.superunit and sup.superunit.jenis_id in [1, 3]:
+                        lembaga_map[lb.kode_lembaga] = sup.superunit.namasingkat or sup.superunit.nama
+                    else:
+                        lembaga_map[lb.kode_lembaga] = lb.namasingkat or lb.nama
+
+            presensi_qs = (
+                Presensi.objects
+                .filter(
+                    pertemuan__mulai__year=tahun,
+                    peserta__profile__status="Aktif",
+                    peserta__profile__home_id__isnull=False,
+                )
+                .exclude(peserta__profile__kepegawaian="Dosen Tidak Tetap")
+                .select_related('pertemuan__tipe_pertemuan', 'peserta__profile')
+            )
+
+            tipe_data = defaultdict(lambda: defaultdict(int))
+            tipe_names = {}
+
+            for p in presensi_qs:
+                tipe = p.pertemuan.tipe_pertemuan
+                if not tipe:
+                    continue
+                home_id = p.peserta.profile.home_id
+                label = lembaga_map.get(home_id, home_id)
+                tipe_data[tipe.id][label] += 1
+                tipe_names[tipe.id] = tipe.nama
+
+            output = []
+            for tipe_id in sorted(tipe_data.keys()):
+                counts = tipe_data[tipe_id]
+                total = sum(counts.values())
+                slices = sorted(
+                    [
+                        {
+                            "lembaga": k,
+                            "count": v,
+                            "percent": round(v / total * 100, 1) if total else 0,
+                        }
+                        for k, v in counts.items()
+                    ],
+                    key=lambda x: -x["count"],
+                )
+                output.append({
+                    "tipe_id": tipe_id,
+                    "tipe_nama": tipe_names[tipe_id],
+                    "total": total,
+                    "data": slices,
+                })
+
+            return JsonResponse(output, safe=False)
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
