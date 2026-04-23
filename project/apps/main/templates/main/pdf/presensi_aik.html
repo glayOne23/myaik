@@ -1,0 +1,211 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @page {
+    size: A4 landscape;
+    margin: 12mm 12mm 14mm 12mm;
+    @frame footer_frame {
+      -pdf-frame-content: footer_content;
+      bottom: 4mm; left: 12mm; right: 12mm; height: 7mm;
+    }
+  }
+
+  body {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 8pt;
+    color: #222;
+  }
+
+  #footer_content {
+    font-size: 7pt;
+    color: #555;
+    text-align: right;
+    border-top: 0.5pt solid #bbb;
+    padding-top: 1.5mm;
+  }
+
+  /* ── document header ── */
+  .doc-header {
+    width: 100%;
+    border-bottom: 1.5pt solid #333;
+    margin-bottom: 5mm;
+    padding-bottom: 3mm;
+  }
+
+  .doc-header td {
+    border: none;
+    padding: 0;
+    vertical-align: middle;
+  }
+
+  .doc-header .logo-cell {
+    width: 27mm;
+    text-align: left;
+  }
+
+  .doc-header .title-cell {
+    text-align: center;
+  }
+
+  .doc-header .title1 {
+    font-size: 12pt;
+    font-weight: bold;
+    color: #111;
+  }
+
+  .doc-header .title2 {
+    font-size: 11pt;
+    color: #333;
+    margin-top: 1mm;
+  }
+
+  .doc-header .title3 {
+    font-size: 11pt;
+    color: #333;
+    margin-top: 1mm;
+  }
+
+  h3 {
+    font-size: 11pt;
+    font-weight: bold;
+    margin: 5mm 0 2mm 0;
+    color: #444;
+  }
+
+  table {
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  th {
+    background-color: #4a4a4a;
+    color: #ffffff;
+    font-size: 9pt;
+    font-weight: bold;
+    padding: 3pt 3pt;
+    border: 0.5pt solid #333333;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  td {
+    font-size: 9pt;
+    padding: 3pt 4pt;
+    border: 0.5pt solid #cccccc;
+    vertical-align: middle;
+  }
+
+  tr.even td { background-color: #f2f2f2; }
+
+  .tc { text-align: center; }
+  .tl { text-align: left; }
+  .spacer { height: 5mm; }
+</style>
+</head>
+<body>
+
+<div id="footer_content">
+  Halaman <pdf:pagenumber> dari <pdf:pagecount>
+</div>
+
+<!-- ===== DOCUMENT HEADER ===== -->
+<table class="doc-header">
+  <tr>
+    <td class="logo-cell">
+      <img src="{% static 'images/logo/ums_logo_color.png' %}" style="width: auto; height: auto;" alt="Logo UMS">
+    </td>
+    <td class="title-cell">
+      <div class="title1">PRESENSI AL-ISLAM DAN KEMUHAMMADIYAHAN</div>
+      <div class="title2">TARJIH &mdash; TAFSIR &mdash; QIYAMUL LAIL &mdash; WEBINAR</div>
+      <div class="title3">TAHUN {{ tahun }}</div>
+    </td>
+  </tr>
+</table>
+
+<!-- ===== TABLE 1: PERSENTASE ===== -->
+<h3>Persentase Kehadiran</h3>
+<table style="width: 100%;">
+  <colgroup>
+    <col style="width: {{ t1_no }}mm;">
+    <col style="width: {{ t1_nip }}mm;">
+    <col style="width: {{ t1_nama }}mm;">
+    <col style="width: {{ t1_homebase }}mm;">
+    {% for tipe in tipe_list %}<col style="width: {{ t1_tipe_w }}mm;">{% endfor %}
+  </colgroup>
+  <thead>
+    <tr>
+      <th>No</th>
+      <th>NIP</th>
+      <th>Nama</th>
+      <th>Unit / Fakultas</th>
+      {% for tipe in tipe_list %}
+      <th>{{ tipe.nama }} %</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in rows %}
+    <tr {% if forloop.counter|divisibleby:2 %}class="even"{% endif %}>
+      <td class="tc">{{ forloop.counter }}</td>
+      <td class="tc">{{ row.nip }}</td>
+      <td class="tl">{{ row.nama }}</td>
+      <td class="tl">{{ row.homebase }}</td>
+      {% for t in row.tipe_data %}
+      <td class="tc">{{ t.persen }}%</td>
+      {% endfor %}
+    </tr>
+    {% empty %}
+    <tr><td colspan="{{ col_count_1 }}" class="tc">Tidak ada data.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="spacer"></div>
+
+<!-- ===== TABLE 2: DETAIL ===== -->
+<h3>Detail Kehadiran</h3>
+<table style="width: 100%;">
+  <colgroup>
+    <col style="width: {{ t2_no }}mm;">
+    <col style="width: {{ t2_nama }}mm;">
+    {% for tipe in tipe_list %}
+    <col style="width: {{ t2_col_w }}mm;">
+    <col style="width: {{ t2_col_w }}mm;">
+    {% endfor %}
+  </colgroup>
+  <thead>
+    <tr>
+      <th rowspan="2">No</th>
+      <th rowspan="2">Nama</th>
+      {% for tipe in tipe_list %}
+      <th colspan="2">{{ tipe.nama }}</th>
+      {% endfor %}
+    </tr>
+    <tr>
+      {% for tipe in tipe_list %}
+      <th>Jumlah</th>
+      <th>Diikuti</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in rows %}
+    <tr {% if forloop.counter|divisibleby:2 %}class="even"{% endif %}>
+      <td class="tc">{{ forloop.counter }}</td>
+      <td class="tl">{{ row.nama }}</td>
+      {% for t in row.tipe_data %}
+      <td class="tc">{{ t.total }}</td>
+      <td class="tc">{{ t.diikuti }}</td>
+      {% endfor %}
+    </tr>
+    {% empty %}
+    <tr><td colspan="{{ col_count_2 }}" class="tc">Tidak ada data.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+</body>
+</html>

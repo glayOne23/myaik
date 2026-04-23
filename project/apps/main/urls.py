@@ -103,7 +103,7 @@ urlpatterns = [
 
         path('presensi/', include([
             path('presentase/', presensi.UserPresensiPresentaseView.as_view(), name='user.presensi.presentase'),
-            path('presentase/export/', presensi.UserPresensiPresentaseExcelView.as_view(), name='user.presensi.presentase.export'),
+            path('presentase/export/', presensi.UserPresensiPresentasePDFView.as_view(), name='user.presensi.presentase.export'),
             path('bagan/', presensi.UserPresensiBaganView.as_view(), name='user.presensi.bagan'),
             path('grafik/', presensi.LembagaPresensiGrafikView.as_view(), name='user.presensi.grafik'),
             path('<int:presensi_id>/sertifikat/', presensi.UserPresensiSertifikatView.as_view(), name='user.presensi.sertifikat'),

@@ -7,6 +7,7 @@ from apps.main.forms.presensi import (PresensiExcelForm, PresensiForm,
 from apps.main.models import Pertemuan, Presensi, TipePertemuan
 from apps.main.views.base import (AdminRequiredMixin, CustomTemplateBaseMixin,
                                   in_grup)
+from apps.services.cetak_pdf import render_to_pdf
 from apps.services.stream_pdf import stream_sertifikat_pdf
 from apps.services.utils import profilesync
 from django.conf import settings
@@ -678,7 +679,7 @@ class UserPresensiPresentaseView(LoginRequiredMixin, View):
             return None
 
 
-class UserPresensiPresentaseExcelView(LoginRequiredMixin, View):
+class UserPresensiPresentasePDFView(LoginRequiredMixin, View):
     def get(self, request):
         tahun = request.GET.get('tahun')
         lembaga_id = request.GET.get('lembaga')
@@ -777,75 +778,56 @@ class UserPresensiPresentaseExcelView(LoginRequiredMixin, View):
 
             data.append(row)
 
-        wb = openpyxl.Workbook()
-
-        header_fill = openpyxl.styles.PatternFill("solid", fgColor="2F5496")
-        header_font = openpyxl.styles.Font(bold=True, color="FFFFFF")
-        center_align = openpyxl.styles.Alignment(horizontal="center", vertical="center", wrap_text=True)
-
-        def style_header_row(ws):
-            for cell in ws[1]:
-                cell.fill = header_fill
-                cell.font = header_font
-                cell.alignment = center_align
-            ws.freeze_panes = "A2"
-
-        # Sheet 1: Persentase
-        ws1 = wb.active
-        ws1.title = "Persentase"
-
-        headers1 = ['No', 'NIP', 'Nama', 'Unit/Fakultas']
-        for tipe in tipe_list:
-            headers1.append(f'{tipe.nama} %')
-        ws1.append(headers1)
-        style_header_row(ws1)
-
-        for i, row in enumerate(data, start=1):
-            r = [i, row['nip'], row['nama'], row['homebase']]
+        # ── pre-process rows untuk template ───────────────────────
+        n_tipe = len(tipe_list)
+        rows = []
+        for row in data:
+            tipe_data = []
             for tipe in tipe_list:
                 key = tipe.nama.lower().replace(' ', '_')
-                r.append(row.get(f'{key}_persen', 0))
-            ws1.append(r)
+                tipe_data.append({
+                    'persen':  row.get(f'{key}_persen', 0),
+                    'total':   row.get(f'{key}_total', 0),
+                    'diikuti': row.get(f'{key}_diikuti', 0),
+                })
+            rows.append({
+                'nip':      row['nip'],
+                'nama':     row['nama'],
+                'homebase': row['homebase'],
+                'tipe_data': tipe_data,
+            })
 
-        ws1.column_dimensions['A'].width = 5
-        ws1.column_dimensions['B'].width = 18
-        ws1.column_dimensions['C'].width = 30
-        ws1.column_dimensions['D'].width = 25
-        for col_idx in range(5, 5 + len(tipe_list)):
-            col_letter = openpyxl.utils.get_column_letter(col_idx)
-            ws1.column_dimensions[col_letter].width = 16
+        # ── lebar kolom dalam mm (A4 landscape: 297 - 24mm margin = 273mm) ──
+        PAGE_W = 273
 
-        # Sheet 2: Detail
-        ws2 = wb.create_sheet("Detail")
+        t1_no, t1_nip, t1_nama, t1_homebase = 8, 22, 68, 55
+        t1_tipe_w = round((PAGE_W - t1_no - t1_nip - t1_nama - t1_homebase) / n_tipe, 1) if n_tipe else 20
 
-        headers2 = ['No', 'Nama']
-        for tipe in tipe_list:
-            headers2.append(f'Jumlah {tipe.nama}')
-            headers2.append(f'{tipe.nama} Diikuti')
-        ws2.append(headers2)
-        style_header_row(ws2)
+        t2_no, t2_nama = 8, 75
+        t2_col_w = round((PAGE_W - t2_no - t2_nama) / (n_tipe * 2), 1) if n_tipe else 20
 
-        for i, row in enumerate(data, start=1):
-            r = [i, row['nama']]
-            for tipe in tipe_list:
-                key = tipe.nama.lower().replace(' ', '_')
-                r.append(row.get(f'{key}_total', 0))
-                r.append(row.get(f'{key}_diikuti', 0))
-            ws2.append(r)
+        context = {
+            'tahun':      tahun,
+            'tipe_list':  tipe_list,
+            'rows':       rows,
+            'col_count_1': 4 + n_tipe,
+            'col_count_2': 2 + n_tipe * 2,
+            # table 1 widths (mm)
+            't1_no': t1_no, 't1_nip': t1_nip, 't1_nama': t1_nama,
+            't1_homebase': t1_homebase, 't1_tipe_w': t1_tipe_w,
+            # table 2 widths (mm)
+            't2_no': t2_no, 't2_nama': t2_nama, 't2_col_w': t2_col_w,
+        }
 
-        ws2.column_dimensions['A'].width = 5
-        ws2.column_dimensions['B'].width = 30
-        for col_idx in range(3, 3 + len(tipe_list) * 2):
-            col_letter = openpyxl.utils.get_column_letter(col_idx)
-            ws2.column_dimensions[col_letter].width = 20
-
-        filename = f'Presensi_AIK_{tahun}.xlsx'
-        response = HttpResponse(
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        # ── render HTML → PDF via xhtml2pdf ───────────────────────
+        template = 'main/pdf/presensi_aik.html'
+        filename = f'Presensi_AIK_{tahun}.pdf'
+        # return render(request, template, context)
+        return render_to_pdf(
+            template,
+            context,
+            filename=filename
         )
-        response['Content-Disposition'] = f'attachment; filename="{filename}"'
-        wb.save(response)
-        return response
 
     def _parse_tanggal_masuk(self, value):
         if not value:
