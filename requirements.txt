@@ -32,6 +32,7 @@ openpyxl==3.1.5
 reportlab==4.4.7
 PyPDF2==3.0.1
 
+xhtml2pdf==0.2.17
 djangorestframework==3.16.1
 Markdown==3.10.2
 django-filter==25.2
