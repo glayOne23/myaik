@@ -1,4 +1,5 @@
 import os
+import re
 from io import BytesIO
 
 from django.conf import settings
@@ -8,17 +9,26 @@ from django.template.loader import get_template
 from xhtml2pdf import pisa
 
 
-def link_callback(uri, rel):
+def _strip_manifest_hash(relative_path):
     """
-    Convert HTML URIs to absolute system paths so xhtml2pdf can access those resources
+    ManifestStaticFilesStorage appends a content hash before the extension,
+    e.g. 'images/logo/ums_logo_color.490156a3b753.png'
+         → 'images/logo/ums_logo_color.png'
+    Strip it so finders.find() can locate the source file.
+    """
+    return re.sub(r'\.[a-f0-9]{12}(\.[^./]+)$', r'\1', relative_path)
+
+
+def link_callback(uri, _rel):
+    """
+    Convert HTML URIs to absolute system paths so xhtml2pdf can access those resources.
+    Handles ManifestStaticFilesStorage hashed filenames transparently.
     """
     if uri.startswith(settings.STATIC_URL):
-        path = finders.find(uri.replace(settings.STATIC_URL, ""))
+        relative = uri.replace(settings.STATIC_URL, "")
+        path = finders.find(relative) or finders.find(_strip_manifest_hash(relative))
     elif uri.startswith(settings.MEDIA_URL):
-        path = os.path.join(
-            settings.MEDIA_ROOT,
-            uri.replace(settings.MEDIA_URL, "")
-        )
+        path = os.path.join(settings.MEDIA_ROOT, uri.replace(settings.MEDIA_URL, ""))
     else:
         return uri
 
