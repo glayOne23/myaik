@@ -173,7 +173,7 @@
 
 
 	<!-- =================== [Div Bagan AIK] ======================= -->
-	<div class="mt-2 mt-lg-2">
+	<div class="mt-2 mt-lg-2" id="bagan-aik-section">
 		<div class="card bcard">
 			<div class="border-t-3 w-100 brc-primary-m1 radius-t-1"></div>
 
@@ -383,11 +383,23 @@ $(document).ready(function () {
 		'#ffc107', '#5c6bc0'
 	];
 
+	let baganLoaded = false;
+
+	const baganObserver = new IntersectionObserver(function (entries) {
+		entries.forEach(function (entry) {
+			if (entry.isIntersecting && !baganLoaded) {
+				baganLoaded = true;
+				load_chart2($('#tahun2').val());
+			}
+		});
+	}, { threshold: 1 });
+
 	$(document).ready(function () {
-		load_chart2($('#tahun2').val(), $('#lembaga2').val());
+		baganObserver.observe(document.getElementById('bagan-aik-section'));
 	});
 
 	$('#tahun2').change(function () {
+		baganLoaded = true;
 		load_chart2($('#tahun2').val());
 	});
 
