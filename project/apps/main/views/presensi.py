@@ -489,6 +489,7 @@ class LembagaPresensiGrafikView(LoginRequiredMixin, View):
 class LembagaPresensiPieView(LoginRequiredMixin, View):
     def get(self, request):
         tahun = request.GET.get('tahun')
+        kode_lembaga = request.GET.get('lembaga')
 
         if not tahun:
             return JsonResponse({"error": "Tahun harus disediakan."}, status=400)
@@ -510,6 +511,14 @@ class LembagaPresensiPieView(LoginRequiredMixin, View):
                     elif sup and sup.superunit and sup.superunit.jenis_id in [1, 3]:
                         lembaga_map[lb.kode_lembaga] = sup.superunit.namasingkat or sup.superunit.nama
                     # else: unmappable home_ids are excluded from the chart
+
+            # If a specific lembaga is selected, restrict to its label only
+            if kode_lembaga and kode_lembaga != 'all':
+                selected_label = lembaga_map.get(kode_lembaga)
+                if selected_label in valid_labels:
+                    valid_labels = {selected_label}
+                else:
+                    valid_labels = set()
 
             # Count total active employees per effective lembaga (denominator)
             total_per_lembaga = defaultdict(int)

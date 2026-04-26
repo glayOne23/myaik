@@ -44,6 +44,7 @@ def index(request):
     context['data_tahun_pertemuan'] = Pertemuan.objects.values_list('mulai__year', flat=True).distinct().order_by('-mulai__year')
     if user.groups.filter(name='admin').exists():
         context['datalembaga'] = Lembaga.objects.all()
+        context['datalembaga_pie'] = Lembaga.objects.filter(jenis_id__in=[1, 3]).order_by('nama')
         context['datakaryawan'] = (
             base_karyawan_qs
             .distinct()
@@ -51,6 +52,7 @@ def index(request):
     elif datajabatan:
         context['datalembaga'] = Lembaga.objects.filter(Q(id__in=datajabatan) | Q(superunit__id__in=datajabatan)).distinct()
         datakodelembaga = context['datalembaga'].values_list('kode_lembaga', flat=True)
+        context['datalembaga_pie'] = context['datalembaga'].filter(jenis_id__in=[1, 3]).order_by('nama')
         context['datakaryawan'] = (
             base_karyawan_qs
             .filter(
@@ -61,6 +63,10 @@ def index(request):
         )
     else:
         context['datalembaga'] = Lembaga.objects.filter(kode_lembaga=user.profile.home_id).distinct()
+        context['datalembaga_pie'] = Lembaga.objects.filter(
+            Q(kode_lembaga=user.profile.home_id) | Q(superunit__kode_lembaga=user.profile.home_id),
+            jenis_id__in=[1, 3]
+        ).order_by('nama').distinct()
         context['datakaryawan'] = User.objects.filter(username=request.user.username)
 
 

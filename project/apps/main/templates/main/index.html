@@ -184,13 +184,28 @@
 
 				<div class="card-toolbar align-self-center" style="flex:1; min-width:0;">
 
-					<div class="input-group flex-nowrap">
-						<span class="input-group-text" id="addon-wrapping2">Tahun</span>
-						<select class="select form-control select2bs4" name="tahun2" id="tahun2">
-							{% for tahun in data_tahun_pertemuan %}
-								<option value="{{tahun}}">{{tahun}}</option>
-							{% endfor %}
-						</select>
+					<div class="row w-100 no-gutters">
+						<div class="col-auto mr-2">
+							<div class="input-group flex-nowrap">
+								<span class="input-group-text">Tahun</span>
+								<select class="select form-control select2bs4" name="tahun2" id="tahun2">
+									{% for tahun in data_tahun_pertemuan %}
+										<option value="{{tahun}}">{{tahun}}</option>
+									{% endfor %}
+								</select>
+							</div>
+						</div>
+						<div class="col mr-2">
+							<div class="input-group flex-nowrap">
+								<span class="input-group-text">Lembaga</span>
+								<select class="select form-control select2bs4" name="lembaga2" id="lembaga2">
+									<option value="all">Semua</option>
+									{% for lb in datalembaga_pie %}
+										<option value="{{ lb.kode_lembaga }}">{{ lb.nama }}</option>
+									{% endfor %}
+								</select>
+							</div>
+						</div>
 					</div>
 
 					<a href="#" data-action="toggle" class="card-toolbar-btn text-grey text-110 ml-2">
@@ -389,7 +404,7 @@ $(document).ready(function () {
 		entries.forEach(function (entry) {
 			if (entry.isIntersecting && !baganLoaded) {
 				baganLoaded = true;
-				load_chart2($('#tahun2').val());
+				load_chart2($('#tahun2').val(), $('#lembaga2').val());
 			}
 		});
 	}, { threshold: 1 });
@@ -398,16 +413,16 @@ $(document).ready(function () {
 		baganObserver.observe(document.getElementById('bagan-aik-section'));
 	});
 
-	$('#tahun2').change(function () {
+	$('#tahun2, #lembaga2').change(function () {
 		baganLoaded = true;
-		load_chart2($('#tahun2').val());
+		load_chart2($('#tahun2').val(), $('#lembaga2').val());
 	});
 
-	function load_chart2(tahun2) {
+	function load_chart2(tahun2, lembaga2) {
 		$.ajax({
 			url: "{% url 'main:user.presensi.pie' %}",
 			type: "GET",
-			data: { tahun: tahun2 },
+			data: { tahun: tahun2, lembaga: lembaga2 },
 			success: function (response) {
 				renderCharts2(response);
 			},
