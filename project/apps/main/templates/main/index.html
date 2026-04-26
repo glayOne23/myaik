@@ -429,8 +429,9 @@ $(document).ready(function () {
 
 			const chartId = `pie_chart_${tipe.tipe_id}`;
 			const labels   = tipe.data.map(d => d.lembaga);
-			const values   = tipe.data.map(d => d.count);
-			const percents = tipe.data.map(d => d.percent);
+			const values     = tipe.data.map(d => d.percent);   // avg attendance rate as pie value
+			const totals     = tipe.data.map(d => d.total);
+			const nPertemuan = tipe.data.map(d => d.n_pertemuan);
 			const colors   = labels.map((_, i) => PIE_COLORS[i % PIE_COLORS.length]);
 
 			$('#charts2').append(`
@@ -475,16 +476,17 @@ $(document).ready(function () {
 						tooltip: {
 							callbacks: {
 								label: function (ctx) {
-									return `${ctx.label}: ${percents[ctx.dataIndex]}%`;
+									const i = ctx.dataIndex;
+									return `${ctx.label}: ${values[i]}% rata-rata dari ${nPertemuan[i]} pertemuan (${totals[i]} karyawan)`;
 								}
 							}
 						},
 						datalabels: {
 							display: function (ctx) {
-								return percents[ctx.dataIndex] >= 5;
+								return values[ctx.dataIndex] >= 5;
 							},
 							formatter: function (value, ctx) {
-								return percents[ctx.dataIndex] + '%';
+								return values[ctx.dataIndex] + '%';
 							},
 							color: '#fff',
 							font: { weight: 'bold', size: 11 }

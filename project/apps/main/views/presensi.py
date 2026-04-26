@@ -494,21 +494,49 @@ class LembagaPresensiPieView(LoginRequiredMixin, View):
             return JsonResponse({"error": "Tahun harus disediakan."}, status=400)
 
         try:
-            # Build effective lembaga map: home_id → display label (jenis_id 1 or 3 only)
+            # Build effective lembaga map: home_id → label (jenis_id 1 or 3 only)
+            # Also track which labels are valid (come from jenis_id 1 or 3)
             lembaga_map = {}
+            valid_labels = set()
             for lb in Lembaga.objects.select_related('superunit', 'superunit__superunit').all():
                 if lb.jenis_id in [1, 3]:
-                    lembaga_map[lb.kode_lembaga] = lb.namasingkat or lb.nama
+                    label = lb.namasingkat or lb.nama
+                    lembaga_map[lb.kode_lembaga] = label
+                    valid_labels.add(label)
                 else:
                     sup = lb.superunit
                     if sup and sup.jenis_id in [1, 3]:
                         lembaga_map[lb.kode_lembaga] = sup.namasingkat or sup.nama
                     elif sup and sup.superunit and sup.superunit.jenis_id in [1, 3]:
                         lembaga_map[lb.kode_lembaga] = sup.superunit.namasingkat or sup.superunit.nama
-                    else:
-                        lembaga_map[lb.kode_lembaga] = lb.namasingkat or lb.nama
+                    # else: unmappable home_ids are excluded from the chart
 
-            presensi_qs = (
+            # Count total active employees per effective lembaga (denominator)
+            total_per_lembaga = defaultdict(int)
+            for home_id in (
+                User.objects
+                .filter(profile__status="Aktif", profile__home_id__isnull=False)
+                .exclude(profile__kepegawaian="Dosen Tidak Tetap")
+                .values_list('profile__home_id', flat=True)
+            ):
+                label = lembaga_map.get(home_id)
+                if label in valid_labels:
+                    total_per_lembaga[label] += 1
+
+            # All pertemuan for the year grouped by tipe
+            tipe_names = {}
+            tipe_pertemuan_ids = defaultdict(set)
+            for row in (
+                Pertemuan.objects
+                .filter(mulai__year=tahun, tipe_pertemuan__isnull=False)
+                .values('id', 'tipe_pertemuan__id', 'tipe_pertemuan__nama')
+            ):
+                tid = row['tipe_pertemuan__id']
+                tipe_names[tid] = row['tipe_pertemuan__nama']
+                tipe_pertemuan_ids[tid].add(row['id'])
+
+            # Distinct (pertemuan_id, peserta_id, home_id) — one row per person per meeting
+            attendance_rows = (
                 Presensi.objects
                 .filter(
                     pertemuan__mulai__year=tahun,
@@ -516,40 +544,46 @@ class LembagaPresensiPieView(LoginRequiredMixin, View):
                     peserta__profile__home_id__isnull=False,
                 )
                 .exclude(peserta__profile__kepegawaian="Dosen Tidak Tetap")
-                .select_related('pertemuan__tipe_pertemuan', 'peserta__profile')
+                .values('pertemuan_id', 'peserta_id', 'peserta__profile__home_id')
+                .distinct()
             )
 
-            tipe_data = defaultdict(lambda: defaultdict(int))
-            tipe_names = {}
-
-            for p in presensi_qs:
-                tipe = p.pertemuan.tipe_pertemuan
-                if not tipe:
+            # pertemuan_id → lembaga_label → set of peserta_ids
+            pertemuan_attendees = defaultdict(lambda: defaultdict(set))
+            for row in attendance_rows:
+                label = lembaga_map.get(row['peserta__profile__home_id'])
+                if label not in valid_labels:
                     continue
-                home_id = p.peserta.profile.home_id
-                label = lembaga_map.get(home_id, home_id)
-                tipe_data[tipe.id][label] += 1
-                tipe_names[tipe.id] = tipe.nama
+                pertemuan_attendees[row['pertemuan_id']][label].add(row['peserta_id'])
 
+            # Average attendance rate per lembaga per tipe:
+            # rate_per_meeting = attendees_from_lembaga / total_employees_in_lembaga
+            # avg_rate = mean of rate_per_meeting across all meetings of that tipe
             output = []
-            for tipe_id in sorted(tipe_data.keys()):
-                counts = tipe_data[tipe_id]
-                total = sum(counts.values())
-                slices = sorted(
-                    [
-                        {
-                            "lembaga": k,
-                            "count": v,
-                            "percent": round(v / total * 100, 1) if total else 0,
-                        }
-                        for k, v in counts.items()
-                    ],
-                    key=lambda x: -x["count"],
-                )
+            for tipe_id in sorted(tipe_pertemuan_ids.keys()):
+                pertemuan_ids = tipe_pertemuan_ids[tipe_id]
+                n = len(pertemuan_ids)
+                slices = []
+                for label in sorted(valid_labels):
+                    total_emp = total_per_lembaga.get(label, 0)
+                    if total_emp == 0 or n == 0:
+                        avg_rate = 0.0
+                    else:
+                        sum_rates = sum(
+                            len(pertemuan_attendees[pid].get(label, set())) / total_emp * 100
+                            for pid in pertemuan_ids
+                        )
+                        avg_rate = round(sum_rates / n, 1)
+                    slices.append({
+                        "lembaga": label,
+                        "percent": avg_rate,
+                        "total": total_emp,
+                        "n_pertemuan": n,
+                    })
+                slices.sort(key=lambda x: -x["percent"])
                 output.append({
                     "tipe_id": tipe_id,
                     "tipe_nama": tipe_names[tipe_id],
-                    "total": total,
                     "data": slices,
                 })
 
