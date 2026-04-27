@@ -219,7 +219,7 @@ class UserPertemuanListJsonView(LoginRequiredMixin, View):
         # ------------------------------------------------------------------
         # Queryset dengan filter
         # ------------------------------------------------------------------
-        queryset = Pertemuan.objects.all().order_by('-id')
+        queryset = Pertemuan.objects.all().order_by('-mulai')
         # filter tipe pertemuan
         if tipe_pertemuan_id := request.POST.get('tipe_pertemuan'):
             queryset = queryset.filter(tipe_pertemuan__id=tipe_pertemuan_id)
