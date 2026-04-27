@@ -86,7 +86,7 @@
 								<select class="select form-control select2bs4" name="karyawan" id="karyawan">
 									<option value="">Semua</option>
 									{% for karyawan in datakaryawan %}
-										<option value="{{karyawan.id}}">{{karyawan.get_full_name}} |{{karyawan.username}}| |{{karyawan.profile.nip}}|</option>
+										<option value="{{karyawan.id}}" {% if karyawan.id == request.user.id %}selected{% endif %}>{{karyawan.get_full_name}} |{{karyawan.username}}| |{{karyawan.profile.nip}}|</option>
 									{% endfor %}
 								</select>
 							</div>
