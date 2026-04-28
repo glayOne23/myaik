@@ -50,15 +50,15 @@ def index(request):
             .distinct()
         )
     elif datajabatan:
-        context['datalembaga'] = Lembaga.objects.filter(Q(id__in=datajabatan) | Q(superunit__id__in=datajabatan)).distinct()
-        datakodelembaga = context['datalembaga'].values_list('kode_lembaga', flat=True)
+        home_id = user.profile.home_id
+        context['datalembaga'] = Lembaga.objects.filter(
+            Q(id__in=datajabatan) | Q(superunit__id__in=datajabatan) | Q(kode_lembaga=home_id)
+        ).distinct()
         context['datalembaga_pie'] = context['datalembaga'].filter(jenis_id__in=[1, 3]).order_by('nama')
+        context['user_home_id'] = home_id
         context['datakaryawan'] = (
             base_karyawan_qs
-            .filter(
-                Q(profile__home_id__in=datakodelembaga) |
-                Q(username=request.user.username)
-            )
+            .filter(profile__home_id=home_id)
             .distinct()
         )
     else:

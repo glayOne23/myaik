@@ -75,7 +75,7 @@
 										<option value="">Semua</option>
 									{% endif %}
 									{% for lembaga in datalembaga %}
-										<option value="{{lembaga.kode_lembaga}}">{{lembaga.nama}}</option>
+										<option value="{{lembaga.kode_lembaga}}" {% if user_home_id and lembaga.kode_lembaga == user_home_id %}selected{% endif %}>{{lembaga.nama}}</option>
 									{% endfor %}
 								</select>
 							</div>
