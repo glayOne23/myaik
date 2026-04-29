@@ -81,6 +81,7 @@ urlpatterns = [
             path('excel_import/', pertemuan.AdminPertemuanExcelImportView.as_view(), name='admin.pertemuan.excel_import'),
             path('<int:id>/update/', pertemuan.AdminPertemuanUpdateView.as_view(), name='admin.pertemuan.update'),
             path('<int:pertemuan_id>/presensi/table/', presensi.AdminPresensiListView.as_view(), name='admin.presensi.table'),
+            path('<int:pertemuan_id>/presensi/add/', presensi.AdminPresensiCreateView.as_view(), name='admin.presensi.add'),
             # ==================================================[ SERVICE ]==================================================
             path('deletelist/', pertemuan.AdminPertemuanDeleteListView.as_view(), name='admin.pertemuan.deletelist'),
         ])),

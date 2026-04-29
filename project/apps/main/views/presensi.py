@@ -2,8 +2,8 @@ import datetime
 from collections import defaultdict
 
 import openpyxl
-from apps.main.forms.presensi import (PresensiExcelForm, PresensiForm,
-                                      PresensiTotalExcelForm)
+from apps.main.forms.presensi import (AdminPresensiForm, PresensiExcelForm,
+                                      PresensiForm, PresensiTotalExcelForm)
 from apps.main.models import Lembaga, Pertemuan, Presensi, TipePertemuan
 from apps.main.views.base import (AdminRequiredMixin, CustomTemplateBaseMixin,
                                   in_grup)
@@ -15,7 +15,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import AccessMixin, LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.db.models import Count, Prefetch, Q, Value
 from django.db.models.functions import Replace
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
@@ -57,6 +57,56 @@ class AdminPresensiListView(AdminRequiredMixin, CustomTemplateBaseMixin, ListVie
     def get_queryset(self):
         pertemuan_id = self.kwargs.get("pertemuan_id")
         return self.model.objects.filter(pertemuan__id=pertemuan_id).order_by('-id')
+
+
+class AdminPresensiCreateView(AdminRequiredMixin, CustomTemplateBaseMixin, View):
+    template_name = "main/admin/presensi/add.html"
+
+    def get_pertemuan(self, pertemuan_id):
+        return get_object_or_404(Pertemuan, id=pertemuan_id)
+
+    def get_available_users(self, pertemuan):
+        already_attended = Presensi.objects.filter(pertemuan=pertemuan).values_list('peserta_id', flat=True)
+        return (
+            User.objects
+            .select_related('profile')
+            .filter(profile__status="Aktif", profile__home_id__isnull=False)
+            .exclude(profile__kepegawaian="Dosen Tidak Tetap")
+            .exclude(id__in=already_attended)
+            .order_by('first_name', 'last_name')
+        )
+
+    def get(self, request, pertemuan_id):
+        pertemuan = self.get_pertemuan(pertemuan_id)
+        form = AdminPresensiForm()
+        form.fields['peserta'].queryset = self.get_available_users(pertemuan)
+        return render(request, self.template_name, {
+            "pertemuan": pertemuan,
+            "form": form,
+            "select2": True,
+        })
+
+    def post(self, request, pertemuan_id):
+        pertemuan = self.get_pertemuan(pertemuan_id)
+        form = AdminPresensiForm(request.POST, request.FILES)
+        form.fields['peserta'].queryset = self.get_available_users(pertemuan)
+
+        if form.is_valid():
+            presensi = form.save(commit=False)
+            presensi.pertemuan = pertemuan
+            try:
+                presensi.save()
+            except IntegrityError:
+                messages.error(request, f"Presensi untuk {presensi.peserta.get_full_name()} sudah tercatat.")
+                return redirect(reverse_lazy("main:admin.presensi.table", kwargs={"pertemuan_id": pertemuan_id}))
+            messages.success(request, f"Presensi untuk {presensi.peserta.get_full_name()} berhasil ditambahkan.")
+            return redirect(reverse_lazy("main:admin.presensi.table", kwargs={"pertemuan_id": pertemuan_id}))
+
+        return render(request, self.template_name, {
+            "pertemuan": pertemuan,
+            "form": form,
+            "select2": True,
+        })
 
 
 class AdminPresensiExcelImportV2View(AdminRequiredMixin, View):
