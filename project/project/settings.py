@@ -107,6 +107,7 @@ DATABASES = {
        'PORT'       : config('DB_PORT',     default=5432, cast=int), # <= '5432'
        'OPTIONS'    : {
            'charset': 'utf8mb4',
+           'init_command': "SET NAMES 'utf8mb4' COLLATE 'utf8mb4_unicode_ci'",
        },
     }
 }
