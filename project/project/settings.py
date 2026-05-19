@@ -105,6 +105,9 @@ DATABASES = {
        'PASSWORD'   : config('DB_PASSWORD', default=None), # <= 'YOUR_DB_PASSWORD'
        'HOST'       : config('DB_HOST',     default=None), # <= '127.0.0.1'
        'PORT'       : config('DB_PORT',     default=5432, cast=int), # <= '5432'
+       'OPTIONS'    : {
+           'charset': 'utf8mb4',
+       },
     }
 }
 
