@@ -1,22 +1,17 @@
 from apps.main.api.v1.serializers.presensi import (PresensiSerializer,
                                                    PresensiTotalSerializer)
-from apps.main.models import Pertemuan, Presensi, TipePertemuan
-from apps.services.api.view import (CustomListAPIView, CustomListCreateAPIView,
-                                    CustomRetrieveAPIView,
-                                    CustomRetrieveDestroyAPIView,
-                                    CustomRetrieveUpdateAPIView,
-                                    CustomRetrieveUpdateDestroyAPIView)
+from apps.main.models import Presensi, TipePertemuan
+from apps.services.api.authentication import GatewayJWTAuthentication, IsSelfOrAdmin
+from apps.services.api.view import CustomListCreateAPIView
 from django.db.models import Count, ExpressionWrapper, F, FloatField, Q
 from django.db.models.functions import Coalesce
-from rest_framework.authentication import (BasicAuthentication,
-                                           SessionAuthentication)
-from rest_framework.permissions import IsAuthenticated
 
 
 class PresensiUserListAPIView(CustomListCreateAPIView):
     queryset = Presensi.objects.all().order_by('-id')
     serializer_class = PresensiSerializer
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [GatewayJWTAuthentication]
+    # permission_classes = [IsSelfOrAdmin]
 
     def get(self, request, username):
         self.queryset = Presensi.objects.filter(peserta__username=username).order_by('-id')
@@ -34,7 +29,8 @@ class PresensiUserListAPIView(CustomListCreateAPIView):
 class PresensiUserTotalListAPIView(CustomListCreateAPIView):
     queryset = Presensi.objects.all().order_by('-id')
     serializer_class = PresensiTotalSerializer
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [GatewayJWTAuthentication]
+    # permission_classes = [IsSelfOrAdmin]
 
     def get(self, request, username):
         tahun = request.GET.get('tahun')
