@@ -29,7 +29,8 @@ urlpatterns = [
     path('authentication/', include('apps.authentication.urls', namespace='authentication')),
     path('main/', include('apps.main.urls', namespace='main')),
 
-    path('api/main/', include('apps.main.api.urls')),
+    # api untuk di gateway
+    path('presensi-myaik/', include('apps.main.api.urls')),
 ]
 
 if settings.DEBUG:
