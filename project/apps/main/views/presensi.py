@@ -1,5 +1,6 @@
 import datetime
 from collections import defaultdict
+from io import BytesIO
 
 import openpyxl
 from apps.main.forms.presensi import (AdminPresensiForm, PresensiExcelForm,
@@ -845,6 +846,152 @@ class UserPresensiPresentaseView(LoginRequiredMixin, View):
             return None
 
 
+def _parse_tanggal(value):
+    if not value:
+        return None
+    try:
+        return datetime.datetime.strptime(value, "%Y-%m-%d").date()
+    except Exception:
+        return None
+
+
+def build_presentase_rows(tahun, lembaga_id=None, karyawan_id=None):
+    """
+    Hitung rekap presensi per karyawan untuk export (PDF/Excel).
+    Hanya mengambil kolom yang dibutuhkan (values_list) agar tetap cepat
+    walau semua karyawan diexport.
+    """
+    tipe_list = list(TipePertemuan.objects.all())
+
+    # pertemuan_id -> (tipe_id, tanggal mulai)
+    pertemuan_map = {
+        pid: (tipe_id, mulai.date() if mulai else None)
+        for pid, tipe_id, mulai in (
+            Pertemuan.objects
+            .filter(mulai__year=tahun, tipe_pertemuan__isnull=False)
+            .values_list('id', 'tipe_pertemuan_id', 'mulai')
+        )
+    }
+
+    users_qs = (
+        User.objects
+        .filter(profile__home_id__isnull=False, profile__status="Aktif")
+        .exclude(profile__kepegawaian="Dosen Tidak Tetap")
+    )
+    if lembaga_id:
+        users_qs = users_qs.filter(profile__home_id=lembaga_id)
+    if karyawan_id:
+        users_qs = users_qs.filter(id=karyawan_id)
+
+    users = list(
+        users_qs
+        .order_by('profile__homebase', 'first_name', 'last_name')
+        .values_list('id', 'username', 'first_name', 'last_name',
+                     'profile__nip', 'profile__homebase', 'profile__tanggalmulaimasuk')
+    )
+
+    # user_id -> set(pertemuan_id) dalam satu query ringan
+    hadir_map = defaultdict(set)
+    hadir_qs = Presensi.objects.filter(pertemuan_id__in=pertemuan_map.keys())
+    if lembaga_id or karyawan_id:
+        hadir_qs = hadir_qs.filter(peserta_id__in=users_qs.values('id'))
+    for peserta_id, pertemuan_id in hadir_qs.values_list('peserta_id', 'pertemuan_id').iterator():
+        hadir_map[peserta_id].add(pertemuan_id)
+
+    rows = []
+    for uid, username, first_name, last_name, nip, homebase, tgl_masuk in users:
+        tgl_masuk = _parse_tanggal(tgl_masuk)
+
+        total_per_tipe = defaultdict(int)
+        valid_ids = set()
+        for pid, (tipe_id, mulai) in pertemuan_map.items():
+            if tgl_masuk and (not mulai or mulai < tgl_masuk):
+                continue
+            total_per_tipe[tipe_id] += 1
+            valid_ids.add(pid)
+
+        diikuti_per_tipe = defaultdict(int)
+        for pid in hadir_map.get(uid, ()):
+            if pid in valid_ids:
+                diikuti_per_tipe[pertemuan_map[pid][0]] += 1
+
+        tipe_data = []
+        for tipe in tipe_list:
+            total = total_per_tipe.get(tipe.id, 0)
+            diikuti = diikuti_per_tipe.get(tipe.id, 0)
+            persen = round((diikuti / total) * 100, 2) if total > 0 else 0
+            tipe_data.append({
+                'persen': min(persen, 100),
+                'total': total,
+                'diikuti': diikuti,
+            })
+
+        rows.append({
+            'nip': nip or username,
+            'nama': f'{first_name} {last_name}'.strip(),
+            'homebase': homebase or '',
+            'tipe_data': tipe_data,
+        })
+
+    return tipe_list, rows
+
+
+class UserPresensiPresentaseExcelView(LoginRequiredMixin, View):
+    def get(self, request):
+        tahun = request.GET.get('tahun')
+        if not tahun or not tahun.isdigit():
+            return JsonResponse({"error": "Tahun wajib diisi"}, status=400)
+        tahun = int(tahun)
+
+        tipe_list, rows = build_presentase_rows(
+            tahun,
+            lembaga_id=request.GET.get('lembaga'),
+            karyawan_id=request.GET.get('karyawan'),
+        )
+
+        from openpyxl.cell import WriteOnlyCell
+        from openpyxl.styles import Alignment, Font, PatternFill
+
+        # write_only: streaming writer, cepat & hemat memori untuk data besar
+        wb = openpyxl.Workbook(write_only=True)
+        ws = wb.create_sheet(f'Presensi AIK {tahun}')
+
+        ws.column_dimensions['A'].width = 6
+        ws.column_dimensions['B'].width = 16
+        ws.column_dimensions['C'].width = 35
+        ws.column_dimensions['D'].width = 35
+
+        bold = Font(bold=True)
+        fill = PatternFill('solid', fgColor='DDEBF7')
+        center = Alignment(horizontal='center', vertical='center', wrap_text=True)
+
+        def header_cell(value):
+            c = WriteOnlyCell(ws, value=value)
+            c.font, c.fill, c.alignment = bold, fill, center
+            return c
+
+        header = ['No', 'NIP', 'Nama', 'Unit/Fakultas']
+        for tipe in tipe_list:
+            header += [f'Jumlah {tipe.nama}', f'{tipe.nama} Diikuti', f'{tipe.nama} %']
+        ws.append([header_cell(h) for h in header])
+
+        for no, row in enumerate(rows, start=1):
+            line = [no, row['nip'], row['nama'], row['homebase']]
+            for td in row['tipe_data']:
+                line += [td['total'], td['diikuti'], td['persen']]
+            ws.append(line)
+
+        buffer = BytesIO()
+        wb.save(buffer)
+
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = f'attachment; filename="Presensi_AIK_{tahun}.xlsx"'
+        return response
+
+
 class UserPresensiPresentasePDFView(LoginRequiredMixin, View):
     def get(self, request):
         tahun = request.GET.get('tahun')
@@ -853,6 +1000,9 @@ class UserPresensiPresentasePDFView(LoginRequiredMixin, View):
 
         if not tahun:
             return JsonResponse({"error": "Tahun wajib diisi"}, status=400)
+
+        if not karyawan_id:
+            return JsonResponse({"error": "PDF hanya untuk karyawan tertentu, gunakan export Excel untuk semua karyawan"}, status=400)
 
         tahun = int(tahun)
 

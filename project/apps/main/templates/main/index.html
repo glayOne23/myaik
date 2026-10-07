@@ -92,8 +92,9 @@
 							</div>
 						</div>
 
-						<div class="col-md-2 my-1">
-							<a id="btn-unduh-laporan" href="#" class="btn btn-success text-nowrap" target="_blank"><i class="fa fa-file-pdf mr-1"></i> Unduh</a>
+						<div class="col-md-2 my-1 text-nowrap">
+							<a id="btn-unduh-laporan" href="#" class="btn btn-danger text-nowrap" target="_blank" title="Pilih karyawan untuk unduh PDF"><i class="fa fa-file-pdf mr-1"></i> PDF</a>
+							<a id="btn-unduh-excel" href="#" class="btn btn-success text-nowrap"><i class="fa fa-file-excel mr-1"></i> Excel</a>
 						</div>
 
 					</div>
@@ -378,7 +379,19 @@ $(document).ready(function () {
 		const params = getFilterParams();
 		const qs = new URLSearchParams(params).toString();
 		$('#btn-unduh-laporan').attr('href', '{% url "main:user.presensi.presentase.export" %}?' + qs);
+		$('#btn-unduh-excel').attr('href', '{% url "main:user.presensi.presentase.export_excel" %}?' + qs);
+
+		// PDF hanya untuk karyawan tertentu, "Semua" -> gunakan Excel
+		const semua = !params.karyawan;
+		$('#btn-unduh-laporan')
+			.toggleClass('disabled', semua)
+			.attr('aria-disabled', semua)
+			.attr('tabindex', semua ? -1 : 0);
 	}
+
+	$('#btn-unduh-laporan').on('click', function (e) {
+		if ($(this).hasClass('disabled')) e.preventDefault();
+	});
 
 	$('#tahun, #lembaga, #karyawan').on('change', function () {
 		table1.ajax.reload(null, true); // reset to page 1

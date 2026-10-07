@@ -105,6 +105,7 @@ urlpatterns = [
         path('presensi/', include([
             path('presentase/', presensi.UserPresensiPresentaseView.as_view(), name='user.presensi.presentase'),
             path('presentase/export/', presensi.UserPresensiPresentasePDFView.as_view(), name='user.presensi.presentase.export'),
+            path('presentase/export_excel/', presensi.UserPresensiPresentaseExcelView.as_view(), name='user.presensi.presentase.export_excel'),
             path('bagan/', presensi.UserPresensiBaganView.as_view(), name='user.presensi.bagan'),
             path('grafik/', presensi.LembagaPresensiGrafikView.as_view(), name='user.presensi.grafik'),
             path('pie/', presensi.LembagaPresensiPieView.as_view(), name='user.presensi.pie'),
