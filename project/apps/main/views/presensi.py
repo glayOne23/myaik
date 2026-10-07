@@ -855,17 +855,18 @@ def _parse_tanggal(value):
         return None
 
 
-def build_presentase_rows(tahun, lembaga_id=None, karyawan_id=None):
+def build_presentase_rows(tahun, lembaga_id=None, karyawan_id=None, with_komentar=False):
     """
     Hitung rekap presensi per karyawan untuk export (PDF/Excel).
     Hanya mengambil kolom yang dibutuhkan (values_list) agar tetap cepat
     walau semua karyawan diexport.
+    with_komentar: sertakan rangkuman dari kajian terbaru per tipe pertemuan.
     """
     tipe_list = list(TipePertemuan.objects.all())
 
-    # pertemuan_id -> (tipe_id, tanggal mulai)
+    # pertemuan_id -> (tipe_id, mulai)
     pertemuan_map = {
-        pid: (tipe_id, mulai.date() if mulai else None)
+        pid: (tipe_id, mulai)
         for pid, tipe_id, mulai in (
             Pertemuan.objects
             .filter(mulai__year=tahun, tipe_pertemuan__isnull=False)
@@ -890,13 +891,35 @@ def build_presentase_rows(tahun, lembaga_id=None, karyawan_id=None):
                      'profile__nip', 'profile__homebase', 'profile__tanggalmulaimasuk')
     )
 
-    # user_id -> set(pertemuan_id) dalam satu query ringan
-    hadir_map = defaultdict(set)
+    # user_id -> {pertemuan_id: presensi_id} dalam satu query ringan (tanpa kolom rangkuman)
+    hadir_map = defaultdict(dict)
     hadir_qs = Presensi.objects.filter(pertemuan_id__in=pertemuan_map.keys())
     if lembaga_id or karyawan_id:
         hadir_qs = hadir_qs.filter(peserta_id__in=users_qs.values('id'))
-    for peserta_id, pertemuan_id in hadir_qs.values_list('peserta_id', 'pertemuan_id').iterator():
-        hadir_map[peserta_id].add(pertemuan_id)
+    for presensi_id, peserta_id, pertemuan_id in (
+        hadir_qs.values_list('id', 'peserta_id', 'pertemuan_id').iterator()
+    ):
+        hadir_map[peserta_id][pertemuan_id] = presensi_id
+
+    # rangkuman hanya diambil untuk presensi terbaru per (user, tipe)
+    komentar_map = {}
+    if with_komentar:
+        terbaru = {}  # (user_id, tipe_id) -> (sort_key, presensi_id)
+        for uid, hadir in hadir_map.items():
+            for pid, presensi_id in hadir.items():
+                tipe_id, mulai = pertemuan_map[pid]
+                key = (mulai or datetime.datetime.min, presensi_id)
+                cur = terbaru.get((uid, tipe_id))
+                if cur is None or key > cur[0]:
+                    terbaru[(uid, tipe_id)] = (key, presensi_id)
+
+        id_to_key = {presensi_id: k for k, (_, presensi_id) in terbaru.items()}
+        ids = list(id_to_key)
+        for i in range(0, len(ids), 2000):
+            for presensi_id, rangkuman in (
+                Presensi.objects.filter(id__in=ids[i:i + 2000]).values_list('id', 'rangkuman')
+            ):
+                komentar_map[id_to_key[presensi_id]] = rangkuman or ''
 
     rows = []
     for uid, username, first_name, last_name, nip, homebase, tgl_masuk in users:
@@ -905,7 +928,7 @@ def build_presentase_rows(tahun, lembaga_id=None, karyawan_id=None):
         total_per_tipe = defaultdict(int)
         valid_ids = set()
         for pid, (tipe_id, mulai) in pertemuan_map.items():
-            if tgl_masuk and (not mulai or mulai < tgl_masuk):
+            if tgl_masuk and (not mulai or mulai.date() < tgl_masuk):
                 continue
             total_per_tipe[tipe_id] += 1
             valid_ids.add(pid)
@@ -924,6 +947,7 @@ def build_presentase_rows(tahun, lembaga_id=None, karyawan_id=None):
                 'persen': min(persen, 100),
                 'total': total,
                 'diikuti': diikuti,
+                'komentar': komentar_map.get((uid, tipe.id), ''),
             })
 
         rows.append({
@@ -947,9 +971,12 @@ class UserPresensiPresentaseExcelView(LoginRequiredMixin, View):
             tahun,
             lembaga_id=request.GET.get('lembaga'),
             karyawan_id=request.GET.get('karyawan'),
+            with_komentar=True,
         )
 
         from openpyxl.cell import WriteOnlyCell
+        from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
+        from openpyxl.utils import get_column_letter
         from openpyxl.styles import Alignment, Font, PatternFill
 
         # write_only: streaming writer, cepat & hemat memori untuk data besar
@@ -965,20 +992,35 @@ class UserPresensiPresentaseExcelView(LoginRequiredMixin, View):
         fill = PatternFill('solid', fgColor='DDEBF7')
         center = Alignment(horizontal='center', vertical='center', wrap_text=True)
 
+        # kolom komentar di akhir: setelah 4 kolom identitas + 3 kolom per tipe
+        komentar_start = 5 + len(tipe_list) * 3
+        for i in range(len(tipe_list)):
+            ws.column_dimensions[get_column_letter(komentar_start + i)].width = 50
+
         def header_cell(value):
             c = WriteOnlyCell(ws, value=value)
             c.font, c.fill, c.alignment = bold, fill, center
             return c
 
+        def text_cell(value):
+            # paksa sebagai teks (rangkuman diawali "=" tidak dianggap formula),
+            # buang karakter kontrol & batasi panjang sel Excel
+            value = ILLEGAL_CHARACTERS_RE.sub('', value or '')[:32000]
+            c = WriteOnlyCell(ws, value=value)
+            c.data_type = 's'
+            return c
+
         header = ['No', 'NIP', 'Nama', 'Unit/Fakultas']
         for tipe in tipe_list:
             header += [f'Jumlah {tipe.nama}', f'{tipe.nama} Diikuti', f'{tipe.nama} %']
+        header += [f'Komentar {tipe.nama} Terbaru' for tipe in tipe_list]
         ws.append([header_cell(h) for h in header])
 
         for no, row in enumerate(rows, start=1):
             line = [no, row['nip'], row['nama'], row['homebase']]
             for td in row['tipe_data']:
                 line += [td['total'], td['diikuti'], td['persen']]
+            line += [text_cell(td['komentar']) for td in row['tipe_data']]
             ws.append(line)
 
         buffer = BytesIO()
