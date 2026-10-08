@@ -888,7 +888,8 @@ def build_presentase_rows(tahun, lembaga_id=None, karyawan_id=None, with_komenta
         users_qs
         .order_by('profile__homebase', 'first_name', 'last_name')
         .values_list('id', 'username', 'first_name', 'last_name',
-                     'profile__nip', 'profile__homebase', 'profile__tanggalmulaimasuk')
+                     'profile__nip', 'profile__homebase', 'profile__tanggalmulaimasuk',
+                     'profile__kepegawaian', 'profile__jenis_kelamin')
     )
 
     # user_id -> {pertemuan_id: presensi_id} dalam satu query ringan (tanpa kolom rangkuman)
@@ -922,7 +923,8 @@ def build_presentase_rows(tahun, lembaga_id=None, karyawan_id=None, with_komenta
                 komentar_map[id_to_key[presensi_id]] = rangkuman or ''
 
     rows = []
-    for uid, username, first_name, last_name, nip, homebase, tgl_masuk in users:
+    for (uid, username, first_name, last_name, nip, homebase, tgl_masuk,
+         kepegawaian, jenis_kelamin) in users:
         tgl_masuk = _parse_tanggal(tgl_masuk)
 
         total_per_tipe = defaultdict(int)
@@ -954,6 +956,8 @@ def build_presentase_rows(tahun, lembaga_id=None, karyawan_id=None, with_komenta
             'nip': nip or username,
             'nama': f'{first_name} {last_name}'.strip(),
             'homebase': homebase or '',
+            'kepegawaian': kepegawaian or '',
+            'jenis_kelamin': jenis_kelamin or '',
             'tipe_data': tipe_data,
         })
 
@@ -987,13 +991,15 @@ class UserPresensiPresentaseExcelView(LoginRequiredMixin, View):
         ws.column_dimensions['B'].width = 16
         ws.column_dimensions['C'].width = 35
         ws.column_dimensions['D'].width = 35
+        ws.column_dimensions['E'].width = 22
+        ws.column_dimensions['F'].width = 14
 
         bold = Font(bold=True)
         fill = PatternFill('solid', fgColor='DDEBF7')
         center = Alignment(horizontal='center', vertical='center', wrap_text=True)
 
-        # kolom komentar di akhir: setelah 4 kolom identitas + 3 kolom per tipe
-        komentar_start = 5 + len(tipe_list) * 3
+        # kolom komentar di akhir: setelah 6 kolom identitas + 3 kolom per tipe
+        komentar_start = 7 + len(tipe_list) * 3
         for i in range(len(tipe_list)):
             ws.column_dimensions[get_column_letter(komentar_start + i)].width = 50
 
@@ -1010,14 +1016,17 @@ class UserPresensiPresentaseExcelView(LoginRequiredMixin, View):
             c.data_type = 's'
             return c
 
-        header = ['No', 'NIP', 'Nama', 'Unit/Fakultas']
+        header = ['No', 'NIP', 'Nama', 'Unit/Fakultas', 'Status Kepegawaian', 'Jenis Kelamin']
         for tipe in tipe_list:
             header += [f'Jumlah {tipe.nama}', f'{tipe.nama} Diikuti', f'{tipe.nama} %']
         header += [f'Komentar {tipe.nama} Terbaru' for tipe in tipe_list]
         ws.append([header_cell(h) for h in header])
 
         for no, row in enumerate(rows, start=1):
-            line = [no, row['nip'], row['nama'], row['homebase']]
+            line = [
+                no, row['nip'], row['nama'], row['homebase'],
+                row['kepegawaian'], row['jenis_kelamin'],
+            ]
             for td in row['tipe_data']:
                 line += [td['total'], td['diikuti'], td['persen']]
             line += [text_cell(td['komentar']) for td in row['tipe_data']]

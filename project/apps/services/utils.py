@@ -77,6 +77,23 @@ def split_full_name(full_name: str, max_len: int = 30):
 
 
 
+def normalize_jenis_kelamin(data):
+    """
+    Ambil jenis kelamin dari data SIHRD dan seragamkan jadi 'Laki-laki' / 'Perempuan'.
+    """
+    value = data.get('jenis_kelamin')
+    if not value:
+        return None
+
+    raw = str(value).strip()
+    value = raw.lower()
+    if value in ('l', 'lk', 'pria', 'laki-laki', 'laki laki', 'laki'):
+        return 'Laki-laki'
+    if value in ('p', 'pr', 'w', 'wanita', 'perempuan'):
+        return 'Perempuan'
+    return raw[:20]
+
+
 def profilesync(user) -> User:
     try:
         username = user.username
@@ -127,6 +144,10 @@ def profilesync(user) -> User:
 
         if 'status' in data and data['status']:
             user.profile.status       = data['status']
+
+        jenis_kelamin = normalize_jenis_kelamin(data)
+        if jenis_kelamin:
+            user.profile.jenis_kelamin  = jenis_kelamin
 
         if 'fname' in data and data['fname']:
             user.first_name             = data['fname']

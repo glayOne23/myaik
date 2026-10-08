@@ -32,6 +32,7 @@ class Profile(models.Model):
     tanggalmulaimasuk = models.CharField(max_length=255, null=True, blank=True)
     kepegawaian     = models.CharField(max_length=255, null=True, blank=True)
     status          = models.CharField(max_length=255, null=True, blank=True)
+    jenis_kelamin   = models.CharField(max_length=20, null=True, blank=True) # Laki-laki / Perempuan
     image           = PrivateImageField(null=True, blank=True, upload_to=path_image, validators=[FileExtensionValidator(allowed_extensions=['jpg','jpeg','png','webp'])])
     otp             = models.CharField(max_length=100, null=True, blank=True)
 
