@@ -121,6 +121,29 @@
   document.getElementById("btnTidak").addEventListener("click", function() {
     window.location.href = "{% url 'main:user.pertemuan.table' %}";
   });
+
+  // penghitung karakter rangkuman (dihitung sama seperti validasi server: spasi berlebih diabaikan)
+  (function () {
+    const textarea = document.getElementById('id_rangkuman');
+    if (!textarea) return;
+
+    const min = parseInt(textarea.getAttribute('minlength'), 10) || 0;
+    const counter = document.createElement('small');
+    counter.className = 'd-block mt-1';
+    textarea.insertAdjacentElement('afterend', counter);
+
+    function update() {
+      const len = textarea.value.split(/\s+/).filter(Boolean).join(' ').length;
+      const kurang = Math.max(min - len, 0);
+      counter.textContent = kurang
+        ? `${len} / ${min} karakter (kurang ${kurang} karakter lagi)`
+        : `${len} karakter ✓`;
+      counter.className = 'd-block mt-1 ' + (kurang ? 'text-danger' : 'text-success');
+    }
+
+    textarea.addEventListener('input', update);
+    update();
+  })();
 </script>
 
 {% endblock javascript %}

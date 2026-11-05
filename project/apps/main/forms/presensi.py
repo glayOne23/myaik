@@ -6,6 +6,10 @@ from apps.services.mixins import FormErrorsMixin
 from apps.main.models import Presensi
 
 
+# minimal karakter rangkuman presensi peserta (tidak berlaku untuk input admin)
+RANGKUMAN_MIN_LENGTH = 50
+
+
 class PresensiForm(forms.ModelForm, FormErrorsMixin):
     class Meta:
         model   = Presensi
@@ -14,6 +18,22 @@ class PresensiForm(forms.ModelForm, FormErrorsMixin):
         labels  = {
             'berkas_rangkuman' : _('Berkas Rangkuman (Jika Ada)'),
         }
+        help_texts = {
+            'rangkuman' : _('Minimal %(min)s karakter.') % {'min': RANGKUMAN_MIN_LENGTH},
+        }
+        widgets = {
+            'rangkuman' : forms.Textarea(attrs={'minlength': RANGKUMAN_MIN_LENGTH, 'rows': 6}),
+        }
+
+    def clean_rangkuman(self):
+        # spasi/enter berlebih tidak ikut dihitung
+        rangkuman = ' '.join(self.cleaned_data.get('rangkuman', '').split())
+        if len(rangkuman) < RANGKUMAN_MIN_LENGTH:
+            raise forms.ValidationError(
+                _('Rangkuman minimal %(min)s karakter (saat ini %(len)s karakter).'),
+                params={'min': RANGKUMAN_MIN_LENGTH, 'len': len(rangkuman)},
+            )
+        return rangkuman
 
 
 class AdminPresensiForm(forms.ModelForm, FormErrorsMixin):
