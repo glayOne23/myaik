@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     "crispy_bootstrap4",
     'rest_framework',
+    'django_crontab',
     # =======[My Own Apps]=======
     'apps.services',
     'apps.landingpage',
@@ -268,6 +269,7 @@ API_GATEWAY_PASSWORD    = config('API_GATEWAY_PASSWORD', default=None) # <= 'YOU
 API_GATEWAY_KEY         = os.path.join(BASE_DIR, 'apps', 'services', 'api-gateway-key.pub')
 API_GATEWAY_ALGO        = ['RS256']
 API_GATEWAY_VERIFY      = False # verify signature jwt
+API_GATEWAY_TIMEOUT     = config('API_GATEWAY_TIMEOUT', default=60, cast=int) # detik per request ke API Gateway
 
 
 # =======[API STAR]======
@@ -339,3 +341,21 @@ LOGGING = {
         },
     },
 }
+
+
+# =======[CRONTAB]=======
+# https://github.com/kraiz/django-crontab
+# Aktifkan dengan: python manage.py crontab add  (otomatis di docker-entrypoint.sh)
+# Jadwal mengikuti timezone sistem/container (TZ=Asia/Jakarta)
+
+CRONJOBS = [
+    # Sabtu 01:00 - sinkron lembaga, jabatan & profile karyawan dari SIHRD
+    ('0 1 * * 6', 'django.core.management.call_command', ['sync_sihrd'], {},
+     '>> {} 2>&1'.format(config('CRON_LOG_FILE', default='/proc/1/fd/1'))),
+]
+
+# cron tidak mewarisi environment container, jadi load env yang disimpan saat container start
+CRON_ENV_FILE           = config('CRON_ENV_FILE', default='/home/app/webapp/.cron_env')
+CRONTAB_COMMAND_PREFIX  = '[ -f {0} ] && . {0};'.format(CRON_ENV_FILE)
+CRONTAB_DJANGO_MANAGE_PATH = os.path.join(BASE_DIR, 'manage.py')
+CRONTAB_LOCK_JOBS       = True # cegah job jalan dobel jika run sebelumnya belum selesai

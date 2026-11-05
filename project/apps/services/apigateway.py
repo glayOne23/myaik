@@ -9,6 +9,9 @@ import requests, ssl, socket, json, jwt, os, logging
 
 logger = logging.getLogger(__name__)
 
+# detik; tanpa timeout, respon SIHRD yang lambat bisa menggantung worker / cron selamanya
+API_TIMEOUT = getattr(settings, "API_GATEWAY_TIMEOUT", 60)
+
 class API_GATEWAY:
     url         = settings.API_GATEWAY_URL
     key_path    = settings.API_GATEWAY_KEY
@@ -64,7 +67,7 @@ class API_GATEWAY:
 
         url     = '%stoken/' % (self.url)
         body    = { 'username' : self.username, 'password' : self.password }
-        response= requests.post(url, data=body, verify=True)
+        response= requests.post(url, data=body, verify=True, timeout=API_TIMEOUT)
 
         if response.status_code == 200:
             responsejson    = response.json()
@@ -105,7 +108,7 @@ class API_GATEWAY:
 
         url     = '%stoken/refresh/' % (self.url)
         body    = { 'refresh' : refresh }
-        response= requests.post(url, data=body, verify=True)
+        response= requests.post(url, data=body, verify=True, timeout=API_TIMEOUT)
         
         if response.status_code == 200:
             responsejson = response.json()
@@ -196,7 +199,7 @@ class API_GATEWAY:
 
             access_token= gettoken['data']['access']
             header      = { 'Authorization' : 'Bearer %s' % (access_token) }
-            response    = requests.get(url, headers=header, verify=True)
+            response    = requests.get(url, headers=header, verify=True, timeout=API_TIMEOUT)
 
             if response.status_code == 200:
                 responsejson = response.json()
@@ -237,7 +240,7 @@ class API_GATEWAY:
 
             access_token= gettoken['data']['access']
             header      = { 'Authorization' : 'Bearer %s' % (access_token) }
-            response    = requests.get(url, headers=header, verify=True)
+            response    = requests.get(url, headers=header, verify=True, timeout=API_TIMEOUT)
 
             if response.status_code == 200:
                 responsejson = response.json()
@@ -286,7 +289,7 @@ class API_GATEWAY:
 
             access_token= gettoken['data']['access']
             header      = { 'Authorization' : 'Bearer %s' % (access_token) }
-            response    = requests.get(url, headers=header, verify=True)
+            response    = requests.get(url, headers=header, verify=True, timeout=API_TIMEOUT)
 
             if response.status_code == 200:
                 responsejson = response.json()
@@ -325,7 +328,7 @@ class API_GATEWAY:
 
             access_token= gettoken['data']['access']
             header      = { 'Authorization' : 'Bearer %s' % (access_token) }
-            response    = requests.get(url, headers=header, verify=True)
+            response    = requests.get(url, headers=header, verify=True, timeout=API_TIMEOUT)
 
             if response.status_code == 200:
                 responsejson = response.json()
@@ -362,7 +365,7 @@ class API_GATEWAY:
 
             access_token= gettoken['data']['access']
             header      = { 'Authorization' : 'Bearer %s' % (access_token) }
-            response    = requests.get(url, headers=header, verify=True)
+            response    = requests.get(url, headers=header, verify=True, timeout=API_TIMEOUT)
 
             if response.status_code == 200:
                 responsejson = response.json()
