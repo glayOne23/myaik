@@ -48,13 +48,19 @@ INSTALLED_APPS = [
     'crispy_forms',
     "crispy_bootstrap4",
     'rest_framework',
-    'django_crontab',
     # =======[My Own Apps]=======
     'apps.services',
     'apps.landingpage',
     'apps.authentication',
     'apps.main',
 ]
+
+# django-crontab opsional: dipakai di Docker/VPS, tidak dibutuhkan di shared hosting (pakai cPanel Cron Jobs)
+try:
+    import django_crontab  # noqa: F401
+    INSTALLED_APPS.append('django_crontab')
+except ImportError:
+    pass
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
