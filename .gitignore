@@ -10,3 +10,5 @@ project/staticfiles/*
 token/
 token.json
 .vscode
+# env dump untuk cron (berisi secret)
+.cron_env

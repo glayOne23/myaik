@@ -41,7 +41,7 @@ RUN mkdir -p $DockerHOME
 WORKDIR $DockerHOME
 
 # set environment variables  
-ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 TZ=Asia/Jakarta
 
 # Install runtime dependencies
 RUN apt-get update \
@@ -49,6 +49,9 @@ RUN apt-get update \
 	libpq5 \
 	default-libmysqlclient-dev \
 	nano \
+	cron \
+	tzdata \
+	&& ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone \
 	&& apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -61,6 +64,11 @@ COPY --from=builder /usr/local/ /usr/local/
 COPY ./project $DockerHOME
 
 RUN python manage.py collectstatic --noinput
+
+# Entrypoint: daftarkan & jalankan cron (sync SIHRD tiap Sabtu 01:00) sebelum gunicorn
+COPY ./docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+ENTRYPOINT ["docker-entrypoint.sh"]
 
 # Set Gunicorn as the default command
 CMD ["gunicorn", "project.wsgi:application", "--bind", "0.0.0.0:8000"]

@@ -40,6 +40,8 @@ docker compose up -d --build     # see docker-compose.yml "LOCAL" section; the "
 
 There is no configured test runner beyond Django's default (`apps.py: tests.py` per app are present but effectively empty scaffolding) — use `python manage.py test` if adding tests.
 
+Scheduled jobs use `django-crontab` (`CRONJOBS` in `settings.py`): `sync_sihrd` (lembaga → jabatan → profile sync of all employees) runs every Saturday 01:00 WIB. In Docker, `docker-entrypoint.sh` dumps the container env to `.cron_env` (cron starts with an empty env), registers the jobs (`manage.py crontab add`) and starts `cron` before gunicorn. Run manually with `python manage.py sync_sihrd [--skip-lembaga] [--skip-jabatan] [--skip-profile]`.
+
 CI/CD is Jenkins (`Jenkinsfile`), building/pushing a Docker image to UMS's GitLab registry with commit-message-driven version bumps (`--mc`/`--fc`/default = major/feature/minor). No linting step is configured in CI.
 
 ## Architecture

@@ -31,3 +31,4 @@ docs/*
 !docs/requirements.txt
 
 .vscode
+.cron_env

@@ -35,3 +35,6 @@ xhtml2pdf==0.2.11
 djangorestframework==3.16.1
 Markdown==3.10.2
 django-filter==25.2
+
+# Cron job scheduler untuk Django (sync SIHRD mingguan)
+django-crontab==0.7.1
