@@ -57,7 +57,7 @@
 				<div class="card-toolbar align-self-center">
 
 					<div class="row">
-						<div class="col-md-3 my-1">
+						<div class="col-md-2 my-1">
 							<div class="input-group flex-nowrap mr-1">
 								<span class="input-group-text" id="addon-wrapping">Tahun</span>
 								<select class="select form-control select2bs4" name="tahun" id="tahun">
@@ -80,6 +80,19 @@
 								</select>
 							</div>
 						</div>
+						{% if data_status_keaktifan %}
+						<div class="col-md-3 my-1">
+							<div class="input-group flex-nowrap mr-1">
+								<span class="input-group-text" id="addon-wrapping">Status</span>
+								<select class="select form-control select2bs4" name="status" id="status">
+									<option value="{{ status_keaktifan_semua }}">Semua</option>
+									{% for status in data_status_keaktifan %}
+										<option value="{{ status }}" {% if status == status_keaktifan_default %}selected{% endif %}>{{ status }}</option>
+									{% endfor %}
+								</select>
+							</div>
+						</div>
+						{% endif %}
 						<div class="col-md-4 my-1">
 							<div class="input-group flex-nowrap mr-1">
 								<span class="input-group-text" id="addon-wrapping">Karyawan</span>
@@ -249,36 +262,40 @@
 
 
 <script>
-	// ketika lembaga diubah, load karyawan sesuai lembaga
-	$('#lembaga').on('change', function () {
-		let lembaga = $(this).val();
+	// filter status hanya tampil untuk admin & pejabat
+	function getStatusKeaktifan() {
+		return $('#status').val() || '{{ status_keaktifan_default }}';
+	}
+
+	// ketika lembaga/status diubah, load karyawan sesuai filter
+	$('#lembaga, #status').on('change', function () {
+		let lembaga = $('#lembaga').val();
 
 		$.ajax({
 			url: "{% url 'main:account_by_lembaga_json' %}",
 			type: "GET",
-			data: { lembaga: lembaga },
+			data: { lembaga: lembaga, status: getStatusKeaktifan() },
 			success: function (response) {
 				let $karyawan = $('#karyawan');
 
 				// clear select
 				$karyawan.empty();
 
-				if (response.length > 0) {
+				// "Semua" selalu ada agar filter karyawan tidak kosong saat hasilnya 0
+				$karyawan.append(new Option("Semua", ""))
 
-					$karyawan.append(new Option("Semua", ""))
-
-					response.forEach((item, index) => {
-						$karyawan.append(
-							new Option(item.text, item.id)
-						);
-					});
-				}
+				response.forEach((item, index) => {
+					$karyawan.append(
+						new Option(item.text, item.id)
+					);
+				});
 
 				// trigger change untuk select2
 				$karyawan.trigger('change');
 			},
 			error: function () {
 				console.error('Gagal load karyawan');
+				$('#karyawan').trigger('change');
 			}
 		});
 	});
@@ -292,7 +309,8 @@ function getFilterParams() {
     return {
         tahun: $('#tahun').val(),
         lembaga: $('#lembaga').val(),
-        karyawan: $('#karyawan').val()
+        karyawan: $('#karyawan').val(),
+        status: getStatusKeaktifan()
     };
 }
 

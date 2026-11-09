@@ -3,6 +3,7 @@ from json import dumps
 from apps.authentication.forms.auth import FormSignUp
 from apps.authentication.models import GroupDetails
 from apps.main.forms import FormGroupDetails, FormProfileEdit, FormUserEdit
+from apps.main.views.base import filter_status_keaktifan
 from apps.services.apigateway import apigateway
 from apps.services.apistar import apistar
 from apps.services.decorators import group_required, login_required
@@ -523,9 +524,10 @@ def by_lembaga_json(request):
     qs = User.objects.select_related('profile')
     qs = (qs.filter(
             profile__home_id__isnull=False,
-            profile__status="Aktif"
         )
         .exclude(profile__kepegawaian="Dosen Tidak Tetap"))
+
+    qs = filter_status_keaktifan(qs, request.GET.get('status'))
 
     if lembaga != '':
         qs = qs.filter(profile__home_id=lembaga)

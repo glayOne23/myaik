@@ -5,6 +5,18 @@ from django.http import HttpResponseForbidden
 # =====================================================================================================
 #                                               MIXINS
 # =====================================================================================================
+STATUS_KEAKTIFAN_DEFAULT = 'Aktif'
+STATUS_KEAKTIFAN_SEMUA = 'all'
+
+
+def filter_status_keaktifan(users_qs, status=None):
+    """Filter karyawan per status keaktifan; tanpa status berarti hanya yang Aktif."""
+    status = status or STATUS_KEAKTIFAN_DEFAULT
+    if status == STATUS_KEAKTIFAN_SEMUA:
+        return users_qs
+    return users_qs.filter(profile__status=status)
+
+
 def in_grup(user, grup_name):
     if user:
         return user.groups.filter(name=grup_name).count() > 0

@@ -7,7 +7,7 @@ from apps.main.forms.presensi import (AdminPresensiForm, PresensiExcelForm,
                                       PresensiForm, PresensiTotalExcelForm)
 from apps.main.models import Lembaga, Pertemuan, Presensi, TipePertemuan
 from apps.main.views.base import (AdminRequiredMixin, CustomTemplateBaseMixin,
-                                  in_grup)
+                                  filter_status_keaktifan, in_grup)
 from apps.services.cetak_pdf import render_to_pdf
 from apps.services.stream_pdf import stream_sertifikat_pdf
 from apps.services.utils import profilesync
@@ -720,9 +720,10 @@ class UserPresensiPresentaseView(LoginRequiredMixin, View):
         users_qs = User.objects.select_related('profile')
         users_qs = (users_qs.filter(
                 profile__home_id__isnull=False,
-                profile__status="Aktif"
             )
             .exclude(profile__kepegawaian="Dosen Tidak Tetap"))
+
+        users_qs = filter_status_keaktifan(users_qs, request.GET.get('status'))
 
         if lembaga_id:
             users_qs = users_qs.filter(profile__home_id=lembaga_id)
@@ -855,7 +856,7 @@ def _parse_tanggal(value):
         return None
 
 
-def build_presentase_rows(tahun, lembaga_id=None, karyawan_id=None, with_komentar=False):
+def build_presentase_rows(tahun, lembaga_id=None, karyawan_id=None, with_komentar=False, status=None):
     """
     Hitung rekap presensi per karyawan untuk export (PDF/Excel).
     Hanya mengambil kolom yang dibutuhkan (values_list) agar tetap cepat
@@ -876,9 +877,10 @@ def build_presentase_rows(tahun, lembaga_id=None, karyawan_id=None, with_komenta
 
     users_qs = (
         User.objects
-        .filter(profile__home_id__isnull=False, profile__status="Aktif")
+        .filter(profile__home_id__isnull=False)
         .exclude(profile__kepegawaian="Dosen Tidak Tetap")
     )
+    users_qs = filter_status_keaktifan(users_qs, status)
     if lembaga_id:
         users_qs = users_qs.filter(profile__home_id=lembaga_id)
     if karyawan_id:
@@ -976,6 +978,7 @@ class UserPresensiPresentaseExcelView(LoginRequiredMixin, View):
             lembaga_id=request.GET.get('lembaga'),
             karyawan_id=request.GET.get('karyawan'),
             with_komentar=True,
+            status=request.GET.get('status'),
         )
 
         from openpyxl.cell import WriteOnlyCell
@@ -1071,10 +1074,11 @@ class UserPresensiPresentasePDFView(LoginRequiredMixin, View):
             .select_related('profile')
             .filter(
                 profile__home_id__isnull=False,
-                profile__status="Aktif"
             )
             .exclude(profile__kepegawaian="Dosen Tidak Tetap")
         )
+
+        users_qs = filter_status_keaktifan(users_qs, request.GET.get('status'))
 
         if lembaga_id:
             users_qs = users_qs.filter(profile__home_id=lembaga_id)

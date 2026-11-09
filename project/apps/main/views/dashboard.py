@@ -1,6 +1,7 @@
 from json import dumps
 
 from apps.main.models import Jabatan, Lembaga, Pertemuan
+from apps.main.views.base import STATUS_KEAKTIFAN_DEFAULT, STATUS_KEAKTIFAN_SEMUA
 from apps.services.decorators import group_required, login_required
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -41,8 +42,23 @@ def index(request):
         .exclude(profile__kepegawaian="Dosen Tidak Tetap")
     )
 
+    # Pilihan status keaktifan (hanya untuk admin & pejabat, user biasa hanya melihat datanya sendiri)
+    data_status_keaktifan = (
+        User.objects
+        .filter(profile__home_id__isnull=False)
+        .exclude(profile__kepegawaian="Dosen Tidak Tetap")
+        .exclude(profile__status__isnull=True)
+        .exclude(profile__status='')
+        .order_by('profile__status')
+        .values_list('profile__status', flat=True)
+        .distinct()
+    )
+    context['status_keaktifan_default'] = STATUS_KEAKTIFAN_DEFAULT
+    context['status_keaktifan_semua'] = STATUS_KEAKTIFAN_SEMUA
+
     context['data_tahun_pertemuan'] = Pertemuan.objects.values_list('mulai__year', flat=True).distinct().order_by('-mulai__year')
     if user.groups.filter(name='admin').exists():
+        context['data_status_keaktifan'] = data_status_keaktifan
         context['datalembaga'] = Lembaga.objects.all()
         context['datalembaga_pie'] = Lembaga.objects.filter(jenis_id__in=[1, 3]).order_by('nama')
         context['datakaryawan'] = (
@@ -51,6 +67,7 @@ def index(request):
         )
     elif datajabatan:
         home_id = user.profile.home_id
+        context['data_status_keaktifan'] = data_status_keaktifan
         context['datalembaga'] = Lembaga.objects.filter(
             Q(id__in=datajabatan) | Q(superunit__id__in=datajabatan) | Q(kode_lembaga=home_id)
         ).distinct()
